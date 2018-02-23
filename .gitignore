@@ -1,22 +1,60 @@
-# Compiled class file
+# Git folder #
+/.git/
+
+# Compilation folders #
+/bin/
+/target/
+/build/
+
+# Java compile files #
 *.class
 
-# Log file
-*.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
+# Package files #
 *.jar
 *.war
 *.ear
-*.zip
-*.tar.gz
-*.rar
+*.db
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
+# Log files #
+/*.log
+/*.log.*
+
+# Output folders #
+/test-output/
+
+# Eclipse files #
+.buildpath
+.classpath
+.cproject
+.externalToolBuilders/
+.launch
+.loadpath
+.metadata
+.project
+.settings/
+bin/**
+tmp/**
+tmp/**/*
+*.tmp
+*.nak
+*.swp
+*~.nib
+*.pydevproject
+local.properties
+/src/main/resources/rebel.xml
+.springBeans
+
+# IntelliJ Idea files #
+.idea
+*.iml
+
+# Windows files #
+Thumbs.db
+Desktop.ini
+
+# OS files #
+.DS_Store
+.svn
+._*
+.Spotlight-V100
+.Trashes

@@ -1,0 +1,32 @@
+# Travis CI Configuration file
+# @link https://travis-ci.org/
+
+# Using Java for the project
+language: java
+matrix:
+  include:
+    # Code artifacts deployed with OpenJDK7
+    - jdk: openjdk7
+      env: DEPLOY=true
+    # Documentation deployed with JDK8
+    - jdk: oraclejdk8
+      env: DEPLOY_DOCS=true
+
+before_install:
+  # Gets scripts
+  - git clone -b v1.1.3 --single-branch https://github.com/Bernardo-MG/ci-shell-scripts.git ~/.scripts
+  # Sets scripts as executable
+  - chmod -R +x ~/.scripts/*
+  # Prepares CI environment
+  - source ~/.scripts/travis/load-travis-environment.sh
+before_script:
+  # Creates Maven settings
+  - ~/.scripts/java/maven/create-maven-settings.sh $VERSION_TYPE
+script:
+  # Unit and integration tests are run
+  - mvn clean verify
+after_success:
+  # Documentation deployment script
+  - ~/.scripts/java/maven/deploy-site.sh $DO_DEPLOY_DOCS deployment
+  # Code artifacts deployment script
+  - ~/.scripts/java/maven/deploy.sh $DO_DEPLOY deployment
