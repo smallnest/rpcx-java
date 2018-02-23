@@ -54,43 +54,6 @@
    </distributionManagement>
 
 
-   <profiles>
-      <profile>
-         <id>deployment</id>
-         <properties>
-            <maven.test.skip>true</maven.test.skip>
-         </properties>
-      </profile>
-      <profile>
-         <id>release-sign-artifacts</id>
-         <activation>
-            <property>
-               <name>performRelease</name>
-               <value>true</value>
-            </property>
-         </activation>
-         <build>
-            <plugins>
-               <plugin>
-                  <groupId>org.apache.maven.plugins</groupId>
-                  <artifactId>maven-gpg-plugin</artifactId>
-                  <version>1.6</version>
-                  <executions>
-                     <execution>
-                        <id>sign-artifacts</id>
-                        <phase>verify</phase>
-                        <goals>
-                           <goal>sign</goal>
-                        </goals>
-                     </execution>
-                  </executions>
-               </plugin>
-            </plugins>
-         </build>
-      </profile>
-   </profiles>
-
-
    <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <java-version>1.7</java-version>
@@ -98,12 +61,25 @@
       <maven.compiler.target>1.7</maven.compiler.target>
       <sortpom.version>2.3.0</sortpom.version>
 
+      <lombok.version>1.16.20</lombok.version>
+      <commons-io.version>2.6</commons-io.version>
+
       <junit.version>4.11</junit.version>
    </properties>
 
 
-
    <dependencies>
+      <dependency>
+         <groupId>commons-io</groupId>
+         <artifactId>commons-io</artifactId>
+         <version>${commons-io.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>org.projectlombok</groupId>
+         <artifactId>lombok</artifactId>
+         <version>${lombok.version}</version>
+         <scope>provided</scope>
+      </dependency>
       <dependency>
          <!-- JUnit -->
          <groupId>junit</groupId>
@@ -113,13 +89,22 @@
       </dependency>
    </dependencies>
 
-   <!-- ********************************************** -->
-   <!-- ******************* BUILD ******************** -->
-   <!-- ********************************************** -->
-
    <build>
       <defaultGoal>clean package install</defaultGoal>
       <plugins>
+         <!--<plugin>-->
+            <!--<groupId>org.projectlombok</groupId>-->
+            <!--<artifactId>lombok-maven-plugin</artifactId>-->
+            <!--<version>1.16.20.0</version>-->
+            <!--<executions>-->
+               <!--<execution>-->
+                  <!--<phase>generate-sources</phase>-->
+                  <!--<goals>-->
+                     <!--<goal>delombok</goal>-->
+                  <!--</goals>-->
+               <!--</execution>-->
+            <!--</executions>-->
+         <!--</plugin>-->
          <plugin>
             <groupId>com.google.code.sortpom</groupId>
             <artifactId>maven-sortpom-plugin</artifactId>
@@ -164,9 +149,6 @@
       </plugins>
    </build>
 
-   <!-- ********************************************** -->
-   <!-- ****************** REPORTS ******************* -->
-   <!-- ********************************************** -->
 
    <reporting>
       <plugins>
@@ -217,5 +199,41 @@
          </plugin>
       </plugins>
    </reporting>
+
+   <profiles>
+      <profile>
+         <id>deployment</id>
+         <properties>
+            <maven.test.skip>true</maven.test.skip>
+         </properties>
+      </profile>
+      <profile>
+         <id>release-sign-artifacts</id>
+         <activation>
+            <property>
+               <name>performRelease</name>
+               <value>true</value>
+            </property>
+         </activation>
+         <build>
+            <plugins>
+               <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-gpg-plugin</artifactId>
+                  <version>1.6</version>
+                  <executions>
+                     <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                           <goal>sign</goal>
+                        </goals>
+                     </execution>
+                  </executions>
+               </plugin>
+            </plugins>
+         </build>
+      </profile>
+   </profiles>
 
 </project>
