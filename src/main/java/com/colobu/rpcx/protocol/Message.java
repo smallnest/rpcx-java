@@ -4,11 +4,16 @@ import lombok.Data;
 import org.apache.commons.io.IOUtils;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Message is a common class for requests and responses.
+ */
 @Data
 public class Message {
     public static byte magicNumber = 0x08;
@@ -16,7 +21,7 @@ public class Message {
     byte[] header;
     String servicePath;
     String serviceMethod;
-    Map<String,String> metadata;
+    Map<String, String> metadata;
     byte[] payload;
 
     public Message() {
@@ -27,6 +32,124 @@ public class Message {
         metadata = new HashMap<>();
         payload = new byte[]{};
     }
+
+    public Message(String servicePath, String serviceMethod) {
+        this();
+        this.servicePath = servicePath;
+        this.serviceMethod = serviceMethod;
+    }
+
+    public Message(String servicePath, String serviceMethod, Map<String, String> metadata) {
+        this(servicePath, serviceMethod);
+        this.metadata = metadata;
+    }
+
+    public Message(String servicePath, String serviceMethod, Map<String, String> metadata, byte[] payload) {
+        this(servicePath, serviceMethod, metadata);
+        this.payload = payload;
+    }
+
+
+    public byte getVersion() {
+        return header[1];
+    }
+
+    public void setVersion(byte version) {
+        header[1] = version;
+    }
+
+    public MessageType getMessageType() {
+        if ((header[2] & 0x80) == 0) {
+            return MessageType.Request;
+        }
+
+        return MessageType.Response;
+    }
+
+    public void setMessageType(MessageType mt) {
+        if (mt == MessageType.Request) {
+            header[2] &= ~0x80;
+        } else {
+            header[2] |= 0x80;
+        }
+    }
+
+    public boolean isHeartbeat() {
+        return (header[2] & 0x40) != 0;
+    }
+
+    public void setHeartbeat(boolean heartbeat) {
+        if (heartbeat) {
+            header[2] |= 0x40;
+        } else {
+            header[2] &= ~0x40;
+        }
+    }
+
+    public boolean isOneway() {
+        return (header[2] & 0x40) != 0;
+    }
+
+    public void setOneway(boolean oneway) {
+        if (oneway) {
+            header[2] |= 0x20;
+        } else {
+            header[2] &= ~0x20;
+        }
+    }
+
+
+    public CompressType getCompressType() {
+        int v = (header[2] & 0x1C) >> 2;
+        return CompressType.getValue(v);
+    }
+
+    public void setCompressType(CompressType ct) {
+        int v = ct.value();
+        header[2] &= ~0x1C;
+        header[2] |= (v << 2) & 0x1C;
+    }
+
+    public MessageStatusType getMessageStatusType() {
+        int v = header[2] & 0x03;
+        return MessageStatusType.getValue(v);
+    }
+
+    public void setMessageStatusType(MessageStatusType mst) {
+        int v = mst.value();
+        header[2] &=  ~0x03;
+        header[2] |= v & 0x03;
+    }
+
+    public SerializeType getSerializeType() {
+        int v = (header[3] & 0xF0) >> 4;
+        return SerializeType.getValue(v);
+    }
+
+    public void setSerializeType(SerializeType st) {
+        int v = st.value();
+        header[3] &= 0x0F;
+        header[3] |= (v << 4) & 0xF0;
+    }
+
+    public double getSeq() {
+        ByteBuffer buf = ByteBuffer.wrap(header);
+        buf.position(3);
+        return buf.getDouble();
+    }
+
+    public void setSeq(double seq) {
+        ByteBuffer buf = ByteBuffer.wrap(header);
+        buf.position(3);
+        buf.putDouble(seq);
+    }
+
+    /**
+     * decode from an inputstream and fill this message with it.
+     *
+     * @param in input data
+     * @throws Exception
+     */
     public void decode(InputStream in) throws Exception {
         int magic = in.read();
         if (magic != magicNumber) {
@@ -76,6 +199,12 @@ public class Message {
         buf.get(payload);
     }
 
+    /**
+     * encode this message to a byte array.
+     *
+     * @return encoded data for this message.
+     * @throws Exception
+     */
     public byte[] encode() throws Exception {
         ByteArrayOutputStream os = new ByteArrayOutputStream(24);
         os.write(header);
@@ -101,12 +230,46 @@ public class Message {
         return os.toByteArray();
     }
 
-    private void decodeMetadata(byte[] b) {
-        // TODO
+    private void decodeMetadata(byte[] b) throws UnsupportedEncodingException {
+
+        ByteBuffer buf = ByteBuffer.wrap(b);
+        int len;
+        for (; ; ) {
+            if (buf.remaining() < 4) {
+                break;
+            }
+            len = buf.getInt();
+            b = new byte[len];
+            buf.get(b);
+            String k = new String(b, "UTF-8");
+
+            len = buf.getInt();
+            b = new byte[len];
+            buf.get(b);
+            String v = new String(b, "UTF-8");
+            metadata.put(k, v);
+        }
+
     }
 
-    private byte[] encodeMetadata() {
-        // TODO
-        return new byte[]{};
+    private byte[] encodeMetadata() throws IOException {
+        if (metadata.size() == 0) {
+            return new byte[]{};
+        }
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+        for (Map.Entry<String, String> entry : metadata.entrySet()) {
+            String key = entry.getKey();
+            byte[] keyBytes = key.getBytes("UTF-8");
+            os.write(ByteBuffer.allocate(4).putInt(keyBytes.length).array());
+            os.write(keyBytes);
+
+            String v = entry.getValue();
+            byte[] vBytes = v.getBytes("UTF-8");
+            os.write(ByteBuffer.allocate(4).putInt(vBytes.length).array());
+            os.write(vBytes);
+        }
+
+        return os.toByteArray();
     }
 }
