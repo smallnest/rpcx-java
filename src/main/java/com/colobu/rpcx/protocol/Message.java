@@ -3,13 +3,12 @@ package com.colobu.rpcx.protocol;
 import lombok.Data;
 import org.apache.commons.io.IOUtils;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Message is a common class for requests and responses.
@@ -19,10 +18,10 @@ public class Message {
     public static byte magicNumber = 0x08;
 
     byte[] header;
-    String servicePath;
-    String serviceMethod;
-    Map<String, String> metadata;
-    byte[] payload;
+    public String servicePath;
+    public String serviceMethod;
+    public Map<String, String> metadata;
+    public byte[] payload;
 
     public Message() {
         header = new byte[12];
@@ -134,13 +133,13 @@ public class Message {
 
     public double getSeq() {
         ByteBuffer buf = ByteBuffer.wrap(header);
-        buf.position(3);
+        buf.position(4);
         return buf.getDouble();
     }
 
     public void setSeq(double seq) {
         ByteBuffer buf = ByteBuffer.wrap(header);
-        buf.position(3);
+        buf.position(4);
         buf.putDouble(seq);
     }
 
@@ -197,6 +196,19 @@ public class Message {
         len = buf.getInt();
         payload = new byte[len];
         buf.get(payload);
+
+        //decompress
+        if (getCompressType() == CompressType.Gzip) {
+            GZIPInputStream zipStream = new GZIPInputStream(new ByteArrayInputStream(payload));
+
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int ll;
+            while ((ll = zipStream.read(buffer)) != -1) {
+                bos.write(buffer, 0, len);
+            }
+            payload = bos.toByteArray();
+        }
     }
 
     /**
@@ -208,6 +220,14 @@ public class Message {
     public byte[] encode() throws Exception {
         ByteArrayOutputStream os = new ByteArrayOutputStream(24);
         os.write(header);
+
+        //compress
+        if (getCompressType() == CompressType.Gzip) {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            GZIPOutputStream zipStream = new GZIPOutputStream(bos);
+            zipStream.write(payload);
+            payload = bos.toByteArray();
+        }
 
         byte[] spBytes = servicePath.getBytes("UTF-8");
         byte[] smBytes = serviceMethod.getBytes("UTF-8");
