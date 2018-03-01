@@ -15,6 +15,9 @@ public class Client {
     private Socket socket;
     private ExecutorService executor;
     private Map<Double, CompletableFuture<Message>> futures = new ConcurrentHashMap<>();
+    // callback for handling responses which seq is missing in futures. Those messages may be requests from servers.
+    private Callable missingSeqCallbacks;
+
 
     public Client() {
         executor = Executors.newCachedThreadPool();
@@ -22,6 +25,11 @@ public class Client {
 
     public Client(ExecutorService executor) {
         this.executor = executor;
+    }
+
+    // recommend you handle messages in callback in another thread pool to avoid blocking receiving messages from server.
+    public void setCallback(Callable callback) {
+        missingSeqCallbacks = callback;
     }
 
     // connect the server.
@@ -98,8 +106,8 @@ public class Client {
                 CompletableFuture<Message> f = futures.get(seq);
                 if (f != null) {
                     f.complete(res);
-                } else {
-                    //dropped
+                } else if (missingSeqCallbacks != null){
+                    missingSeqCallbacks.call(res);
                 }
             } catch (Exception e) {
                 try {
