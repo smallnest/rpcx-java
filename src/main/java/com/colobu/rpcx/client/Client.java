@@ -7,6 +7,9 @@ import java.net.Socket;
 import java.util.Map;
 import java.util.concurrent.*;
 
+// Client is a class to connect rpcx services and invoke services sync or async.
+// It can compress/decompress according to CompressType setting.
+// Notice current clients does not serialize/deserialize payload so you need to handle it manually.
 public class Client {
     public int callTimeoutInMills = 10000;
     private Socket socket;
@@ -21,6 +24,7 @@ public class Client {
         this.executor = executor;
     }
 
+    // connect the server.
     public void connect(String serverAddress, int serverPort) throws IOException {
         socket = new Socket(serverAddress, serverPort);
         new Thread(() -> {
@@ -32,6 +36,8 @@ public class Client {
         }).start();
     }
 
+    // call services asynchronously.
+    // Please invoke cancelFuture if you cancel this future by `f.cancel(bool)` manually, otherwise there may be memory leak.
     public CompletableFuture<Message> asyncCall(Message req) throws Exception {
 
         CompletableFuture<Message> f = new CompletableFuture<>();
@@ -61,6 +67,14 @@ public class Client {
 
 
         return f;
+    }
+
+    public void cancelFuture(double seq,CompletableFuture<Message> f) {
+        if (!f.isCancelled() && !f.isDone() && !f.isCompletedExceptionally()) {
+            f.cancel(true);
+        }
+
+        futures.remove(seq);
     }
 
     private void clearWaitingFutures(Exception e) {
@@ -102,6 +116,7 @@ public class Client {
         }
     }
 
+    // call services synchronously.
     public Message call(Message req) throws Exception {
         CompletableFuture<Message> f = asyncCall(req);
         return f.get(callTimeoutInMills, TimeUnit.MILLISECONDS);
