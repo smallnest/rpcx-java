@@ -4,7 +4,6 @@ import com.colobu.rpcx.protocol.*;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 import static org.junit.Assert.*;
@@ -50,9 +49,7 @@ public class ClientTest {
     @Test
     public void call() throws Exception {
         //prepare req
-
         Message req = new Message("echo", "Echo");
-
         req.setVersion((byte)0);
         req.setMessageType(MessageType.Request);
         req.setHeartbeat(false);
@@ -70,6 +67,7 @@ public class ClientTest {
         }
 
 
+        // create the client
         Client client = new Client();
         client.connect("127.0.0.1", 8972);
         Message res = client.call(req);
