@@ -29,18 +29,6 @@
       <url>https://github.com/smallnest/rpcx-java</url>
    </scm>
 
-   <organization>
-		<name>colobu</name>
-		<url>http://colobu.com</url>
-	</organization>
-	<developers>
-		<developer>
-			<id>smallnest</id>
-			<name>smallnest</name>
-			<email>smallnest@gmail.com</email>
-		</developer>
-	</developers>
-	
    <issueManagement>
       <system>GitHub</system>
       <url>https://github.com/smallnest/rpcx-java/issues</url>
