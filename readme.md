@@ -12,3 +12,10 @@ Yes, you can write a http client to invoke rpcx services via [rpcx-gateway](http
 but http protocol is slower than direct TCP communications.
 
 This client can access rpcx services via raw rpcx protocol sync ot async.
+
+
+## roadmap
+
+- 1.x: implement simple rpcx client
+- 2.x: support Service discovery and service governance
+- 3.x: support develop services in Java 
