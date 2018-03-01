@@ -6,7 +6,7 @@
 
    <groupId>com.colobu</groupId>
    <artifactId>rpcx</artifactId>
-   <version>1.0</version>
+   <version>1.1-SNAPSHOT</version>
    <packaging>jar</packaging>
 
    <name>Basic Maven Project</name>
@@ -24,7 +24,7 @@
    <scm>
       <connection>scm:git:https://github.com/smallnest/rpcx-java.git</connection>
       <developerConnection>scm:git:https://github.com/smallnest/rpcx-java.git</developerConnection>
-      <tag>rpcx-1.0</tag>
+      <tag>head</tag>
       <url>https://github.com/smallnest/rpcx-java</url>
    </scm>
 
