@@ -76,13 +76,13 @@ public class ClientTest {
         assertEquals(req.servicePath, res.servicePath);
         assertEquals(req.serviceMethod,res.serviceMethod);
 
-        assertEquals(req.getVersion(), req.getVersion());
+        assertEquals(req.getVersion(), res.getVersion());
         assertEquals(MessageType.Response, res.getMessageType());
-        assertEquals(req.isHeartbeat(), req.isHeartbeat());
-        assertEquals(req.isOneway(), req.isOneway());
-        assertEquals(req.getCompressType(), req.getCompressType());
-        assertEquals(req.getMessageStatusType(), req.getMessageStatusType());
-        assertEquals(req.getSeq(), req.getSeq(), 0);
+        assertEquals(req.isHeartbeat(), res.isHeartbeat());
+        assertEquals(req.isOneway(), res.isOneway());
+        assertEquals(req.getCompressType(), res.getCompressType());
+        assertEquals(req.getMessageStatusType(), res.getMessageStatusType());
+        assertEquals(req.getSeq(), res.getSeq(), 0);
 
         assertEquals("helloworld", new String(res.payload, "UTF-8"));
     }
