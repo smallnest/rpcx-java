@@ -18,7 +18,7 @@ public class MessageTest {
         req.setMessageType(MessageType.Request);
         req.setHeartbeat(true);
         req.setOneway(true);
-        req.setCompressType(CompressType.Gzip);
+        req.setCompressType(CompressType.None);
         req.setMessageStatusType(MessageStatusType.Normal);
         req.setSerializeType(SerializeType.JSON);
         req.setSeq(12345678);
