@@ -19,6 +19,6 @@ This client can access rpcx services via raw rpcx protocol sync ot async.
 
 ## roadmap
 
-- 1.x: implement simple rpcx client
-- 2.x: support Service discovery and service governance
+- 1.x: implement simple rpcx client and bidirectional communication
+- 2.x: support service discovery and service governance
 - 3.x: support develop services in Java 
