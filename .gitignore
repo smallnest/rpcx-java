@@ -60,3 +60,5 @@ Desktop.ini
 .Trashes
 .idea
 *.iml
+pom.xml.releaseBackup
+release.properties
