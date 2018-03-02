@@ -1,6 +1,6 @@
 ## rpcx-java
 
-[![License](https://img.shields.io/:license-apache%202-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![GoDoc](https://godoc.org/github.com/smallnest/rpcx-java?status.png)](http://godoc.org/github.com/smallnest/rpcx-java)  [![travis](https://travis-ci.org/smallnest/rpcx-java.svg?branch=master)](https://travis-ci.org/smallnest/rpcx-java) [![codecov](https://codecov.io/gh/smallnest/rpcx-java/branch/master/graph/badge.svg)](https://codecov.io/gh/smallnest/rpcx-java)
+[![License](https://img.shields.io/:license-apache%202-blue.svg)](https://opensource.org/licenses/Apache-2.0)  [![travis](https://travis-ci.org/smallnest/rpcx-java.svg?branch=master)](https://travis-ci.org/smallnest/rpcx-java) [![codecov](https://codecov.io/gh/smallnest/rpcx-java/branch/master/graph/badge.svg)](https://codecov.io/gh/smallnest/rpcx-java)
 
 
 rpcx-java is java implementation of [rpcx](https://github.com/smallnest/rpcx).
