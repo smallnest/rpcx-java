@@ -5,6 +5,7 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.cache.*;
 import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.apache.zookeeper.CreateMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,8 +61,14 @@ public class ZkClient {
             System.out.println("状态为：" + cache.getCurrentData().getStat());
             System.out.println("---------------------------------------");
         });
+    }
 
-
+    public void create() throws Exception {
+        String path = "/youpin/services/Arith/tcp@192.168.31.82:8976";
+//        String path = "/abceeee";
+        if (client.checkExists().forPath(path) == null) {
+            client.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL).forPath(path);
+        }
     }
 
 

@@ -1,6 +1,5 @@
 package com.colobu.rpcx.netty;
 
-import com.colobu.rpcx.client.NettyClient;
 import com.colobu.rpcx.common.RemotingHelper;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -21,12 +20,11 @@ public class NettyConnetManageHandler extends ChannelDuplexHandler {
 
     private static final Logger log = LoggerFactory.getLogger(NettyConnetManageHandler.class);
 
-    private final NettyClient nettyClient;
+    private final NettyRemotingAbstract nettyRemotingAbstract;
 
-    public NettyConnetManageHandler(NettyClient nettyClient) {
-        this.nettyClient = nettyClient;
+    public NettyConnetManageHandler(NettyRemotingAbstract nettyRemotingAbstract) {
+        this.nettyRemotingAbstract = nettyRemotingAbstract;
     }
-
 
     @Override
     public void connect(ChannelHandlerContext ctx, SocketAddress remoteAddress, SocketAddress localAddress, ChannelPromise promise)
@@ -36,8 +34,8 @@ public class NettyConnetManageHandler extends ChannelDuplexHandler {
         log.info("NETTY CLIENT PIPELINE: CONNECT  {} => {}", local, remote);
         super.connect(ctx, remoteAddress, localAddress, promise);
 
-        if (nettyClient.hasEventListener()) {
-            nettyClient.putNettyEvent(new NettyEvent(NettyEventType.CONNECT, remoteAddress.toString(), ctx.channel()));
+        if (nettyRemotingAbstract.hasEventListener()) {
+            nettyRemotingAbstract.putNettyEvent(new NettyEvent(NettyEventType.CONNECT, remoteAddress.toString(), ctx.channel()));
         }
     }
 
@@ -49,8 +47,8 @@ public class NettyConnetManageHandler extends ChannelDuplexHandler {
         closeChannel(ctx.channel());
         super.disconnect(ctx, promise);
 
-        if (nettyClient.hasEventListener()) {
-            nettyClient.putNettyEvent(new NettyEvent(NettyEventType.CLOSE, remoteAddress.toString(), ctx.channel()));
+        if (nettyRemotingAbstract.hasEventListener()) {
+            nettyRemotingAbstract.putNettyEvent(new NettyEvent(NettyEventType.CLOSE, remoteAddress.toString(), ctx.channel()));
         }
     }
 
@@ -59,11 +57,11 @@ public class NettyConnetManageHandler extends ChannelDuplexHandler {
     public void close(ChannelHandlerContext ctx, ChannelPromise promise) throws Exception {
         final String remoteAddress = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
         log.info("NETTY CLIENT PIPELINE: CLOSE {}", remoteAddress);
-        nettyClient.closeChannel(ctx.channel());
+        nettyRemotingAbstract.closeChannel(ctx.channel());
         super.close(ctx, promise);
 
-        if (nettyClient.hasEventListener()) {
-            nettyClient.putNettyEvent(new NettyEvent(NettyEventType.CLOSE, remoteAddress.toString(), ctx.channel()));
+        if (nettyRemotingAbstract.hasEventListener()) {
+            nettyRemotingAbstract.putNettyEvent(new NettyEvent(NettyEventType.CLOSE, remoteAddress.toString(), ctx.channel()));
         }
     }
 
@@ -75,8 +73,8 @@ public class NettyConnetManageHandler extends ChannelDuplexHandler {
                 final String remoteAddress = RemotingHelper.parseChannelRemoteAddr(ctx.channel());
                 log.warn("NETTY CLIENT PIPELINE: IDLE exception [{}]", remoteAddress);
                 closeChannel(ctx.channel());
-                if (nettyClient.hasEventListener()) {
-                    nettyClient
+                if (nettyRemotingAbstract.hasEventListener()) {
+                    nettyRemotingAbstract
                             .putNettyEvent(new NettyEvent(NettyEventType.IDLE, remoteAddress.toString(), ctx.channel()));
                 }
             }
@@ -91,8 +89,8 @@ public class NettyConnetManageHandler extends ChannelDuplexHandler {
         log.warn("NETTY CLIENT PIPELINE: exceptionCaught {}", remoteAddress);
         log.warn("NETTY CLIENT PIPELINE: exceptionCaught exception.", cause);
         closeChannel(ctx.channel());
-        if (nettyClient.hasEventListener()) {
-            nettyClient.putNettyEvent(new NettyEvent(NettyEventType.EXCEPTION, remoteAddress.toString(), ctx.channel()));
+        if (nettyRemotingAbstract.hasEventListener()) {
+            nettyRemotingAbstract.putNettyEvent(new NettyEvent(NettyEventType.EXCEPTION, remoteAddress.toString(), ctx.channel()));
         }
     }
 

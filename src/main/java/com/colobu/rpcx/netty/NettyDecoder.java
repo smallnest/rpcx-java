@@ -1,6 +1,7 @@
 package com.colobu.rpcx.netty;
 
 import com.colobu.rpcx.protocol.Message;
+import com.colobu.rpcx.protocol.MessageType;
 import com.colobu.rpcx.protocol.RemotingCommand;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -14,7 +15,7 @@ public class NettyDecoder extends ReplayingDecoder{
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        RemotingCommand command = RemotingCommand.createResponseCommand();
+
         Message message = new Message();
         byte[]header = new byte[12];
         in.readBytes(header);
@@ -49,6 +50,13 @@ public class NettyDecoder extends ReplayingDecoder{
         buf.get(payload);
         message.payload = payload;
 
+        MessageType type = message.getMessageType();
+        RemotingCommand command = null;
+        if (type == MessageType.Request) {
+            command = RemotingCommand.createRequestCommand(2);//request
+        } else {
+            command = RemotingCommand.createResponseCommand();//response
+        }
         command.setMessage(message);
         out.add(command);
     }

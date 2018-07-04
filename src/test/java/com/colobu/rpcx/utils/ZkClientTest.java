@@ -30,4 +30,11 @@ public class ZkClientTest {
         ZkClient.ins().watch2(queue,"");
         TimeUnit.HOURS.sleep(1);
     }
+
+
+    @Test
+    public void testCreate() throws Exception {
+        ZkClient.ins().create();
+        TimeUnit.HOURS.sleep(1);
+    }
 }

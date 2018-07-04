@@ -1,7 +1,6 @@
 package com.colobu.rpcx.client;
 
 import com.colobu.rpcx.client.impl.RandomSelector;
-import com.colobu.rpcx.common.RemotingUtil;
 import com.colobu.rpcx.config.NettyClientConfig;
 import com.colobu.rpcx.exception.RemotingSendRequestException;
 import com.colobu.rpcx.exception.RemotingTimeoutException;
@@ -20,18 +19,17 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by zhangzhiyong on 2018/7/3.
  */
-public class NettyClient implements IClient {
+public class NettyClient extends NettyRemotingAbstract implements IClient {
 
     private static final Logger logger = LoggerFactory.getLogger(NettyClient.class);
 
@@ -41,17 +39,11 @@ public class NettyClient implements IClient {
 
     private final EventLoopGroup eventLoopGroupWorker;
 
-    private final ChannelEventListener channelEventListener;
 
-    public final ConcurrentHashMap<Integer, ResponseFuture> responseTable = new ConcurrentHashMap<>(256);
 
     protected final NettyEventExecuter nettyEventExecuter = new NettyEventExecuter();
 
-    private final ConcurrentHashMap<String /* addr */, ChannelWrapper> channelTables = new ConcurrentHashMap<>();
 
-    private final Lock lockChannelTables = new ReentrantLock();
-
-    private static final long LockTimeoutMillis = 3000;
 
     private Bootstrap bootstrap;
 
@@ -59,7 +51,6 @@ public class NettyClient implements IClient {
 
     public NettyClient(ServiceDiscovery serviceDiscovery) {
         this.serviceDiscovery = serviceDiscovery;
-        channelEventListener = new ClientChannelEventListener();
         this.eventLoopGroupWorker = new NioEventLoopGroup(1, new ThreadFactory() {
             private AtomicInteger threadIndex = new AtomicInteger(0);
 
@@ -118,28 +109,7 @@ public class NettyClient implements IClient {
     }
 
 
-    public void scanResponseTable() {
-        final List<ResponseFuture> rfList = new LinkedList<>();
-        Iterator<Map.Entry<Integer, ResponseFuture>> it = this.responseTable.entrySet().iterator();//* Integer 是协议对应号
-        while (it.hasNext()) {
-            Map.Entry<Integer, ResponseFuture> next = it.next();
-            ResponseFuture rep = next.getValue();
-            if ((rep.getBeginTimestamp() + rep.getTimeoutMillis() + 1000) <= System.currentTimeMillis()) {
-                rep.release();
-                it.remove();
-                rfList.add(rep);
-                logger.warn("remove timeout request, " + rep);
-            }
-        }
 
-        for (ResponseFuture rf : rfList) {
-            try {
-                rf.executeInvokeCallback();
-            } catch (Throwable e) {
-                logger.warn("scanResponseTable, operationComplete Exception", e);
-            }
-        }
-    }
 
 
     /**
@@ -240,55 +210,7 @@ public class NettyClient implements IClient {
         return null;
     }
 
-    /**
-     * 关闭channel
-     *
-     * @param channel
-     */
-    public void closeChannel(final Channel channel) {
-        if (null == channel)
-            return;
 
-        try {
-            if (this.lockChannelTables.tryLock(LockTimeoutMillis, TimeUnit.MILLISECONDS)) {
-                try {
-                    boolean removeItemFromTable = true;
-                    ChannelWrapper prevCW = null;
-                    String addrRemote = null;
-                    for (Map.Entry<String, ChannelWrapper> entry : channelTables.entrySet()) {
-                        String key = entry.getKey();
-                        ChannelWrapper prev = entry.getValue();
-                        if (prev.getChannel() != null) {
-                            if (prev.getChannel() == channel) {
-                                prevCW = prev;
-                                addrRemote = key;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (null == prevCW) {
-                        logger.info("eventCloseChannel: the channel[{}] has been removed from the channel table before", addrRemote);
-                        removeItemFromTable = false;
-                    }
-
-                    if (removeItemFromTable) {
-                        this.channelTables.remove(addrRemote);
-                        logger.info("closeChannel: the channel[{}] was removed from channel table", addrRemote);
-                        RemotingUtil.closeChannel(channel);
-                    }
-                } catch (Exception e) {
-                    logger.error("closeChannel: close the channel exception", e);
-                } finally {
-                    this.lockChannelTables.unlock();
-                }
-            } else {
-                logger.warn("closeChannel: try to lock channel table, but timeout, {}ms", LockTimeoutMillis);
-            }
-        } catch (InterruptedException e) {
-            logger.error("closeChannel exception", e);
-        }
-    }
 
 
     public static SocketAddress string2SocketAddress(final String addr) {
@@ -339,9 +261,7 @@ public class NettyClient implements IClient {
     }
 
 
-    public boolean hasEventListener() {
-        return this.channelEventListener != null;
-    }
+
 
     public void putNettyEvent(final NettyEvent event) {
         this.nettyEventExecuter.putNettyEvent(event);

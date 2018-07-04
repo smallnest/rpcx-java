@@ -3,7 +3,6 @@ package com.colobu.rpcx.client;
 import com.colobu.rpcx.utils.PathStatus;
 import com.colobu.rpcx.utils.ZkClient;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
