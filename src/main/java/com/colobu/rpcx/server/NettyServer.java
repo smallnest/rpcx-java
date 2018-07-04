@@ -16,6 +16,7 @@ import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -77,11 +78,22 @@ public class NettyServer extends NettyRemotingAbstract {
             public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request) throws Exception {
                 System.out.println(request);
                 System.out.println(new String(request.getMessage().payload));
+
+                Message reqMsg = request.getMessage();
+                String method = reqMsg.serviceMethod;
+                String clazz = reqMsg.servicePath;
+
+                Class<?> c = Class.forName("com.colobu.rpcx.service." + clazz);
+                Object obj = c.newInstance();
+
+                Method m = c.getMethod(method, new byte[]{}.getClass());
+                Object v = m.invoke(obj, reqMsg.payload);
+
                 RemotingCommand res = RemotingCommand.createResponseCommand();
                 Message message = new Message();
                 message.setMessageType(MessageType.Response);
                 message.setSeq(request.getOpaque());
-                message.payload = "hahahaxixixi".getBytes();
+                message.payload = (byte[]) v;
                 res.setMessage(message);
                 return res;
             }
