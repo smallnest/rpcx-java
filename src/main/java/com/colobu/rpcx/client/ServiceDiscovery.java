@@ -20,8 +20,13 @@ public class ServiceDiscovery {
 
     private ConcurrentHashMap<String, Set<String>> map = new ConcurrentHashMap<>();
 
-    public ServiceDiscovery() {
-        this.map.put("Arith", new HashSet<>());
+    private final String basePath;
+    private final String serviceName;
+
+    public ServiceDiscovery(final String basePath, final String serviceName) {
+        this.basePath = basePath;
+        this.serviceName = serviceName;
+        this.map.put(serviceName, new HashSet<>());
 
         Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(() -> {
             System.out.println(this.map);
@@ -47,12 +52,12 @@ public class ServiceDiscovery {
                     System.out.println("---------->" + ps);
 
                     if (ps.getType().equals("CHILD_ADDED")) {
-                        this.map.compute("Arith", (k, v) -> {
+                        this.map.compute(serviceName, (k, v) -> {
                             v.add(ps.getValue());
                             return v;
                         });
                     } else if (ps.getType().equals("CHILD_REMOVED")) {
-                        this.map.compute("Arith", (k, v) -> {
+                        this.map.compute(serviceName, (k, v) -> {
                             v.remove(ps.getValue());
                             return v;
                         });
@@ -64,6 +69,6 @@ public class ServiceDiscovery {
             }
         }).start();
 
-        ZkClient.ins().watch2(queue, "/youpin/services/Arith");
+        ZkClient.ins().watch2(queue, basePath + serviceName);
     }
 }

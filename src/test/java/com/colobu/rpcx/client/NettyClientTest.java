@@ -47,7 +47,7 @@ public class NettyClientTest {
         req.metadata.put("test", "1234");
         req.payload = "world".getBytes("UTF-8");
 
-        ServiceDiscovery serviceDiscovery = new ServiceDiscovery();
+        ServiceDiscovery serviceDiscovery = new ServiceDiscovery("/youpin/services/","Arith");
         IClient client = new NettyClient(serviceDiscovery);
         Message res = client.call(req);
         System.out.println(new String(res.payload));
