@@ -49,7 +49,7 @@ public class ClientTest {
     @Test
     public void call() throws Exception {
         //prepare req
-        Message req = new Message("echo", "Echo");
+        Message req = new Message("Arith", "Echo");
         req.setVersion((byte)0);
         req.setMessageType(MessageType.Request);
         req.setHeartbeat(false);
@@ -69,9 +69,9 @@ public class ClientTest {
 
         // create the client
         Client client = new Client();
-        client.connect("127.0.0.1", 8972);
+        client.connect("10.231.72.75", 8976);
         Message res = client.call(req);
-        assertNotNull(res);
+        System.out.println(new String(res.payload));
 
         assertEquals(req.servicePath, res.servicePath);
         assertEquals(req.serviceMethod,res.serviceMethod);
@@ -84,6 +84,5 @@ public class ClientTest {
         assertEquals(req.getMessageStatusType(), res.getMessageStatusType());
         assertEquals(req.getSeq(), res.getSeq(), 0);
 
-        assertEquals("helloworld", new String(res.payload, "UTF-8"));
     }
 }
