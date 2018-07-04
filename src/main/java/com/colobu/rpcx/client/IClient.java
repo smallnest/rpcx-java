@@ -11,5 +11,5 @@ public interface IClient {
 
     Message call(String addr,Message req) throws Exception;
 
-    void connect(String serverAddress, int serverPort) throws IOException;
+    Message call(Message req) throws Exception;
 }

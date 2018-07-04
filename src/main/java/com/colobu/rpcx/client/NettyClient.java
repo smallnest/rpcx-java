@@ -1,5 +1,6 @@
 package com.colobu.rpcx.client;
 
+import com.colobu.rpcx.client.impl.RandomSelector;
 import com.colobu.rpcx.common.RemotingUtil;
 import com.colobu.rpcx.config.NettyClientConfig;
 import com.colobu.rpcx.exception.RemotingSendRequestException;
@@ -17,7 +18,6 @@ import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.*;
@@ -55,7 +55,10 @@ public class NettyClient implements IClient {
 
     private Bootstrap bootstrap;
 
-    public NettyClient() {
+    private final ServiceDiscovery serviceDiscovery;
+
+    public NettyClient(ServiceDiscovery serviceDiscovery) {
+        this.serviceDiscovery = serviceDiscovery;
         channelEventListener = new ClientChannelEventListener();
         this.eventLoopGroupWorker = new NioEventLoopGroup(1, new ThreadFactory() {
             private AtomicInteger threadIndex = new AtomicInteger(0);
@@ -139,11 +142,34 @@ public class NettyClient implements IClient {
     }
 
 
+    /**
+     * 同步的调用
+     * @param addr
+     * @param req
+     * @return
+     * @throws Exception
+     */
     @Override
     public Message call(String addr, Message req) throws Exception {
         final RemotingCommand request = RemotingCommand.createRequestCommand(1);
         request.setMessage(req);
         long timeoutMillis = 300000000;//TODO $--
+        final Channel channel = this.getAndCreateChannel(addr);//* 获取或者创建channel
+        RemotingCommand response = this.invokeSyncImpl(channel, request, timeoutMillis);//* 同步执行
+        return response.getMessage();
+    }
+
+
+    public Message call(Message req) throws Exception {
+        final RemotingCommand request = RemotingCommand.createRequestCommand(1);
+        request.setMessage(req);
+        long timeoutMillis = 300000000;//TODO $--
+
+        List<String> serviceList = this.serviceDiscovery.getServices();
+        String addr = new RandomSelector().select(req.servicePath, req.serviceMethod,serviceList);
+        if (null == addr) {
+            throw new RuntimeException("addr error");
+        }
         final Channel channel = this.getAndCreateChannel(addr);//* 获取或者创建channel
         RemotingCommand response = this.invokeSyncImpl(channel, request, timeoutMillis);//* 同步执行
         return response.getMessage();
@@ -312,10 +338,6 @@ public class NettyClient implements IClient {
         }
     }
 
-    @Override
-    public void connect(String serverAddress, int serverPort) throws IOException {
-
-    }
 
     public boolean hasEventListener() {
         return this.channelEventListener != null;
