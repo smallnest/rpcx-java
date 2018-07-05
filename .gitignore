@@ -5,6 +5,10 @@
 /bin/
 /target/
 /build/
+/common/target/
+/client/target/
+/server/target/
+/demo/target/
 
 # Java compile files #
 *.class

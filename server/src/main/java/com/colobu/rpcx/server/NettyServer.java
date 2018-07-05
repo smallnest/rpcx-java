@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -40,6 +41,8 @@ public class NettyServer extends NettyRemotingAbstract {
 
     @Getter
     private int port;
+
+    private final CountDownLatch latch = new CountDownLatch(1);
 
     private final Timer timer = new Timer("ServerHouseKeepingService", true);
 
@@ -172,6 +175,23 @@ public class NettyServer extends NettyRemotingAbstract {
                 }
             }
         }, 1000 * 3, 1000);
+
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            logger.info("shutdown begin");
+            latch.countDown();
+            logger.info("shutdown end");
+        }));
+
+    }
+
+
+    public void await() {
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
 }
