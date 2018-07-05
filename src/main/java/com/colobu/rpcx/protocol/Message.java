@@ -131,16 +131,17 @@ public class Message {
         header[3] |= (v << 4) & 0xF0;
     }
 
-    public double getSeq() {
+    public long getSeq() {
         ByteBuffer buf = ByteBuffer.wrap(header);
         buf.position(4);
-        return buf.getDouble();
+        return buf.getLong();
     }
 
-    public void setSeq(double seq) {
+    public void setSeq(long seq) {
+        System.out.println(">>>>>>>>>>"+seq);
         ByteBuffer buf = ByteBuffer.wrap(header);
         buf.position(4);
-        buf.putDouble(seq);
+        buf.putLong(seq);
     }
 
     /**

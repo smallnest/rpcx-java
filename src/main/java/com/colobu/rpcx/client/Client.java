@@ -14,7 +14,7 @@ public class Client {
     public int callTimeoutInMills = 10000;
     private Socket socket;
     private ExecutorService executor;
-    private Map<Double, CompletableFuture<Message>> futures = new ConcurrentHashMap<>();
+    private Map<Long, CompletableFuture<Message>> futures = new ConcurrentHashMap<>();
     // callback for handling responses which seq is missing in futures. Those messages may be requests from servers.
     private Callable missingSeqCallbacks;
 

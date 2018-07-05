@@ -8,6 +8,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ReplayingDecoder;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -19,10 +20,11 @@ public class NettyDecoder extends ReplayingDecoder{
         Message message = new Message();
         byte[]header = new byte[12];
         in.readBytes(header);
+        System.out.println(Arrays.toString(header));
 
         ByteBuffer headerBuf = ByteBuffer.wrap(header);
         headerBuf.position(4);
-        double seq = headerBuf.getDouble();
+        long seq = headerBuf.getLong();
         message.setSeq(seq);
 
         int totalLen  = in.readInt();

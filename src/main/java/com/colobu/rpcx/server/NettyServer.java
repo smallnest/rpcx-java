@@ -93,6 +93,7 @@ public class NettyServer extends NettyRemotingAbstract {
                 Message message = new Message();
                 message.setMessageType(MessageType.Response);
                 message.setSeq(request.getOpaque());
+                System.out.println("----------->"+request.getOpaque());
                 message.payload = (byte[]) v;
                 res.setMessage(message);
                 return res;

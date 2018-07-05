@@ -75,9 +75,4 @@ public class RequestTask implements Runnable {
         if (!this.stopRun) this.runnable.run();
     }
 
-    public void returnResponse(int code, String remark) {
-        final RemotingCommand response = RemotingCommand.createResponseCommand(code, remark);
-        response.setOpaque(request.getOpaque());
-        this.channel.writeAndFlush(response);
-    }
 }
