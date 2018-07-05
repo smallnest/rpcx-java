@@ -138,7 +138,6 @@ public class Message {
     }
 
     public void setSeq(long seq) {
-        System.out.println(">>>>>>>>>>"+seq);
         ByteBuffer buf = ByteBuffer.wrap(header);
         buf.position(4);
         buf.putLong(seq);
