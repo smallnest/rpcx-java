@@ -63,9 +63,9 @@ public class ZkClient {
         });
     }
 
-    public void create() throws Exception {
-        String path = "/youpin/services/Arith/tcp@0.0.0.0:8976";
-//        String path = "/abceeee";
+    ///youpin/services/Arith/tcp@0.0.0.0:8976"
+    public void create(String basePath,String serviceName,String addr) throws Exception {
+        String path = basePath+serviceName+"/tcp@"+addr;
         if (client.checkExists().forPath(path) == null) {
             client.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL).forPath(path);
         }

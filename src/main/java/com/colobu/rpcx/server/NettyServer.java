@@ -1,6 +1,7 @@
 package com.colobu.rpcx.server;
 
 import com.colobu.rpcx.common.Pair;
+import com.colobu.rpcx.common.RemotingUtil;
 import com.colobu.rpcx.netty.*;
 import com.colobu.rpcx.protocol.Message;
 import com.colobu.rpcx.protocol.MessageType;
@@ -13,6 +14,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,11 +35,13 @@ public class NettyServer extends NettyRemotingAbstract {
 
     private final ServerBootstrap serverBootstrap;
 
+    @Getter
+    private String addr;
+
+    @Getter
     private int port;
 
     private final Timer timer = new Timer("ServerHouseKeepingService", true);
-
-    private ChannelEventListener channelEventListener;
 
 
     private final EventLoopGroup eventLoopGroupBoss;
@@ -144,10 +148,12 @@ public class NettyServer extends NettyRemotingAbstract {
         }
 
         try {
-            ChannelFuture sync = this.serverBootstrap.bind("0.0.0.0", 8976).sync();
+            String inetHost = RemotingUtil.getLocalAddress();
+            ChannelFuture sync = this.serverBootstrap.bind(inetHost, 0).sync();
             InetSocketAddress addr = (InetSocketAddress) sync.channel().localAddress();
             this.port = addr.getPort();
-            logger.info("rpc server port:{}", this.port);
+            this.addr = addr.getHostString();
+            logger.info("rpc server addr:{} port:{}", this.addr, this.port);
         } catch (InterruptedException e1) {
             throw new RuntimeException("this.serverBootstrap.bind().sync() InterruptedException", e1);
         }
@@ -160,8 +166,8 @@ public class NettyServer extends NettyRemotingAbstract {
             @Override
             public void run() {
                 try {
-                    NettyServer.this.scanResponseTable();
                 } catch (Exception e) {
+                    NettyServer.this.scanResponseTable();
                     logger.error("scanResponseTable exception", e);
                 }
             }

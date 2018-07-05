@@ -18,4 +18,10 @@ public class CommonTest {
                 System.out.println(13);
         }
     }
+
+
+    @Test
+    public void testLocalAddr() {
+        System.out.println(RemotingUtil.getLocalAddress());
+    }
 }

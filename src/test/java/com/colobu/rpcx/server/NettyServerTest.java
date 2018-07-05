@@ -12,9 +12,11 @@ public class NettyServerTest {
 
     @Test
     public void testNettyServer() throws InterruptedException {
-        new ServiceRegister().register();
         NettyServer server = new NettyServer();
         server.start();
+        ServiceRegister reg = new ServiceRegister("/youpin/services/", "Arith", server.getAddr() + ":" + server.getPort());
+        reg.register();
+        reg.start();
         TimeUnit.HOURS.sleep(1);
     }
 }
