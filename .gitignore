@@ -9,6 +9,8 @@
 /client/target/
 /server/target/
 /demo/target/
+/logs/
+/server/logs/
 
 # Java compile files #
 *.class
