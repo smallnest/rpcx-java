@@ -6,7 +6,7 @@ package com.colobu.rpcx.service;
 public class Arith {
 
     public byte[] Echo(byte[] params) {
-        return ("java:" + new String(params)).getBytes();
+        return (new String(params)+" java server") .getBytes();
     }
 
 }
