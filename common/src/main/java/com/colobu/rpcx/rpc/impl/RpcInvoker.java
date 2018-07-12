@@ -5,13 +5,13 @@ import com.colobu.rpcx.protocol.CompressType;
 import com.colobu.rpcx.protocol.Message;
 import com.colobu.rpcx.protocol.MessageType;
 import com.colobu.rpcx.protocol.SerializeType;
-import com.colobu.rpcx.rpc.*;
+import com.colobu.rpcx.rpc.Invocation;
+import com.colobu.rpcx.rpc.Invoker;
+import com.colobu.rpcx.rpc.Result;
+import com.colobu.rpcx.rpc.RpcException;
 import org.msgpack.MessagePack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.Method;
-import java.util.stream.Stream;
 
 public class RpcInvoker<T> implements Invoker<T> {
 
@@ -44,21 +44,8 @@ public class RpcInvoker<T> implements Invoker<T> {
             byte[]data = messagePack.write(invocation);
             req.payload = data;
             Message res = client.call(req);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
-            Class<?> clazz = Class.forName(invocation.getClassName());
-            Class[] clazzArray = Stream.of(invocation.getParameterTypeNames()).map(it -> {
-                try {
-                    return ReflectUtils.name2class(ReflectUtils.desc2name(it));
-                } catch (ClassNotFoundException e) {
-                    throw new RpcException(e);
-                }
-            }).toArray(Class[]::new);
-            Method m = clazz.getMethod(method, clazzArray);
-            Object r = m.invoke(clazz.newInstance(), invocation.getArguments());
+            byte[] d = res.payload;
+            Object r = messagePack.read(d, invocation.getResultType());
             result.setValue(r);
         } catch (Exception e) {
             e.printStackTrace();

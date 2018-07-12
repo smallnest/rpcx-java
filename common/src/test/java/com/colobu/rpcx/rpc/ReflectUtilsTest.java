@@ -21,11 +21,14 @@ public class ReflectUtilsTest {
 
 
     @Test
-    public void test1() throws NoSuchMethodException {
+    public void testMethod() throws NoSuchMethodException {
         Method m = IA.class.getMethod("sum", int.class, int.class);
         System.out.println(m);
 
         Class<?>[] types = m.getParameterTypes();
         System.out.println(Arrays.toString(types));
+
+        Class<?> resType = m.getReturnType();
+        System.out.println(resType);
     }
 }

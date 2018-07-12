@@ -13,6 +13,8 @@ public class RpcInvocation implements Invocation {
 
     private Class<?>[] parameterTypes;
 
+    private Class<?> resultType;
+
     public String[] parameterTypeNames;
 
     private Object[] arguments;
@@ -92,5 +94,13 @@ public class RpcInvocation implements Invocation {
 
     public void setClassName(String className) {
         this.className = className;
+    }
+
+    public Class<?> getResultType() {
+        return resultType;
+    }
+
+    public void setResultType(Class<?> resultType) {
+        this.resultType = resultType;
     }
 }

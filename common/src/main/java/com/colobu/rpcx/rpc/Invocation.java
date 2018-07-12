@@ -22,4 +22,7 @@ public interface Invocation {
 
     Invoker<?> getInvoker();
 
+    Class<?> getResultType();
+
+
 }
