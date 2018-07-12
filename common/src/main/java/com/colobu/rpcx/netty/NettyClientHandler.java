@@ -17,19 +17,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<RemotingComm
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RemotingCommand msg) throws Exception {
-        final RemotingCommand cmd = msg;
-        if (cmd != null) {
-            switch (cmd.getType()) {
-                case REQUEST_COMMAND:
-//                    processRequestCommand(ctx, cmd);
-                    break;
-                case RESPONSE_COMMAND:
-                    nettyClient.processResponseCommand(ctx, cmd);
-                    break;
-                default:
-                    break;
-            }
-        }
+        nettyClient.processMessageReceived(ctx, msg);
     }
 
 

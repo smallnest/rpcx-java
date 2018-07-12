@@ -12,9 +12,13 @@ import com.colobu.rpcx.rpc.RpcException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class RpcInvoker<T> implements Invoker<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(RpcInvoker.class);
+
+    private final AtomicInteger seq = new AtomicInteger();
 
 
     private IClient client;
@@ -41,7 +45,8 @@ public class RpcInvoker<T> implements Invoker<T> {
         req.setOneway(false);
         req.setCompressType(CompressType.None);
         req.setSerializeType(SerializeType.SerializeNone);
-        req.setSeq(123);
+        req.setSeq(seq.incrementAndGet());
+        req.metadata.put("language", "java");
         try {
             byte[] data = HessianUtils.write(invocation);
 

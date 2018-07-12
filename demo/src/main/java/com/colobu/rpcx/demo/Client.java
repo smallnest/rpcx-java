@@ -6,6 +6,7 @@ import com.colobu.rpcx.netty.IClient;
 import com.colobu.rpcx.rpc.impl.Consumer;
 import com.colobu.rpcx.service.IArith;
 
+
 public class Client {
 
 
@@ -14,7 +15,10 @@ public class Client {
         IClient client = new NettyClient(serviceDiscovery);
         IArith arith = new Consumer(client).refer(IArith.class);
 //        int result = arith.sum(1111, 222);
-        int result = arith.sum2(1111, 222);
-        System.out.println("------------->"+result);
+//        int result = arith.sum2(1111, 222);
+        for (int i=0;i<100;i++) {
+            String result = arith.hi("zzy");
+            System.out.println("------------->"+result);
+        }
     }
 }
