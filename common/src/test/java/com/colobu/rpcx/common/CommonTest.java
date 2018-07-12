@@ -24,4 +24,14 @@ public class CommonTest {
     public void testLocalAddr() {
         System.out.println(RemotingUtil.getLocalAddress());
     }
+
+
+    @Test
+    public void testClazz() {
+        int i = 12;
+        System.out.println(new Object[]{i}[0].getClass().getTypeName());
+
+
+
+    }
 }
