@@ -17,7 +17,6 @@
 
         <lombok.version>1.16.20</lombok.version>
         <commons-io.version>2.6</commons-io.version>
-        <msgpack.version>0.8.14</msgpack.version>
 
         <junit.version>4.11</junit.version>
     </properties>
@@ -36,13 +35,8 @@
             <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
-            <groupId>org.msgpack</groupId>
-            <artifactId>msgpack-core</artifactId>
-            <version>${msgpack.version}</version>
-        </dependency>
-        <dependency>
-            <!-- JUnit -->
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
@@ -101,7 +95,11 @@
             <version>3.2.7</version>
         </dependency>
 
-
+        <dependency>
+            <groupId>org.msgpack</groupId>
+            <artifactId>msgpack</artifactId>
+            <version>0.6.12</version>
+        </dependency>
 
 
 

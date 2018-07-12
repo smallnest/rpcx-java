@@ -1,5 +1,6 @@
 package com.colobu.rpcx.client;
 
+import com.colobu.rpcx.netty.IClient;
 import com.colobu.rpcx.protocol.CompressType;
 import com.colobu.rpcx.protocol.Message;
 import com.colobu.rpcx.protocol.MessageType;

@@ -6,6 +6,9 @@ import com.colobu.rpcx.netty.*;
 import com.colobu.rpcx.protocol.Message;
 import com.colobu.rpcx.protocol.MessageType;
 import com.colobu.rpcx.protocol.RemotingCommand;
+import com.colobu.rpcx.rpc.Invocation;
+import com.colobu.rpcx.rpc.ReflectUtils;
+import com.colobu.rpcx.rpc.RpcException;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
@@ -15,6 +18,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import lombok.Getter;
+import org.msgpack.MessagePack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +30,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 /**
  * Created by zhangzhiyong on 2018/7/4.
@@ -84,23 +89,30 @@ public class NettyServer extends NettyRemotingAbstract {
             @Override
             public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request) throws Exception {
                 System.out.println(request);
-                System.out.println(new String(request.getMessage().payload));
-
-                Message reqMsg = request.getMessage();
-                String method = reqMsg.serviceMethod;
-                String clazz = reqMsg.servicePath;
-
-                Class<?> c = Class.forName("com.colobu.rpcx.service." + clazz);
-                Object obj = c.newInstance();
-
-                Method m = c.getMethod(method, new byte[]{}.getClass());
-                Object v = m.invoke(obj, reqMsg.payload);
+                MessagePack messagePack = new MessagePack();
+                Object obj = null;
+                try {
+                    Invocation invocation = messagePack.read(request.getMessage().payload, Invocation.class);
+                    String method = invocation.getMethodName();
+                    Class<?> clazz = Class.forName(invocation.getClassName());
+                    Class[] clazzArray = Stream.of(invocation.getParameterTypeNames()).map(it -> {
+                        try {
+                            return ReflectUtils.name2class(ReflectUtils.desc2name(it));
+                        } catch (ClassNotFoundException e) {
+                            throw new RpcException(e);
+                        }
+                    }).toArray(Class[]::new);
+                    Method m = clazz.getMethod(method, clazzArray);
+                    obj = m.invoke(clazz.newInstance(), invocation.getArguments());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
                 RemotingCommand res = RemotingCommand.createResponseCommand();
                 Message message = new Message();
                 message.setMessageType(MessageType.Response);
                 message.setSeq(request.getOpaque());
-                message.payload = (byte[]) v;
+                message.payload = messagePack.write(obj);
                 res.setMessage(message);
                 return res;
             }

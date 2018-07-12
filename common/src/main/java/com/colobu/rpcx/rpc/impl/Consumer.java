@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 
 public class Consumer {
 
-    private IClient client;
+
 
 
     public <T> T refer(Class<T> clazz) {
