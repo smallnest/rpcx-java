@@ -6,9 +6,13 @@ import com.colobu.rpcx.netty.*;
 import com.colobu.rpcx.protocol.Message;
 import com.colobu.rpcx.protocol.MessageType;
 import com.colobu.rpcx.protocol.RemotingCommand;
+import com.colobu.rpcx.rpc.HessianUtils;
 import com.colobu.rpcx.rpc.Invocation;
 import com.colobu.rpcx.rpc.ReflectUtils;
 import com.colobu.rpcx.rpc.RpcException;
+import com.colobu.rpcx.rpc.impl.RpcInvocation;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
@@ -89,10 +93,9 @@ public class NettyServer extends NettyRemotingAbstract {
             @Override
             public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request) throws Exception {
                 System.out.println(request);
-                MessagePack messagePack = new MessagePack();
                 Object obj = null;
                 try {
-                    Invocation invocation = messagePack.read(request.getMessage().payload, Invocation.class);
+                    Invocation invocation = (Invocation) HessianUtils.read(request.getMessage().payload);
                     String method = invocation.getMethodName();
                     Class<?> clazz = Class.forName(invocation.getClassName());
                     Class[] clazzArray = Stream.of(invocation.getParameterTypeNames()).map(it -> {
@@ -112,7 +115,7 @@ public class NettyServer extends NettyRemotingAbstract {
                 Message message = new Message();
                 message.setMessageType(MessageType.Response);
                 message.setSeq(request.getOpaque());
-                message.payload = messagePack.write(obj);
+                message.payload = HessianUtils.write(obj);
                 res.setMessage(message);
                 return res;
             }
@@ -164,7 +167,7 @@ public class NettyServer extends NettyRemotingAbstract {
 
         try {
             String inetHost = RemotingUtil.getLocalAddress();
-            ChannelFuture sync = this.serverBootstrap.bind(inetHost, 0).sync();
+            ChannelFuture sync = this.serverBootstrap.bind(inetHost, 6380).sync();
             InetSocketAddress addr = (InetSocketAddress) sync.channel().localAddress();
             this.port = addr.getPort();
             this.addr = addr.getHostString();

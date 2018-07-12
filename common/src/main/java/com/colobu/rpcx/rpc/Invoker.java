@@ -1,8 +1,10 @@
 package com.colobu.rpcx.rpc;
 
+import com.colobu.rpcx.rpc.impl.RpcInvocation;
+
 public interface Invoker<T> {
 
     Class<T> getInterface();
 
-    Result invoke(Invocation invocation) throws RpcException;
+    Result invoke(RpcInvocation invocation) throws RpcException;
 }

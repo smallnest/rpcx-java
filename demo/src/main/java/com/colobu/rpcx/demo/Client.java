@@ -1,5 +1,8 @@
 package com.colobu.rpcx.demo;
 
+import com.colobu.rpcx.client.NettyClient;
+import com.colobu.rpcx.client.ServiceDiscovery;
+import com.colobu.rpcx.netty.IClient;
 import com.colobu.rpcx.rpc.impl.Consumer;
 import com.colobu.rpcx.service.IArith;
 
@@ -7,9 +10,11 @@ public class Client {
 
 
     public static void main(String... args) {
-        IArith arith = new Consumer().refer(IArith.class);
+        ServiceDiscovery serviceDiscovery = new ServiceDiscovery("/youpin/services/", "Arith");
+        IClient client = new NettyClient(serviceDiscovery);
+        IArith arith = new Consumer(client).refer(IArith.class);
 //        int result = arith.sum(1111, 222);
         int result = arith.sum2(1111, 222);
-        System.out.println(result);
+        System.out.println("------------->"+result);
     }
 }

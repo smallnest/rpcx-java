@@ -5,11 +5,10 @@ import com.colobu.rpcx.protocol.CompressType;
 import com.colobu.rpcx.protocol.Message;
 import com.colobu.rpcx.protocol.MessageType;
 import com.colobu.rpcx.protocol.SerializeType;
-import com.colobu.rpcx.rpc.Invocation;
+import com.colobu.rpcx.rpc.HessianUtils;
 import com.colobu.rpcx.rpc.Invoker;
 import com.colobu.rpcx.rpc.Result;
 import com.colobu.rpcx.rpc.RpcException;
-import org.msgpack.MessagePack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,13 +19,17 @@ public class RpcInvoker<T> implements Invoker<T> {
 
     private IClient client;
 
+    public RpcInvoker(IClient client) {
+        this.client = client;
+    }
+
     @Override
     public Class<T> getInterface() {
         return null;
     }
 
     @Override
-    public Result invoke(Invocation invocation) throws RpcException {
+    public Result invoke(RpcInvocation invocation) throws RpcException {
         String className = invocation.getClassName();
         String method = invocation.getMethodName();
         RpcResult result = new RpcResult();
@@ -40,12 +43,13 @@ public class RpcInvoker<T> implements Invoker<T> {
         req.setSerializeType(SerializeType.SerializeNone);
         req.setSeq(123);
         try {
-            MessagePack messagePack = new MessagePack();
-            byte[]data = messagePack.write(invocation);
+            byte[] data = HessianUtils.write(invocation);
+
+            System.out.println(new String(data));
             req.payload = data;
-            Message res = client.call(req);
+            Message res = client.call("192.168.31.82:6380", req);
             byte[] d = res.payload;
-            Object r = messagePack.read(d, invocation.getResultType());
+            Object r = HessianUtils.read(d);
             result.setValue(r);
         } catch (Exception e) {
             e.printStackTrace();

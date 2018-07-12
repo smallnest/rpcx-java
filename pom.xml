@@ -77,24 +77,6 @@
    <build>
       <defaultGoal>clean package install</defaultGoal>
       <plugins>
-         <!--<plugin>-->
-            <!--<groupId>org.projectlombok</groupId>-->
-            <!--<artifactId>lombok-maven-plugin</artifactId>-->
-            <!--<version>1.16.20.0</version>-->
-            <!--<executions>-->
-               <!--<execution>-->
-                  <!--<phase>generate-sources</phase>-->
-                  <!--<goals>-->
-                     <!--<goal>delombok</goal>-->
-                  <!--</goals>-->
-               <!--</execution>-->
-            <!--</executions>-->
-         <!--</plugin>-->
-         <plugin>
-            <groupId>com.google.code.sortpom</groupId>
-            <artifactId>maven-sortpom-plugin</artifactId>
-            <version>${sortpom.version}</version>
-         </plugin>
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-source-plugin</artifactId>
@@ -107,41 +89,6 @@
                   </goals>
                </execution>
             </executions>
-         </plugin>
-         <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.10.1</version>
-            <executions>
-               <execution>
-                  <id>attach-javadocs</id>
-                  <goals>
-                     <goal>jar</goal>
-                  </goals>
-               </execution>
-            </executions>
-         </plugin>
-         <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-release-plugin</artifactId>
-            <version>2.5.1</version>
-            <configuration>
-               <checkModificationExcludes>
-                  <checkModificationExclude>pom.xml</checkModificationExclude>
-               </checkModificationExcludes>
-            </configuration>
-         </plugin>
-         <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>cobertura-maven-plugin</artifactId>
-            <version>2.7</version>
-            <configuration>
-               <formats>
-                  <format>html</format>
-                  <format>xml</format>
-               </formats>
-               <check />
-            </configuration>
          </plugin>
       </plugins>
    </build>
