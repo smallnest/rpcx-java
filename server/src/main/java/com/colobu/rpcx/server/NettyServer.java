@@ -113,6 +113,7 @@ public class NettyServer extends NettyRemotingAbstract {
 
                 RemotingCommand res = RemotingCommand.createResponseCommand();
                 Message message = new Message();
+                message.servicePath = "-------->";
                 message.setMessageType(MessageType.Response);
                 message.setSeq(request.getOpaque());
                 message.payload = HessianUtils.write(obj);

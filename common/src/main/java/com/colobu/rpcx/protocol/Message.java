@@ -32,6 +32,7 @@ public class Message {
         payload = new byte[]{};
     }
 
+
     public Message(String servicePath, String serviceMethod) {
         this();
         this.servicePath = servicePath;
@@ -72,6 +73,11 @@ public class Message {
             header[2] |= 0x80;
         }
     }
+
+    public void setMessageType(byte type) {
+            header[2] = type;
+    }
+
 
     public boolean isHeartbeat() {
         return (header[2] & 0x40) != 0;

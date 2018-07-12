@@ -128,7 +128,7 @@ public class NettyRemotingAbstract {
         if (cmd != null) {
             switch (cmd.getType()) {
                 case REQUEST_COMMAND:
-                    processRequestCommand(ctx, cmd);
+//                    processRequestCommand(ctx, cmd);
                     break;
                 case RESPONSE_COMMAND:
                     processResponseCommand(ctx, cmd);

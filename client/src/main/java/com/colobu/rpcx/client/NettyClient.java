@@ -121,6 +121,7 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
      */
     @Override
     public Message call(String addr, Message req) throws Exception {
+        System.out.println("****************call");
         final RemotingCommand request = RemotingCommand.createRequestCommand(1);
         request.setMessage(req);
         long timeoutMillis = 300000000;//TODO $--
@@ -228,6 +229,9 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
             final ResponseFuture responseFuture = new ResponseFuture(opaque, timeoutMillis, null, null);
             this.responseTable.put(opaque, responseFuture);
             final SocketAddress addr = channel.remoteAddress();
+
+            System.out.println("00000000000000000");
+
             channel.writeAndFlush(request).addListener(new ChannelFutureListener() {//* 通过网络发送信息
                 @Override
                 public void operationComplete(ChannelFuture f) throws Exception {
