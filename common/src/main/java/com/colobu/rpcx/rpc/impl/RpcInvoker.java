@@ -52,7 +52,7 @@ public class RpcInvoker<T> implements Invoker<T> {
 
             System.out.println(new String(data));
             req.payload = data;
-            Message res = client.call("192.168.31.82:6380", req);
+            Message res = client.call(req);
             byte[] d = res.payload;
             Object r = HessianUtils.read(d);
             result.setValue(r);

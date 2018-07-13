@@ -11,14 +11,14 @@ public class Client {
 
 
     public static void main(String... args) {
-        ServiceDiscovery serviceDiscovery = new ServiceDiscovery("/youpin/services/", "Arith");
+        ServiceDiscovery serviceDiscovery = new ServiceDiscovery("/youpin/services/", "com.colobu.rpcx.service.Arith");
         IClient client = new NettyClient(serviceDiscovery);
         IArith arith = new Consumer(client).refer(IArith.class);
 //        int result = arith.sum(1111, 222);
 //        int result = arith.sum2(1111, 222);
-        for (int i=0;i<100;i++) {
+        for (int i = 0; i < 1; i++) {
             String result = arith.hi("zzy");
-            System.out.println("------------->"+result);
+            System.out.println("------------->" + result);
         }
     }
 }

@@ -38,7 +38,7 @@ public class ServiceDiscovery {
     }
 
     public List<String> getServices() {
-        return this.map.get("Arith").stream().collect(Collectors.toList());
+        return this.map.get("com.colobu.rpcx.service.Arith").stream().collect(Collectors.toList());
     }
 
 
