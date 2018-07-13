@@ -4,21 +4,21 @@ import com.colobu.rpcx.netty.IClient;
 import com.colobu.rpcx.rpc.CglibProxy;
 import com.colobu.rpcx.rpc.ReflectUtils;
 import com.colobu.rpcx.rpc.Result;
-import com.colobu.rpcx.rpc.annotation.Provider;
+import com.colobu.rpcx.rpc.annotation.Consumer;
 
 import java.util.stream.Stream;
 
-public class Consumer {
+public class ConsumerConfig {
 
     private IClient client;
 
-    public Consumer(IClient client) {
+    public ConsumerConfig(IClient client) {
         this.client = client;
     }
 
     public <T> T refer(Class<T> clazz) {
         return new CglibProxy().getProxy(clazz, (method, args) -> {
-            Provider provider = clazz.getAnnotation(Provider.class);
+            Consumer provider = clazz.getAnnotation(Consumer.class);
             RpcInvocation invocation = new RpcInvocation();
             invocation.setClassName(provider.impl());
             invocation.setArguments(args);

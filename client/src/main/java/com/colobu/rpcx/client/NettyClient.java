@@ -109,9 +109,6 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
     }
 
 
-
-
-
     /**
      * 同步的调用
      * @param addr

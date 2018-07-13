@@ -68,6 +68,6 @@ public class ServiceDiscovery {
             }
         }).start();
 
-        ZkClient.ins().watch2(queue, basePath + serviceName);
+        ZkClient.ins().watch(queue, basePath + serviceName);
     }
 }

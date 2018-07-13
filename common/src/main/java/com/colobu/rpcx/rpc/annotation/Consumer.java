@@ -5,8 +5,8 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
 @Documented
-public @interface Provider {
+public @interface Consumer {
 
-    String name() default "";
+    String impl();
 
 }

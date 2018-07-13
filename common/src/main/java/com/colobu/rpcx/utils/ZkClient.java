@@ -53,16 +53,6 @@ public class ZkClient {
         return new ArrayList<>();
     }
 
-    public void watch() throws Exception {
-        final NodeCache cache = new NodeCache(this.client, "/", false);
-        cache.start(true);
-        cache.getListenable().addListener(() -> {
-            System.out.println("路径为：" + cache.getCurrentData().getPath());
-            System.out.println("数据为：" + new String(cache.getCurrentData().getData()));
-            System.out.println("状态为：" + cache.getCurrentData().getStat());
-            System.out.println("---------------------------------------");
-        });
-    }
 
     ///youpin/services/Arith/tcp@0.0.0.0:8976"
     public void create(String basePath,String serviceName,String addr) throws Exception {
@@ -73,9 +63,9 @@ public class ZkClient {
     }
 
 
-    public void watch2(LinkedBlockingQueue<PathStatus> queue, String p) throws Exception {
+    //监控变化
+    public void watch(LinkedBlockingQueue<PathStatus> queue, String p) throws Exception {
         PathChildrenCache cache = new PathChildrenCache(this.client, p, true);
-        //5 在初始化的时候就进行缓存监听
         cache.start(PathChildrenCache.StartMode.POST_INITIALIZED_EVENT);
         cache.getListenable().addListener((cf, event) -> {
             switch (event.getType()) {

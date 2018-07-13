@@ -1,11 +1,20 @@
 package com.colobu.rpcx.service;
 
+import com.colobu.rpcx.rpc.annotation.Provider;
+
 /**
  * Created by zhangzhiyong on 2018/7/4.
  * 服务类
  */
+@Provider
 public class Arith implements IArith {
 
+    /**
+     * golang 调用
+     *
+     * @param params
+     * @return
+     */
     public byte[] Echo(byte[] params) {
         return (new String(params) + " java server").getBytes();
     }
