@@ -7,6 +7,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ReplayingDecoder;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.List;
 
@@ -26,6 +27,9 @@ public class NettyDecoder extends ReplayingDecoder<DecoderState> {
             case Header:
                 byte[] header = new byte[12];
                 in.readBytes(header);
+
+                message.setMessageType(header[2]);
+
                 ByteBuffer headerBuf = ByteBuffer.wrap(header);
                 headerBuf.position(4);
                 long seq = headerBuf.getLong();
@@ -48,7 +52,7 @@ public class NettyDecoder extends ReplayingDecoder<DecoderState> {
                 len = buf.getInt();
                 b = new byte[len];
                 buf.get(b);
-//        decodeMetadata(b);
+                decodeMetadata(b, message);
 
                 len = buf.getInt();
                 byte[] payload = new byte[len];
@@ -67,8 +71,27 @@ public class NettyDecoder extends ReplayingDecoder<DecoderState> {
             default:
                 throw new Error("Shouldn't reach here.");
         }
+    }
 
 
+    private void decodeMetadata(byte[] b, Message message) throws UnsupportedEncodingException {
+        ByteBuffer buf = ByteBuffer.wrap(b);
+        int len;
+        for (; ; ) {
+            if (buf.remaining() < 4) {
+                break;
+            }
+            len = buf.getInt();
+            b = new byte[len];
+            buf.get(b);
+            String k = new String(b, "UTF-8");
+
+            len = buf.getInt();
+            b = new byte[len];
+            buf.get(b);
+            String v = new String(b, "UTF-8");
+            message.metadata.put(k, v);
+        }
     }
 
 }

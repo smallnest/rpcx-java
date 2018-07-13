@@ -82,7 +82,7 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
                         ch.pipeline().addLast(
                                 defaultEventExecutorGroup,
                                 new NettyEncoder(),
-                                new NettyDecoderBak2(),
+                                new NettyDecoder(),
                                 new IdleStateHandler(0, 0, nettyClientConfig.getClientChannelMaxIdleTimeSeconds()), //*空闲状态的handler
                                 new NettyConnetManageHandler(NettyClient.this), //管理连接的
                                 new NettyClientHandler(NettyClient.this));//* 处理具体业务逻辑的handler
