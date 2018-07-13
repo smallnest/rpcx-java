@@ -8,7 +8,7 @@ import com.colobu.rpcx.server.ServiceRegister;
  * Created by zhangzhiyong on 2018/7/5.
  * 启动server
  */
-public class Bootstrap {
+public class Server {
 
     public static void main(String... args) throws InterruptedException {
         NettyServer server = new NettyServer();
