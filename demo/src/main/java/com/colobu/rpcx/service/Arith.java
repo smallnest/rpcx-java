@@ -16,7 +16,7 @@ public class Arith implements IArith {
      * @return
      */
     public byte[] Echo(byte[] params) {
-        return (new String(params) + " java server").getBytes();
+        return (new String(params) + " java server!!!").getBytes();
     }
 
 

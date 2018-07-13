@@ -92,7 +92,33 @@ public class NettyServer extends NettyRemotingAbstract {
         this.defaultRequestProcessor = new Pair<>(new NettyRequestProcessor() {
             @Override
             public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request) throws Exception {
-                System.out.println(request);
+
+                Message msg = request.getMessage();
+                String language = msg.metadata.get("language");
+
+                //golang 调用
+                if (null == language || !language.equals("java")) {
+                    Message reqMsg = request.getMessage();
+                    String method = reqMsg.serviceMethod;
+                    String clazz = reqMsg.servicePath;
+
+                    Class<?> c = Class.forName(clazz);
+                    Object obj = c.newInstance();
+
+                    Method m = c.getMethod(method, new byte[]{}.getClass());
+                    Object v = m.invoke(obj, reqMsg.payload);
+
+                    RemotingCommand res = RemotingCommand.createResponseCommand();
+                    Message message = new Message();
+                    message.setMessageType(MessageType.Response);
+                    message.setSeq(request.getOpaque());
+                    message.payload = (byte[]) v;
+                    res.setMessage(message);
+                    return res;
+                }
+
+
+                //java 调用
                 Object obj = null;
                 try {
                     Invocation invocation = (Invocation) HessianUtils.read(request.getMessage().payload);
