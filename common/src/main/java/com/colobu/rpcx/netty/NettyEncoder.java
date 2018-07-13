@@ -32,7 +32,6 @@ public class NettyEncoder extends MessageToByteEncoder<RemotingCommand> {
     @Override
     public void encode(ChannelHandlerContext ctx, RemotingCommand remotingCommand, ByteBuf out)
             throws Exception {
-        System.out.println("------------------->encode");
         try {
             byte[] data = remotingCommand.getMessage().encode();
             out.writeBytes(data);

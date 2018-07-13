@@ -9,6 +9,8 @@ public class RpcResult implements Result {
 
     private Object value;
 
+    private Throwable throwable;
+
     public void setValue(Object value) {
         this.value = value;
     }
@@ -20,12 +22,16 @@ public class RpcResult implements Result {
 
     @Override
     public Throwable getException() {
-        return null;
+        return this.throwable;
+    }
+
+    public void setThrowable(Throwable throwable) {
+        this.throwable = throwable;
     }
 
     @Override
     public boolean hasException() {
-        return false;
+        return null != throwable;
     }
 
     @Override

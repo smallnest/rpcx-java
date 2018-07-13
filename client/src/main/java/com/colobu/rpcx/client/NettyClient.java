@@ -230,8 +230,6 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
             this.responseTable.put(opaque, responseFuture);
             final SocketAddress addr = channel.remoteAddress();
 
-            System.out.println("00000000000000000");
-
             channel.writeAndFlush(request).addListener(new ChannelFutureListener() {//* 通过网络发送信息
                 @Override
                 public void operationComplete(ChannelFuture f) throws Exception {

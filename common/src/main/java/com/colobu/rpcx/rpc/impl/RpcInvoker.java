@@ -49,15 +49,13 @@ public class RpcInvoker<T> implements Invoker<T> {
         req.metadata.put("language", "java");
         try {
             byte[] data = HessianUtils.write(invocation);
-
-            System.out.println(new String(data));
             req.payload = data;
             Message res = client.call(req);
             byte[] d = res.payload;
             Object r = HessianUtils.read(d);
             result.setValue(r);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Throwable e) {
+            result.setThrowable(e);
         }
 
         logger.info("class:{} method:{}", className, method);
