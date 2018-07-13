@@ -13,7 +13,7 @@ public class Bootstrap {
     public static void main(String... args) throws InterruptedException {
         NettyServer server = new NettyServer();
         server.start();
-        ServiceRegister reg = new ServiceRegister("/youpin/services/", "com.colobu.rpcx.service.Arith", server.getAddr() + ":" + server.getPort());
+        ServiceRegister reg = new ServiceRegister("/youpin/services/", server.getAddr() + ":" + server.getPort());
         reg.register();
         reg.start();
         server.await();

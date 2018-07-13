@@ -52,8 +52,10 @@ public class RpcInvoker<T> implements Invoker<T> {
             req.payload = data;
             Message res = client.call(req);
             byte[] d = res.payload;
-            Object r = HessianUtils.read(d);
-            result.setValue(r);
+            if (d.length > 0) {
+                Object r = HessianUtils.read(d);
+                result.setValue(r);
+            }
         } catch (Throwable e) {
             result.setThrowable(e);
         }

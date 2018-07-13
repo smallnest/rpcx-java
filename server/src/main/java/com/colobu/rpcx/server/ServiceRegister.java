@@ -1,7 +1,11 @@
 package com.colobu.rpcx.server;
 
+import com.colobu.rpcx.rpc.impl.Exporter;
 import com.colobu.rpcx.utils.ZkClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -10,25 +14,31 @@ import java.util.concurrent.TimeUnit;
  */
 public class ServiceRegister {
 
+    private static final Logger logger = LoggerFactory.getLogger(ServiceRegister.class);
+
     private String basePath;
-    private String serviceName;
+    private Set<String> serviceName;
     private String addr;
 
-    public ServiceRegister(String basePath, String serviceName, String addr) {
+    public ServiceRegister(String basePath, String addr) {
         this.basePath = basePath;
         this.serviceName = serviceName;
         this.addr = addr;
+
+        this.serviceName = new Exporter().export();
+        logger.info("service names:{}", this.serviceName);
     }
 
     //服务注册
     public void register() {
         try {
-            ZkClient.ins().create(this.basePath,this.serviceName,this.addr);
+            ZkClient.ins().create(this.basePath, this.serviceName, this.addr);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    //周期性的注册
     public void start() {
         Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(() -> {
             register();

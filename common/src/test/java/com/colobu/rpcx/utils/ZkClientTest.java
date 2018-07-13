@@ -2,6 +2,7 @@ package com.colobu.rpcx.utils;
 
 import org.junit.Test;
 
+import java.util.HashSet;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -34,7 +35,7 @@ public class ZkClientTest {
 
     @Test
     public void testCreate() throws Exception {
-        ZkClient.ins().create("","","");
+        ZkClient.ins().create("",new HashSet<>(),"");
         TimeUnit.HOURS.sleep(1);
     }
 }

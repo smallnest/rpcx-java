@@ -9,7 +9,9 @@ import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
 
@@ -43,23 +45,29 @@ public class ZkClient {
     }
 
 
-    public List<String> getChildren() {
+    public Set<String> get(String basePath, String serviceName) {
         try {
-            List<String> list = client.getChildren().forPath("/youpin/services/Arith").stream().collect(Collectors.toList());
+            Set<String> list = client.getChildren().forPath(basePath + serviceName).stream().collect(Collectors.toSet());
             return list;
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return new ArrayList<>();
+        return new HashSet<>();
     }
 
 
     ///youpin/services/Arith/tcp@0.0.0.0:8976"
-    public void create(String basePath,String serviceName,String addr) throws Exception {
-        String path = basePath+serviceName+"/tcp@"+addr;
-        if (client.checkExists().forPath(path) == null) {
-            client.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL).forPath(path);
-        }
+    public void create(String basePath, Set<String> serviceNames, String addr) {
+        serviceNames.forEach(name -> {
+            String path = basePath + name + "/tcp@" + addr;
+            try {
+                if (client.checkExists().forPath(path) == null) {
+                    client.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL).forPath(path);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
 

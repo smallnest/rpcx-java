@@ -11,7 +11,8 @@ public class Client {
 
 
     public static void main(String... args) {
-        ServiceDiscovery serviceDiscovery = new ServiceDiscovery("/youpin/services/", "com.colobu.rpcx.service.Arith");
+        //服务发现者
+        ServiceDiscovery serviceDiscovery = new ServiceDiscovery("/youpin/services/");
         IClient client = new NettyClient(serviceDiscovery);
         IArith arith = new ConsumerConfig(client).refer(IArith.class);
 //        int result = arith.sum(1111, 222);

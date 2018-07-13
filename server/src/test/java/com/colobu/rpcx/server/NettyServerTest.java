@@ -14,7 +14,7 @@ public class NettyServerTest {
     public void testNettyServer() throws InterruptedException {
         NettyServer server = new NettyServer();
         server.start();
-        ServiceRegister reg = new ServiceRegister("/youpin/services/", "Arith", server.getAddr() + ":" + server.getPort());
+        ServiceRegister reg = new ServiceRegister("/youpin/services/", server.getAddr() + ":" + server.getPort());
         reg.register();
         reg.start();
         TimeUnit.HOURS.sleep(1);

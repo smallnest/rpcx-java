@@ -40,9 +40,7 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
     private final EventLoopGroup eventLoopGroupWorker;
 
 
-
     protected final NettyEventExecuter nettyEventExecuter = new NettyEventExecuter();
-
 
 
     private Bootstrap bootstrap;
@@ -111,6 +109,7 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
 
     /**
      * 同步的调用
+     *
      * @param addr
      * @param req
      * @return
@@ -133,8 +132,15 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
         request.setMessage(req);
         long timeoutMillis = 300000000;//TODO $--
 
-        List<String> serviceList = this.serviceDiscovery.getServices();
-        String addr = new RandomSelector().select(req.servicePath, req.serviceMethod,serviceList);
+        List<String> serviceList = this.serviceDiscovery.getServices(req.getServicePath());
+
+        if (0 == serviceList.size()) {
+            logger.warn("call service list=0 service:{} method:{}", req.servicePath, req.serviceMethod);
+            return new Message();
+        }
+
+
+        String addr = new RandomSelector().select(req.servicePath, req.serviceMethod, serviceList);
         if (null == addr) {
             throw new RuntimeException("addr error");
         }
@@ -209,8 +215,6 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
     }
 
 
-
-
     public static SocketAddress string2SocketAddress(final String addr) {
         String[] s = addr.split(":");
         InetSocketAddress isa = new InetSocketAddress(s[0], Integer.parseInt(s[1]));
@@ -258,8 +262,6 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
             this.responseTable.remove(opaque);
         }
     }
-
-
 
 
     public void putNettyEvent(final NettyEvent event) {

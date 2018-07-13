@@ -12,7 +12,7 @@ public class ServiceDiscoveryTest {
 
     @Test
     public void testWatch() throws Exception {
-        new ServiceDiscovery("","").watch();
+        new ServiceDiscovery("").watch();
         TimeUnit.HOURS.sleep(1);
     }
 }
