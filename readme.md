@@ -107,4 +107,9 @@ Then you can write the java client:
 
 - 1.x: implement simple rpcx client and bidirectional communication
 - 2.x: support service discovery and service governance
-- 3.x: support develop services in Java 
+- 3.x: support develop services in Java
+
+
+## feature
+- 可以和spring集成
+- 抽象服务发现和服务注册
