@@ -1,6 +1,5 @@
 package com.colobu.rpcx.client;
 
-import com.colobu.rpcx.netty.IClient;
 import com.colobu.rpcx.protocol.CompressType;
 import com.colobu.rpcx.protocol.Message;
 import com.colobu.rpcx.protocol.MessageType;
@@ -14,6 +13,10 @@ import java.util.stream.IntStream;
  */
 public class NettyClientTest {
 
+    /**
+     * 直连
+     * @throws Exception
+     */
     @Test
     public void testSendMsg() throws Exception {
         Message req = new Message("Arith", "Echo");
@@ -32,8 +35,9 @@ public class NettyClientTest {
         System.out.println(new String(res.payload));
     }
 
+    //经过服务发现
     @Test
-    public void testSelector() throws Exception {
+    public void testGolangServiceFinder() throws Exception {
         Message req = new Message("Arith", "Echo");
         req.setVersion((byte) 0);
         req.setMessageType(MessageType.Request);
@@ -45,13 +49,14 @@ public class NettyClientTest {
         req.metadata.put("test", "1234");
         req.payload = "world".getBytes("UTF-8");
 
-        ServiceDiscovery serviceDiscovery = new ServiceDiscovery("/youpin/services/");
+        ServiceDiscovery serviceDiscovery = new ServiceDiscovery("/youpin/services/","Arith");//发现golang的服务
         NettyClient client = new NettyClient(serviceDiscovery);
         Message res = client.call(req);
         System.out.println(new String(res.payload));
     }
 
 
+    //测试循环发送消息
     @Test
     public void testLoopSendMsg() throws Exception {
         Message req = new Message("Arith", "Echo");

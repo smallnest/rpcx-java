@@ -27,7 +27,7 @@ public class ServiceDiscovery {
     private ConcurrentHashMap<String, Set<String>> map = new ConcurrentHashMap<>();
 
     private final String basePath;
-    private final Set<String> serviceName;
+    private Set<String> serviceName = new HashSet<>();
 
 
     private Set<String> findConsumer() {
@@ -35,6 +35,10 @@ public class ServiceDiscovery {
     }
 
 
+    /**
+     * java 的服务发现,会查找所有的consumer
+     * @param basePath
+     */
     public ServiceDiscovery(final String basePath) {
         this.basePath = basePath;
         this.serviceName = findConsumer();
@@ -59,6 +63,30 @@ public class ServiceDiscovery {
             e.printStackTrace();
         }
     }
+
+
+    //golang 的服务发现
+    public ServiceDiscovery(final String basePath,final String serviceName) {
+        this.basePath = basePath;
+        this.serviceName.add(serviceName);
+        logger.info("consumer:{}", this.map);
+
+        this.serviceName.stream().forEach(it -> {
+            Set<String> set = ZkClient.ins().get(basePath, it);
+            this.map.put(it, set);
+        });
+
+
+        Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(() -> {
+            System.out.println(this.map);
+        }, 0, 5, TimeUnit.SECONDS);
+        try {
+            watch();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public List<String> getServices(String serviceName) {
         return this.map.get(serviceName).stream().map(it->it.split("@")[1]).collect(Collectors.toList());

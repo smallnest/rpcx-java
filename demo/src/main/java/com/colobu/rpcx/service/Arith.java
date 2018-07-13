@@ -25,7 +25,6 @@ public class Arith implements IArith {
     }
 
     public int sum2(int a, int b) {
-        System.out.println("----------->sum2");
         return a + b;
     }
 
