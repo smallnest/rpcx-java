@@ -1,7 +1,13 @@
 package com.colobu.rpcx.spring;
 
+import com.colobu.rpcx.client.IServiceDiscovery;
+import com.colobu.rpcx.client.NettyClient;
+import com.colobu.rpcx.client.ZkServiceDiscovery;
+import com.colobu.rpcx.netty.IClient;
+import com.colobu.rpcx.rpc.CglibProxy;
 import com.colobu.rpcx.rpc.annotation.Consumer;
 import com.colobu.rpcx.rpc.annotation.Provider;
+import com.colobu.rpcx.rpc.impl.ConsumerConfig;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -37,38 +43,28 @@ public class ExampleAutoConfigure {
 
     @PostConstruct
     private void init() {
-        logger.info("------------------->{}", context);
-//        AutowireCapableBeanFactory bf = this.context.getAutowireCapableBeanFactory();
-//        String str = "abc";
-//        bf.initializeBean(str, "abc");
+
+        IServiceDiscovery serviceDiscovery = new ZkServiceDiscovery("/youpin/services/");
+        IClient client = new NettyClient(serviceDiscovery);
 
         GenericApplicationContext c = (GenericApplicationContext) context;
         c.getBeanFactory().registerSingleton("str", new String("--------->"));
 
-//        Reflections reflections = new Reflections("com.colobu");
-//        Set<Class<?>> classesList = reflections.getTypesAnnotatedWith(Consumer.class,true);//不包括实现类
-//
-//        classesList.stream().forEach(it->{
-//            System.out.println(it);
-//        });
+        Reflections reflections = new Reflections("com.colobu");
+        Set<Class<?>> classesList = reflections.getTypesAnnotatedWith(Consumer.class, true);//不包括实现类
 
-//        c.getBeanFactory().registerSingleton("testService",new ITes);
-
-//        c.refresh();
-
+        //把consumer都注入进来
+        classesList.stream().forEach(it -> {
+            System.out.println(it.getSimpleName());
+            Object o = new ConsumerConfig(client).refer(it);
+            c.getBeanFactory().registerSingleton(it.getSimpleName(), o);
+        });
 
     }
 
     @Bean
     @ConditionalOnMissingBean
     ExampleService exampleService() {
-
-        System.out.println("XXXXXXXXXXXXXXXX");
-
-//        GenericApplicationContext c = (GenericApplicationContext) context;
-//        c.getBeanFactory().registerSingleton("str", new String("--------->"));
-
-
         return new ExampleService("<", ">" + context);
     }
 

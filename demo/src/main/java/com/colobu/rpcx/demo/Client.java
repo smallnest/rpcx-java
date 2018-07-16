@@ -12,8 +12,8 @@ public class Client {
 
     public static void main(String... args) {
         IServiceDiscovery serviceDiscovery = new ZkServiceDiscovery("/youpin/services/");
-//        IClient client = new NettyClient(serviceDiscovery);
-//        IArith arith = new ConsumerConfig(client).refer(IArith.class);
+        IClient client = new NettyClient(serviceDiscovery);
+        IArith arith = new ConsumerConfig(client).refer(IArith.class);
 ////        System.out.println(arith.sum(1111, 222));
 ////        System.out.println(arith.sum2(1111, 222));
 //        for (int i = 0; i < 100; i++) {
