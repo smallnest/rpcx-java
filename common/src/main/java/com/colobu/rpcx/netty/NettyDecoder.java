@@ -19,23 +19,23 @@ public class NettyDecoder extends ReplayingDecoder<DecoderState> {
 
 
     public NettyDecoder() {
-        super(DecoderState.Header);
+        super(DecoderState.MagicNumber);
     }
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         switch (state()) {
-//            case MagicNumber:
-//                byte magicNumber = in.readByte();
-//                if (magicNumber != Message.magicNumber) {
-//                    throw new RpcException("magicNumber error:"+magicNumber);
-//                }
-//                checkpoint(DecoderState.MagicNumber);
+            case MagicNumber:
+                byte magicNumber = in.readByte();
+                if (magicNumber != Message.magicNumber) {
+                    throw new RpcException("magicNumber error:"+magicNumber);
+                }
+                checkpoint(DecoderState.MagicNumber);
             case Header:
                 byte[] header = new byte[12];
-//                header[0] = Message.magicNumber;
-//                in.readBytes(header,1,11);
-                in.readBytes(header);
+                header[0] = Message.magicNumber;
+                in.readBytes(header,1,11);
+//                in.readBytes(header);
                 message.setMessageType(header[2]);//消息类型
                 ByteBuffer headerBuf = ByteBuffer.wrap(header);
                 headerBuf.position(4);
@@ -73,6 +73,7 @@ public class NettyDecoder extends ReplayingDecoder<DecoderState> {
                     command = RemotingCommand.createResponseCommand();//response
                 }
                 command.setMessage(message);
+                checkpoint(DecoderState.MagicNumber);
                 out.add(command);
                 break;
             default:
