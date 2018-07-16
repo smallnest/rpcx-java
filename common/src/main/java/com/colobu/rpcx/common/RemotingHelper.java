@@ -8,6 +8,7 @@ import java.net.SocketAddress;
  * Created by zhangzhiyong on 2018/7/3.
  */
 public class RemotingHelper {
+
     public static String parseChannelRemoteAddr(final Channel channel) {
         if (null == channel) {
             return "";

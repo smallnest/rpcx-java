@@ -1,7 +1,8 @@
 package com.colobu.rpcx.demo;
 
+import com.colobu.rpcx.server.IServiceRegister;
 import com.colobu.rpcx.server.NettyServer;
-import com.colobu.rpcx.server.ServiceRegister;
+import com.colobu.rpcx.server.ZkServiceRegister;
 
 
 /**
@@ -10,10 +11,10 @@ import com.colobu.rpcx.server.ServiceRegister;
  */
 public class Server {
 
-    public static void main(String... args) throws InterruptedException {
+    public static void main(String... args) {
         NettyServer server = new NettyServer();
         server.start();
-        ServiceRegister reg = new ServiceRegister("/youpin/services/", server.getAddr() + ":" + server.getPort());
+        IServiceRegister reg = new ZkServiceRegister("/youpin/services/", server.getAddr() + ":" + server.getPort());
         reg.register();
         reg.start();
         server.await();

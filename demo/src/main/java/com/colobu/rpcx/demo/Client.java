@@ -1,7 +1,8 @@
 package com.colobu.rpcx.demo;
 
+import com.colobu.rpcx.client.IServiceDiscovery;
 import com.colobu.rpcx.client.NettyClient;
-import com.colobu.rpcx.client.ServiceDiscovery;
+import com.colobu.rpcx.client.ZkServiceDiscovery;
 import com.colobu.rpcx.netty.IClient;
 import com.colobu.rpcx.rpc.impl.ConsumerConfig;
 import com.colobu.rpcx.service.IArith;
@@ -12,7 +13,7 @@ public class Client {
 
     public static void main(String... args) {
         //服务发现者
-        ServiceDiscovery serviceDiscovery = new ServiceDiscovery("/youpin/services/");
+        IServiceDiscovery serviceDiscovery = new ZkServiceDiscovery("/youpin/services/");
         IClient client = new NettyClient(serviceDiscovery);
         IArith arith = new ConsumerConfig(client).refer(IArith.class);
 //        int result = arith.sum(1111, 222);

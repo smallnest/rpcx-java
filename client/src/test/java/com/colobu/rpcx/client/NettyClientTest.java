@@ -49,7 +49,7 @@ public class NettyClientTest {
         req.metadata.put("test", "1234");
         req.payload = "world".getBytes("UTF-8");
 
-        ServiceDiscovery serviceDiscovery = new ServiceDiscovery("/youpin/services/","Arith");//发现golang的服务
+        ZkServiceDiscovery serviceDiscovery = new ZkServiceDiscovery("/youpin/services/","Arith");//发现golang的服务
         NettyClient client = new NettyClient(serviceDiscovery);
         Message res = client.call(req);
         System.out.println(new String(res.payload));

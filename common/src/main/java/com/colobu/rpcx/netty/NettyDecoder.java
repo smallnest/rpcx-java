@@ -27,9 +27,7 @@ public class NettyDecoder extends ReplayingDecoder<DecoderState> {
             case Header:
                 byte[] header = new byte[12];
                 in.readBytes(header);
-
                 message.setMessageType(header[2]);
-
                 ByteBuffer headerBuf = ByteBuffer.wrap(header);
                 headerBuf.position(4);
                 long seq = headerBuf.getLong();

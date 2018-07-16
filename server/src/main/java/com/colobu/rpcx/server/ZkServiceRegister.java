@@ -12,15 +12,15 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by zhangzhiyong on 2018/7/4.
  */
-public class ServiceRegister {
+public class ZkServiceRegister implements IServiceRegister {
 
-    private static final Logger logger = LoggerFactory.getLogger(ServiceRegister.class);
+    private static final Logger logger = LoggerFactory.getLogger(ZkServiceRegister.class);
 
     private String basePath;
     private Set<String> serviceName;
     private String addr;
 
-    public ServiceRegister(String basePath, String addr) {
+    public ZkServiceRegister(String basePath, String addr) {
         this.basePath = basePath;
         this.serviceName = serviceName;
         this.addr = addr;
@@ -30,6 +30,7 @@ public class ServiceRegister {
     }
 
     //服务注册
+    @Override
     public void register() {
         try {
             ZkClient.ins().create(this.basePath, this.serviceName, this.addr);
@@ -39,6 +40,7 @@ public class ServiceRegister {
     }
 
     //周期性的注册
+    @Override
     public void start() {
         Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(() -> {
             register();

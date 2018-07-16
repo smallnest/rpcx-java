@@ -7,7 +7,14 @@ import com.colobu.rpcx.protocol.Message;
  */
 public interface IClient {
 
+    //直连访问
     Message call(String addr, Message req) throws Exception;
 
     Message call(Message req) throws Exception;
+
+    //指定超时时间
+    Message call(String addr, Message req, long timeOut) throws Exception;
+
 }
+
+

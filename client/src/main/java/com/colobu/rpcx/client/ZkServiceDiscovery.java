@@ -19,10 +19,10 @@ import java.util.stream.Collectors;
  * Created by zhangzhiyong on 2018/7/4.
  * 服务发现者
  */
-public class ServiceDiscovery {
+public class ZkServiceDiscovery implements IServiceDiscovery {
 
 
-    private static final Logger logger = LoggerFactory.getLogger(ServiceDiscovery.class);
+    private static final Logger logger = LoggerFactory.getLogger(ZkServiceDiscovery.class);
 
     private ConcurrentHashMap<String, Set<String>> map = new ConcurrentHashMap<>();
 
@@ -37,9 +37,10 @@ public class ServiceDiscovery {
 
     /**
      * java 的服务发现,会查找所有的consumer
+     *
      * @param basePath
      */
-    public ServiceDiscovery(final String basePath) {
+    public ZkServiceDiscovery(final String basePath) {
         this.basePath = basePath;
         this.serviceName = findConsumer();
         this.serviceName.stream().forEach(it -> {
@@ -66,7 +67,7 @@ public class ServiceDiscovery {
 
 
     //golang 的服务发现
-    public ServiceDiscovery(final String basePath,final String serviceName) {
+    public ZkServiceDiscovery(final String basePath, final String serviceName) {
         this.basePath = basePath;
         this.serviceName.add(serviceName);
         logger.info("consumer:{}", this.map);
@@ -88,12 +89,14 @@ public class ServiceDiscovery {
     }
 
 
+    @Override
     public List<String> getServices(String serviceName) {
-        return this.map.get(serviceName).stream().map(it->it.split("@")[1]).collect(Collectors.toList());
+        return this.map.get(serviceName).stream().map(it -> it.split("@")[1]).collect(Collectors.toList());
     }
 
 
-    public void watch() throws Exception {
+    @Override
+    public void watch() {
         LinkedBlockingQueue<PathStatus> queue = new LinkedBlockingQueue<>();
         new Thread(() -> {
             while (true) {

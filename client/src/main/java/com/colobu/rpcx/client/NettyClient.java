@@ -39,15 +39,17 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
 
     private final EventLoopGroup eventLoopGroupWorker;
 
+    private final long CallTimeOut = TimeUnit.SECONDS.toMillis(3);
+
 
     protected final NettyEventExecuter nettyEventExecuter = new NettyEventExecuter();
 
 
     private Bootstrap bootstrap;
 
-    private final ServiceDiscovery serviceDiscovery;
+    private final IServiceDiscovery serviceDiscovery;
 
-    public NettyClient(ServiceDiscovery serviceDiscovery) {
+    public NettyClient(IServiceDiscovery serviceDiscovery) {
         this.serviceDiscovery = serviceDiscovery;
         this.eventLoopGroupWorker = new NioEventLoopGroup(1, new ThreadFactory() {
             private AtomicInteger threadIndex = new AtomicInteger(0);
@@ -117,10 +119,15 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
      */
     @Override
     public Message call(String addr, Message req) throws Exception {
-        System.out.println("****************call");
+        return call(addr, req, CallTimeOut);
+    }
+
+
+    @Override
+    public Message call(String addr, Message req, long timeOut) throws Exception {
         final RemotingCommand request = RemotingCommand.createRequestCommand(1);
         request.setMessage(req);
-        long timeoutMillis = 300000000;//TODO $--
+        long timeoutMillis = timeOut;
         final Channel channel = this.getAndCreateChannel(addr);//* 获取或者创建channel
         RemotingCommand response = this.invokeSyncImpl(channel, request, timeoutMillis);//* 同步执行
         return response.getMessage();
@@ -130,7 +137,7 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
     public Message call(Message req) throws Exception {
         final RemotingCommand request = RemotingCommand.createRequestCommand(1);
         request.setMessage(req);
-        long timeoutMillis = 300000000;//TODO $--
+        long timeoutMillis = CallTimeOut;
 
         List<String> serviceList = this.serviceDiscovery.getServices(req.getServicePath());
 
