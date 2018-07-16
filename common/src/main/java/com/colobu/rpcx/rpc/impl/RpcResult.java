@@ -6,7 +6,6 @@ import java.util.Map;
 
 public class RpcResult implements Result {
 
-
     private Object value;
 
     private Throwable throwable;

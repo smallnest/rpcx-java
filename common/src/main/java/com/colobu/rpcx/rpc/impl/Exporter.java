@@ -5,8 +5,8 @@ import java.util.stream.Collectors;
 
 public class Exporter {
 
-    public Set<String> export() {
-        Set<Class<?>> set = new ProviderFinder().find();
+    public Set<String> export(String providerPackage) {
+        Set<Class<?>> set = new ProviderFinder(providerPackage).find();
         return set.stream().map(it->it.getName()).collect(Collectors.toSet());
     }
 }

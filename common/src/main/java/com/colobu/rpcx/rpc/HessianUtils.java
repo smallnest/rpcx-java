@@ -7,7 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class HessianUtils {
+public abstract class HessianUtils {
 
     public static byte[] write(Object obj) {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -16,9 +16,15 @@ public class HessianUtils {
             ho.writeObject(obj);
             return os.toByteArray();
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                ho.close();
+                os.close();
+            } catch (Exception ex) {
+
+            }
         }
-        return new byte[]{};
     }
 
 
@@ -28,8 +34,14 @@ public class HessianUtils {
         try {
             return hi.readObject();
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                hi.close();
+                is.close();
+            } catch (Exception ex) {
+
+            }
         }
-        return null;
     }
 }

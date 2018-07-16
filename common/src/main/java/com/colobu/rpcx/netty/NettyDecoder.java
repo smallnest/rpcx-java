@@ -20,7 +20,6 @@ public class NettyDecoder extends ReplayingDecoder<DecoderState> {
 
     public NettyDecoder() {
         super(DecoderState.MagicNumber);
-        System.out.println("------------->create");
     }
 
     @Override

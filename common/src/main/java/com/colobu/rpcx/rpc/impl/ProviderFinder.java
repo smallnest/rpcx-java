@@ -7,8 +7,15 @@ import java.util.Set;
 
 public class ProviderFinder {
 
+    private final String providerPackage;
+
+    public ProviderFinder(String providerPackage) {
+        this.providerPackage = providerPackage;
+    }
+
+
     public Set<Class<?>> find() {
-        Reflections reflections = new Reflections("com.colobu");
+        Reflections reflections = new Reflections(providerPackage);
         Set<Class<?>> classesList = reflections.getTypesAnnotatedWith(Provider.class);
         return classesList;
     }

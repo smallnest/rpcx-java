@@ -14,7 +14,7 @@ public class Server {
     public static void main(String... args) {
         NettyServer server = new NettyServer();
         server.start();
-        IServiceRegister reg = new ZkServiceRegister("/youpin/services/", server.getAddr() + ":" + server.getPort());
+        IServiceRegister reg = new ZkServiceRegister("/youpin/services/", server.getAddr() + ":" + server.getPort(), "com.colobu");
         reg.register();
         reg.start();
         server.await();

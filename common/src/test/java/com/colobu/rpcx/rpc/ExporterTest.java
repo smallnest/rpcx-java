@@ -8,6 +8,6 @@ public class ExporterTest {
 
     @Test
     public void testExport() {
-        System.out.println(new Exporter().export());
+        System.out.println(new Exporter().export(""));
     }
 }
