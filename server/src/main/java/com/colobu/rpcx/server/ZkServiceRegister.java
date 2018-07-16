@@ -22,11 +22,10 @@ public class ZkServiceRegister implements IServiceRegister {
 
     public ZkServiceRegister(String basePath, String addr) {
         this.basePath = basePath;
-        this.serviceName = serviceName;
         this.addr = addr;
 
-        this.serviceName = new Exporter().export();
-        logger.info("service names:{}", this.serviceName);
+        logger.info("export service names:{}", this.serviceName);
+        this.serviceName = new Exporter().export();//导出所有有注解的service
     }
 
     //服务注册

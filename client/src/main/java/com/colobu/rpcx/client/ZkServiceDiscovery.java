@@ -21,14 +21,15 @@ import java.util.stream.Collectors;
  */
 public class ZkServiceDiscovery implements IServiceDiscovery {
 
-
     private static final Logger logger = LoggerFactory.getLogger(ZkServiceDiscovery.class);
 
     private ConcurrentHashMap<String, Set<String>> map = new ConcurrentHashMap<>();
 
     private final String basePath;
+
     private Set<String> serviceName = new HashSet<>();
 
+    private LinkedBlockingQueue<PathStatus> queue = new LinkedBlockingQueue<>();
 
     private Set<String> findConsumer() {
         return new ConsumerFinder().find();
@@ -50,13 +51,13 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
         logger.info("consumer:{}", this.map);
 
         this.serviceName.stream().forEach(it -> {
-            Set<String> set = ZkClient.ins().get(basePath, it);
+            Set<String> set = ZkClient.ins().get(basePath, it).stream().map(it2->it2.split("@")[1]).collect(Collectors.toSet());
             this.map.put(it, set);
         });
 
 
         Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(() -> {
-            System.out.println(this.map);
+            logger.info("zk discovery map:{}", this.map);
         }, 0, 5, TimeUnit.SECONDS);
         try {
             watch();
@@ -72,14 +73,15 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
         this.serviceName.add(serviceName);
         logger.info("consumer:{}", this.map);
 
+        //直接获取服务信息
         this.serviceName.stream().forEach(it -> {
             Set<String> set = ZkClient.ins().get(basePath, it);
-            this.map.put(it, set);
+            this.map.put(it, set.stream().map(it1 -> it1.split("@")[1]).collect(Collectors.toSet()));
         });
 
 
         Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(() -> {
-            System.out.println(this.map);
+            logger.info("provider info:{}", this.map);
         }, 0, 5, TimeUnit.SECONDS);
         try {
             watch();
@@ -97,16 +99,15 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
 
     @Override
     public void watch() {
-        LinkedBlockingQueue<PathStatus> queue = new LinkedBlockingQueue<>();
         new Thread(() -> {
             while (true) {
                 try {
                     PathStatus ps = queue.take();
-                    logger.info("zk discovery ps:{}", ps);
+                    logger.info("=========>zk discovery ps:{}", ps);
 
-                    String service = ps.getValue();
+                    String service = ps.getPath().replace(this.basePath, "");
 
-                    if (this.map.contains(service)) {
+                    if (this.map.containsKey(service)) {
                         if (ps.getType().equals("CHILD_ADDED")) {
                             this.map.compute(service, (k, v) -> {
                                 v.add(ps.getValue());

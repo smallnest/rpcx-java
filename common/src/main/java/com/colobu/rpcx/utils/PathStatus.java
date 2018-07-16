@@ -8,9 +8,12 @@ public class PathStatus {
     private String type;
     private String value;
 
-    public PathStatus(String type, String value) {
+    private String path;
+
+    public PathStatus(String type, String value, String path) {
         this.type = type;
         this.value = value;
+        this.path = path;
     }
 
     public String getType() {
@@ -27,6 +30,14 @@ public class PathStatus {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 
     @Override

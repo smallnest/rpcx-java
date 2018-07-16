@@ -7,6 +7,8 @@ import org.apache.curator.framework.recipes.cache.NodeCache;
 import org.apache.curator.framework.recipes.cache.PathChildrenCache;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -19,6 +21,8 @@ import java.util.stream.Collectors;
  * Created by zhangzhiyong on 2018/7/4.
  */
 public class ZkClient {
+
+    private static final Logger logger = LoggerFactory.getLogger(ZkClient.class);
 
     private CuratorFramework client;
 
@@ -72,27 +76,26 @@ public class ZkClient {
 
 
     //监控变化
-    public void watch(LinkedBlockingQueue<PathStatus> queue, String p) throws Exception {
+    public void watch(LinkedBlockingQueue<PathStatus> queue,final String p) throws Exception {
+        logger.info("---------->watch path:{}", p);
         PathChildrenCache cache = new PathChildrenCache(this.client, p, true);
         cache.start(PathChildrenCache.StartMode.POST_INITIALIZED_EVENT);
         cache.getListenable().addListener((cf, event) -> {
             switch (event.getType()) {
                 case CHILD_ADDED:
                     String path = event.getData().getPath();
-                    System.out.println("CHILD_ADDED :" + path);
                     String addr = path.split("@")[1];
-                    System.out.println(addr);
-                    queue.offer(new PathStatus("CHILD_ADDED", addr));
+                    logger.info("------->CHILD_ADDED :{}:{}", path, addr);
+                    queue.offer(new PathStatus("CHILD_ADDED", addr, p));
                     break;
                 case CHILD_UPDATED:
-                    System.out.println("CHILD_UPDATED :" + event.getData().getPath());
+                    logger.info("------>CHILD_UPDATED :" + event.getData().getPath());
                     break;
                 case CHILD_REMOVED:
                     String path2 = event.getData().getPath();
-                    System.out.println("CHILD_REMOVED :" + path2);
                     String addr2 = path2.split("@")[1];
-                    System.out.println(addr2);
-                    queue.offer(new PathStatus("CHILD_REMOVED", addr2));
+                    logger.info("------>CHILD_REMOVED :{}:{}" + path2, addr2);
+                    queue.offer(new PathStatus("CHILD_REMOVED", addr2, p));
                     break;
                 default:
                     break;
