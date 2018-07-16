@@ -102,7 +102,7 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
             while (true) {
                 try {
                     PathStatus ps = queue.take();
-                    System.out.println("---------->" + ps);
+                    logger.info("zk discovery ps:{}", ps);
 
                     String service = ps.getValue();
 

@@ -11,14 +11,10 @@ public class Arith implements IArith {
 
     /**
      * golang 调用
-     *
-     * @param params
-     * @return
      */
     public byte[] Echo(byte[] params) {
         return (new String(params) + " java server!!!").getBytes();
     }
-
 
     public Integer sum(Integer a, Integer b) {
         return a + b;

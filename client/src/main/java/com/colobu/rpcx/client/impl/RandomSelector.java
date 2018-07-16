@@ -20,7 +20,7 @@ public class RandomSelector implements Selector {
             Random random = new Random();
             int i = random.nextInt(list.size());
             String addr = list.get(i);
-            logger.info("---->random select addr:{}", addr);
+            logger.info("random select addr:{}", addr);
             return addr;
         }
         return null;

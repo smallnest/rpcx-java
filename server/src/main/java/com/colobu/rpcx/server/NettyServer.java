@@ -93,8 +93,8 @@ public class NettyServer extends NettyRemotingAbstract {
             @Override
             public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request) throws Exception {
 
-                Message msg = request.getMessage();
-                String language = msg.metadata.get("language");
+                Message req = request.getMessage();
+                String language = req.metadata.get("language");
 
                 //golang 调用
                 if (null == language || !language.equals("java")) {
@@ -110,6 +110,8 @@ public class NettyServer extends NettyRemotingAbstract {
 
                     RemotingCommand res = RemotingCommand.createResponseCommand();
                     Message message = new Message();
+                    message.serviceMethod = reqMsg.serviceMethod;
+                    message.servicePath = reqMsg.servicePath;
                     message.setMessageType(MessageType.Response);
                     message.setSeq(request.getOpaque());
                     message.payload = (byte[]) v;
@@ -138,12 +140,14 @@ public class NettyServer extends NettyRemotingAbstract {
                 }
 
                 RemotingCommand res = RemotingCommand.createResponseCommand();
-                Message message = new Message();
-                message.servicePath = "-------->";
-                message.setMessageType(MessageType.Response);
-                message.setSeq(request.getOpaque());
-                message.payload = HessianUtils.write(obj);
-                res.setMessage(message);
+                Message resMessage = new Message();
+                resMessage.servicePath = req.servicePath;
+                resMessage.serviceMethod = req.serviceMethod;
+
+                resMessage.setMessageType(MessageType.Response);
+                resMessage.setSeq(request.getOpaque());
+                resMessage.payload = HessianUtils.write(obj);
+                res.setMessage(resMessage);
                 return res;
             }
 
