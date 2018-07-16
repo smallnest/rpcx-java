@@ -10,11 +10,14 @@ import org.apache.zookeeper.CreateMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /**
@@ -25,6 +28,12 @@ public class ZkClient {
     private static final Logger logger = LoggerFactory.getLogger(ZkClient.class);
 
     private CuratorFramework client;
+
+
+    private CopyOnWriteArrayList<PathChildrenCache> list = new CopyOnWriteArrayList<>();
+
+    private AtomicBoolean stop = new AtomicBoolean(false);
+
 
     private ZkClient() {
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
@@ -76,9 +85,13 @@ public class ZkClient {
 
 
     //监控变化
-    public void watch(LinkedBlockingQueue<PathStatus> queue,final String p) throws Exception {
+    public void watch(LinkedBlockingQueue<PathStatus> queue, final String p) throws Exception {
+        if (this.stop.get() == true) {
+            return;
+        }
         logger.info("---------->watch path:{}", p);
         PathChildrenCache cache = new PathChildrenCache(this.client, p, true);
+        list.add(cache);
         cache.start(PathChildrenCache.StartMode.POST_INITIALIZED_EVENT);
         cache.getListenable().addListener((cf, event) -> {
             switch (event.getType()) {
@@ -101,6 +114,19 @@ public class ZkClient {
                     break;
             }
         });
+    }
+
+    public void close() {
+        this.stop.compareAndSet(false, true);
+        this.list.forEach(it -> {
+            try {
+                it.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+        this.client.close();
     }
 
 }

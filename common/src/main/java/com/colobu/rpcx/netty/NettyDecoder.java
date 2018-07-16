@@ -30,7 +30,7 @@ public class NettyDecoder extends ReplayingDecoder<DecoderState> {
                 if (magicNumber != Message.magicNumber) {
                     throw new RpcException("magicNumber error:"+magicNumber);
                 }
-                checkpoint(DecoderState.MagicNumber);
+                checkpoint(DecoderState.Header);
             case Header:
                 byte[] header = new byte[12];
                 header[0] = Message.magicNumber;
@@ -40,7 +40,7 @@ public class NettyDecoder extends ReplayingDecoder<DecoderState> {
                 headerBuf.position(4);
                 long seq = headerBuf.getLong();
                 message.setSeq(seq);//消息的序列号
-                checkpoint(DecoderState.Header);
+                checkpoint(DecoderState.Body);
             case Body:
                 int totalLen = in.readInt();
                 byte[] data = new byte[totalLen];

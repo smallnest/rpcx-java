@@ -10,10 +10,16 @@ public class PathStatus {
 
     private String path;
 
+    private boolean stop;
+
     public PathStatus(String type, String value, String path) {
         this.type = type;
         this.value = value;
         this.path = path;
+    }
+
+    public PathStatus(boolean stop) {
+        this.stop = stop;
     }
 
     public String getType() {
@@ -46,5 +52,13 @@ public class PathStatus {
                 "type='" + type + '\'' +
                 ", value='" + value + '\'' +
                 '}';
+    }
+
+    public boolean isStop() {
+        return stop;
+    }
+
+    public void setStop(boolean stop) {
+        this.stop = stop;
     }
 }

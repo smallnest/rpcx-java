@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /**
@@ -35,6 +36,7 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
         return new ConsumerFinder().find();
     }
 
+    private AtomicBoolean stop = new AtomicBoolean(false);
 
     /**
      * java 的服务发现,会查找所有的consumer
@@ -49,14 +51,10 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
         });
 
         this.serviceName.stream().forEach(it -> {
-            Set<String> set = ZkClient.ins().get(basePath, it).stream().map(it2->it2.split("@")[1]).collect(Collectors.toSet());
+            Set<String> set = ZkClient.ins().get(basePath, it).stream().map(it2 -> it2.split("@")[1]).collect(Collectors.toSet());
             this.map.put(it, set);
         });
 
-
-        Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(() -> {
-            logger.info("provider info:{}", this.map);
-        }, 0, 5, TimeUnit.SECONDS);
         try {
             watch();
         } catch (Exception e) {
@@ -101,8 +99,10 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
             while (true) {
                 try {
                     PathStatus ps = queue.take();
+                    if (ps.isStop()) {
+                        break;
+                    }
                     logger.info("=========>zk discovery ps:{}", ps);
-
                     String service = ps.getPath().replace(this.basePath, "");
 
                     if (this.map.containsKey(service)) {
@@ -130,8 +130,15 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
             try {
                 ZkClient.ins().watch(queue, basePath + it);
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("service name foreach {} error:{}", it, e.getMessage());
             }
         });
+    }
+
+    @Override
+    public void close() {
+        this.queue.offer(new PathStatus(true));
+        ZkClient.ins().close();
+        stop.compareAndSet(false,true);
     }
 }

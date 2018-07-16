@@ -8,11 +8,35 @@ import com.google.gson.GsonBuilder;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by zhangzhiyong on 2018/7/5.
  */
 public class CommonTest {
+
+
+    class E {
+        public E() {
+            Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(()->{
+                System.out.println("schedule");
+            },10,1,TimeUnit.SECONDS);
+
+            Executors.newSingleThreadScheduledExecutor()
+                .scheduleWithFixedDelay(() -> {
+                    System.out.println("schedule");
+        }, 0, 5, TimeUnit.SECONDS);
+        }
+    }
+
+
+    @Test
+    public void testSchedule() {
+        E e = new E();
+        System.out.println(e);
+        System.out.println("finish");
+    }
 
 
     @Test

@@ -16,4 +16,5 @@ public interface IServiceDiscovery {
      */
     void watch();
 
+    void close();
 }
