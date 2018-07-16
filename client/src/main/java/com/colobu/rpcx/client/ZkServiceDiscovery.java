@@ -48,8 +48,6 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
             this.map.put(it, new HashSet<>());
         });
 
-        logger.info("consumer:{}", this.map);
-
         this.serviceName.stream().forEach(it -> {
             Set<String> set = ZkClient.ins().get(basePath, it).stream().map(it2->it2.split("@")[1]).collect(Collectors.toSet());
             this.map.put(it, set);
@@ -57,7 +55,7 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
 
 
         Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(() -> {
-            logger.info("zk discovery map:{}", this.map);
+            logger.info("provider info:{}", this.map);
         }, 0, 5, TimeUnit.SECONDS);
         try {
             watch();
