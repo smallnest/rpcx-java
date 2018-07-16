@@ -20,6 +20,7 @@ public class NettyDecoder extends ReplayingDecoder<DecoderState> {
 
     public NettyDecoder() {
         super(DecoderState.MagicNumber);
+        System.out.println("------------->create");
     }
 
     @Override
@@ -35,7 +36,6 @@ public class NettyDecoder extends ReplayingDecoder<DecoderState> {
                 byte[] header = new byte[12];
                 header[0] = Message.magicNumber;
                 in.readBytes(header,1,11);
-//                in.readBytes(header);
                 message.setMessageType(header[2]);//消息类型
                 ByteBuffer headerBuf = ByteBuffer.wrap(header);
                 headerBuf.position(4);
