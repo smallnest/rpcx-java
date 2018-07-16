@@ -3,6 +3,7 @@ package com.colobu.rpcx.netty;
 import com.colobu.rpcx.protocol.Message;
 import com.colobu.rpcx.protocol.MessageType;
 import com.colobu.rpcx.protocol.RemotingCommand;
+import com.colobu.rpcx.rpc.RpcException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ReplayingDecoder;
@@ -24,14 +25,22 @@ public class NettyDecoder extends ReplayingDecoder<DecoderState> {
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         switch (state()) {
+//            case MagicNumber:
+//                byte magicNumber = in.readByte();
+//                if (magicNumber != Message.magicNumber) {
+//                    throw new RpcException("magicNumber error:"+magicNumber);
+//                }
+//                checkpoint(DecoderState.MagicNumber);
             case Header:
                 byte[] header = new byte[12];
+//                header[0] = Message.magicNumber;
+//                in.readBytes(header,1,11);
                 in.readBytes(header);
-                message.setMessageType(header[2]);
+                message.setMessageType(header[2]);//消息类型
                 ByteBuffer headerBuf = ByteBuffer.wrap(header);
                 headerBuf.position(4);
                 long seq = headerBuf.getLong();
-                message.setSeq(seq);
+                message.setSeq(seq);//消息的序列号
                 checkpoint(DecoderState.Header);
             case Body:
                 int totalLen = in.readInt();

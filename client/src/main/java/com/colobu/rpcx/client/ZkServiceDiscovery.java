@@ -91,7 +91,7 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
 
     @Override
     public List<String> getServices(String serviceName) {
-        return this.map.get(serviceName).stream().map(it -> it.split("@")[1]).collect(Collectors.toList());
+        return this.map.get(serviceName).stream().collect(Collectors.toList());
     }
 
 

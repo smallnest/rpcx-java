@@ -57,6 +57,7 @@ public class RpcInvoker<T> implements Invoker<T> {
                 result.setValue(r);
             }
         } catch (Throwable e) {
+            logger.error(e.getMessage(),e);
             result.setThrowable(e);
         }
 
