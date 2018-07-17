@@ -18,5 +18,5 @@ package com.colobu.rpcx.protocol;
 
 public enum RemotingCommandType {
     REQUEST_COMMAND,
-    RESPONSE_COMMAND;
+    RESPONSE_COMMAND
 }

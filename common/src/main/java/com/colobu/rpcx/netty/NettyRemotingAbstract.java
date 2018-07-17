@@ -123,7 +123,7 @@ public class NettyRemotingAbstract {
     }
 
 
-    public void processMessageReceived(ChannelHandlerContext ctx, RemotingCommand msg) throws Exception {
+    public void processMessageReceived(ChannelHandlerContext ctx, RemotingCommand msg) {
         final RemotingCommand cmd = msg;
         if (cmd != null) {
             switch (cmd.getType()) {

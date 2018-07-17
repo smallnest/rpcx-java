@@ -44,8 +44,6 @@ public class ZkClient {
                         .connectionTimeoutMs(5000)
                         .retryPolicy(retryPolicy)
                         .build();
-
-
         client.start();
     }
 
