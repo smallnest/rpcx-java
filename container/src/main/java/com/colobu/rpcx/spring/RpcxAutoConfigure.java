@@ -14,6 +14,7 @@ import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ApplicationContext;
@@ -37,9 +38,16 @@ public class RpcxAutoConfigure {
     private ApplicationContext context;
 
 
+    @Value("${rpcx.package.path}")
+    private String rpcxPackagePath;
+
+    @Value("${rpcx.base.path}")
+    private String rpcxBasePath;
+
+
     @PostConstruct
     private void init() {
-        Reflections reflections = new Reflections("com.colobu");
+        Reflections reflections = new Reflections(rpcxPackagePath);
         Set<Class<?>> providerSet = reflections.getTypesAnnotatedWith(Provider.class, true);
         providerSet.stream().forEach(it -> {
             logger.info("provider:{}", it);
@@ -51,7 +59,7 @@ public class RpcxAutoConfigure {
             return context.getBean(clazz);
         });
         server.start();
-        IServiceRegister reg = new ZkServiceRegister("/youpin/services/", server.getAddr() + ":" + server.getPort(), "com.colobu");
+        IServiceRegister reg = new ZkServiceRegister(rpcxBasePath, server.getAddr() + ":" + server.getPort(), rpcxPackagePath);
         reg.register();
         reg.start();
     }
@@ -59,7 +67,7 @@ public class RpcxAutoConfigure {
     @Bean
     @ConditionalOnMissingBean
     public RpcxConsumer rpcxConsumer() {
-        IServiceDiscovery serviceDiscovery = new ZkServiceDiscovery("/youpin/services/");
+        IServiceDiscovery serviceDiscovery = new ZkServiceDiscovery(rpcxBasePath);
         IClient client = new NettyClient(serviceDiscovery);
         return new RpcxConsumer(client);
     }
