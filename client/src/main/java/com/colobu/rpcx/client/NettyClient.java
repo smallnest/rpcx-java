@@ -135,6 +135,7 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
 
 
     public Message call(Message req) throws Exception {
+        long begin = System.currentTimeMillis();
         final RemotingCommand request = RemotingCommand.createRequestCommand(1);
         request.setMessage(req);
         long timeoutMillis = CallTimeOut;
@@ -153,7 +154,9 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
         }
         final Channel channel = this.getAndCreateChannel(addr);//* 获取或者创建channel
         RemotingCommand response = this.invokeSyncImpl(channel, request, timeoutMillis);//* 同步执行
-        return response.getMessage();
+        Message res = response.getMessage();
+        logger.info("remote call:{} use time:{}", req.getServiceMethod(), (System.currentTimeMillis() - begin));
+        return res;
     }
 
 

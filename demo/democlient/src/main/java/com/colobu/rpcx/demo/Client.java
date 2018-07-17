@@ -17,7 +17,7 @@ public class Client {
 ////        System.out.println(arith.sum(1111, 222));
 ////        System.out.println(arith.sum2(1111, 222));
         for (int i = 0; i < 1; i++) {
-            System.out.println(arith.hi("zzy"));
+            System.out.println(arith.sum(11,22));
         }
 //
         serviceDiscovery.close();
