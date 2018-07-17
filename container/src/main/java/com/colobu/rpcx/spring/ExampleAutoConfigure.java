@@ -4,7 +4,6 @@ import com.colobu.rpcx.client.IServiceDiscovery;
 import com.colobu.rpcx.client.NettyClient;
 import com.colobu.rpcx.client.ZkServiceDiscovery;
 import com.colobu.rpcx.netty.IClient;
-import com.colobu.rpcx.rpc.CglibProxy;
 import com.colobu.rpcx.rpc.annotation.Consumer;
 import com.colobu.rpcx.rpc.annotation.Provider;
 import com.colobu.rpcx.rpc.impl.ConsumerConfig;
@@ -15,7 +14,6 @@ import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ApplicationContext;
@@ -43,7 +41,6 @@ public class ExampleAutoConfigure {
 
     @PostConstruct
     private void init() {
-
         IServiceDiscovery serviceDiscovery = new ZkServiceDiscovery("/youpin/services/");
         IClient client = new NettyClient(serviceDiscovery);
 

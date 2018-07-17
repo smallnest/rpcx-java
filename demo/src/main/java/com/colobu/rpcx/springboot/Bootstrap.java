@@ -26,14 +26,6 @@ public class Bootstrap {
     @Autowired
     private ExampleService exampleService;
 
-    //    @Autowired
-//    @Qualifier("testService")
-    private ITestService testService;
-
-
-//    @Autowired
-    private String str;
-
 
     @Autowired
     private IArith arith;
@@ -46,9 +38,7 @@ public class Bootstrap {
     public String input(String word) {
         String s = arith.hi("aaa");
         System.out.println(s);
-//        System.out.println(testService.test());
         Object obj = context.getBean("str");
-        System.out.println(str + obj);
         return exampleService.wrap(word + s);
     }
 }
