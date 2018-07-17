@@ -4,15 +4,12 @@ import com.colobu.rpcx.client.IServiceDiscovery;
 import com.colobu.rpcx.client.NettyClient;
 import com.colobu.rpcx.client.ZkServiceDiscovery;
 import com.colobu.rpcx.netty.IClient;
-import com.colobu.rpcx.rpc.annotation.Consumer;
 import com.colobu.rpcx.rpc.annotation.Provider;
-import com.colobu.rpcx.rpc.impl.ConsumerConfig;
 import com.colobu.rpcx.server.IServiceRegister;
 import com.colobu.rpcx.server.NettyServer;
 import com.colobu.rpcx.server.ZkServiceRegister;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +19,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.support.GenericApplicationContext;
 
 import javax.annotation.PostConstruct;
 import java.util.Set;
@@ -30,8 +26,8 @@ import java.util.UUID;
 
 
 @Configuration
-@Aspect
-@ConditionalOnClass(RpcxService.class)
+//@Aspect
+@ConditionalOnClass(RpcxConsumer.class)
 public class RpcxAutoConfigure {
 
     private static final Logger logger = LoggerFactory.getLogger(RpcxAutoConfigure.class);
@@ -43,22 +39,7 @@ public class RpcxAutoConfigure {
 
     @PostConstruct
     private void init() {
-        IServiceDiscovery serviceDiscovery = new ZkServiceDiscovery("/youpin/services/");
-        IClient client = new NettyClient(serviceDiscovery);
-
-        GenericApplicationContext c = (GenericApplicationContext) context;
         Reflections reflections = new Reflections("com.colobu");
-        Set<Class<?>> classesList = reflections.getTypesAnnotatedWith(Consumer.class, true);//不包括实现类
-
-        //把consumer都注入进来
-        classesList.stream().forEach(it -> {
-            System.out.println(it.getSimpleName());
-            Object o = new ConsumerConfig(client).refer(it);
-            c.getBeanFactory().registerSingleton(it.getSimpleName(), o);
-        });
-
-
-        //启动provider
         Set<Class<?>> providerSet = reflections.getTypesAnnotatedWith(Provider.class, true);
         providerSet.stream().forEach(it -> {
             logger.info("provider:{}", it);
@@ -77,8 +58,10 @@ public class RpcxAutoConfigure {
 
     @Bean
     @ConditionalOnMissingBean
-    RpcxService exampleService() {
-        return new RpcxService("<", ">" + context);
+    public RpcxConsumer rpcxConsumer() {
+        IServiceDiscovery serviceDiscovery = new ZkServiceDiscovery("/youpin/services/");
+        IClient client = new NettyClient(serviceDiscovery);
+        return new RpcxConsumer(client);
     }
 
 
