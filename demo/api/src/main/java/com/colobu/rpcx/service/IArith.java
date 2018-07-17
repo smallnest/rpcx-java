@@ -9,5 +9,4 @@ public interface IArith {
 
     int sum2(int a, int b);
 
-    String hi(String name);
 }

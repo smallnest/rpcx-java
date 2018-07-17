@@ -22,9 +22,9 @@ public class Bootstrap {
     private IArith arith;
 
 
-    @GetMapping("/input")
-    public String input(String word) {
-        String s = arith.hi("aaa");
+    @GetMapping("/sum")
+    public String sum(String word) {
+        String s = String.valueOf(arith.sum(11, 22));
         return s;
     }
 }

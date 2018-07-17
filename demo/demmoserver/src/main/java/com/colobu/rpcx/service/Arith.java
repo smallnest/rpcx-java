@@ -26,8 +26,5 @@ public class Arith implements IArith {
         return a + b;
     }
 
-    public String hi(String name) {
-        return "hi " + name;
-    }
 
 }

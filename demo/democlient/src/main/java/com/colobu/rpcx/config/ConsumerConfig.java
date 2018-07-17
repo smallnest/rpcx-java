@@ -2,6 +2,7 @@ package com.colobu.rpcx.config;
 
 
 import com.colobu.rpcx.service.IArith;
+import com.colobu.rpcx.service.ITestService;
 import com.colobu.rpcx.spring.RpcxConsumer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -16,5 +17,10 @@ public class ConsumerConfig {
     @Bean
     public IArith arith() {
         return rpcxConsumer.wrap(IArith.class);
+    }
+
+    @Bean
+    public ITestService testService() {
+        return rpcxConsumer.wrap(ITestService.class);
     }
 }

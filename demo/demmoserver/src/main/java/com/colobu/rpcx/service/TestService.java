@@ -9,9 +9,8 @@ import org.springframework.stereotype.Service;
 public class TestService implements ITestService {
 
 
-    //    @Provider
-    public String test() {
-        return "test";
+    public String hi(String str) {
+        return "hi " + str;
     }
 
 }
