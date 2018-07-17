@@ -1,8 +1,7 @@
 package com.colobu.rpcx.springboot;
 
 import com.colobu.rpcx.service.IArith;
-import com.colobu.rpcx.service.ITestService;
-import com.colobu.rpcx.spring.ExampleService;
+import com.colobu.rpcx.spring.RpcxService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -19,12 +18,11 @@ public class Bootstrap {
 
 
     public static void main(String... args) {
-
         SpringApplication.run(Bootstrap.class, args);
     }
 
     @Autowired
-    private ExampleService exampleService;
+    private RpcxService exampleService;
 
 
     @Autowired
@@ -37,8 +35,7 @@ public class Bootstrap {
     @GetMapping("/input")
     public String input(String word) {
         String s = arith.hi("aaa");
-        System.out.println(s);
-        Object obj = context.getBean("str");
-        return exampleService.wrap(word + s);
+        System.out.println(exampleService.wrap(word + s));
+        return s;
     }
 }

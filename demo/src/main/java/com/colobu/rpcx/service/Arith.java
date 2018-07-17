@@ -1,12 +1,14 @@
 package com.colobu.rpcx.service;
 
 import com.colobu.rpcx.rpc.annotation.Provider;
+import org.springframework.stereotype.Service;
 
 /**
  * Created by zhangzhiyong on 2018/7/4.
  * 服务类
  */
 @Provider
+@Service
 public class Arith implements IArith {
 
     /**

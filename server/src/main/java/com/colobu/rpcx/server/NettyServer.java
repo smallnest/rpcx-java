@@ -34,6 +34,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
@@ -59,6 +60,10 @@ public class NettyServer extends NettyRemotingAbstract {
     private final EventLoopGroup eventLoopGroupBoss;
     private final EventLoopGroup eventLoopGroupSelector;
     private final NettyServerConfig nettyServerConfig;
+
+    private boolean useSpring;
+
+    private Function<Class,Object> getBean;
 
     public NettyServer() {
         nettyServerConfig = new NettyServerConfig();
@@ -134,7 +139,12 @@ public class NettyServer extends NettyRemotingAbstract {
                         }
                     }).toArray(Class[]::new);
                     Method m = clazz.getMethod(method, clazzArray);
-                    obj = m.invoke(clazz.newInstance(), invocation.getArguments());
+                    if (useSpring) {//使用spring容器
+                        Object b = getBean.apply(clazz);
+                        obj = m.invoke(b,invocation.getArguments());
+                    } else {//不使用容器
+                        obj = m.invoke(clazz.newInstance(), invocation.getArguments());
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -155,6 +165,7 @@ public class NettyServer extends NettyRemotingAbstract {
             public boolean rejectRequest() {
                 return false;
             }
+
         }, Executors.newFixedThreadPool(10));
 
 
@@ -240,4 +251,12 @@ public class NettyServer extends NettyRemotingAbstract {
         }
     }
 
+
+    public void setUseSpring(boolean useSpring) {
+        this.useSpring = useSpring;
+    }
+
+    public void setGetBean(Function<Class, Object> getBean) {
+        this.getBean = getBean;
+    }
 }

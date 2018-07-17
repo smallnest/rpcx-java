@@ -16,9 +16,9 @@ public class Client {
         IArith arith = new ConsumerConfig(client).refer(IArith.class);
 ////        System.out.println(arith.sum(1111, 222));
 ////        System.out.println(arith.sum2(1111, 222));
-//        for (int i = 0; i < 100; i++) {
-//            System.out.println(arith.hi("zzy"));
-//        }
+        for (int i = 0; i < 1; i++) {
+            System.out.println(arith.hi("zzy"));
+        }
 //
         serviceDiscovery.close();
         System.out.println("client call finish");

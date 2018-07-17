@@ -7,6 +7,9 @@ import com.colobu.rpcx.netty.IClient;
 import com.colobu.rpcx.rpc.annotation.Consumer;
 import com.colobu.rpcx.rpc.annotation.Provider;
 import com.colobu.rpcx.rpc.impl.ConsumerConfig;
+import com.colobu.rpcx.server.IServiceRegister;
+import com.colobu.rpcx.server.NettyServer;
+import com.colobu.rpcx.server.ZkServiceRegister;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -24,15 +27,14 @@ import org.springframework.context.support.GenericApplicationContext;
 import javax.annotation.PostConstruct;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 
 @Configuration
 @Aspect
-@ConditionalOnClass(ExampleService.class)
-public class ExampleAutoConfigure {
+@ConditionalOnClass(RpcxService.class)
+public class RpcxAutoConfigure {
 
-    private static final Logger logger = LoggerFactory.getLogger(ExampleAutoConfigure.class);
+    private static final Logger logger = LoggerFactory.getLogger(RpcxAutoConfigure.class);
 
 
     @Autowired
@@ -45,8 +47,6 @@ public class ExampleAutoConfigure {
         IClient client = new NettyClient(serviceDiscovery);
 
         GenericApplicationContext c = (GenericApplicationContext) context;
-        c.getBeanFactory().registerSingleton("str", new String("--------->"));
-
         Reflections reflections = new Reflections("com.colobu");
         Set<Class<?>> classesList = reflections.getTypesAnnotatedWith(Consumer.class, true);//不包括实现类
 
@@ -57,12 +57,28 @@ public class ExampleAutoConfigure {
             c.getBeanFactory().registerSingleton(it.getSimpleName(), o);
         });
 
+
+        //启动provider
+        Set<Class<?>> providerSet = reflections.getTypesAnnotatedWith(Provider.class, true);
+        providerSet.stream().forEach(it -> {
+            logger.info("provider:{}", it);
+        });
+
+        NettyServer server = new NettyServer();
+        server.setUseSpring(true);
+        server.setGetBean((clazz) -> {
+            return context.getBean(clazz);
+        });
+        server.start();
+        IServiceRegister reg = new ZkServiceRegister("/youpin/services/", server.getAddr() + ":" + server.getPort(), "com.colobu");
+        reg.register();
+        reg.start();
     }
 
     @Bean
     @ConditionalOnMissingBean
-    ExampleService exampleService() {
-        return new ExampleService("<", ">" + context);
+    RpcxService exampleService() {
+        return new RpcxService("<", ">" + context);
     }
 
 

@@ -1,11 +1,11 @@
 package com.colobu.rpcx.spring;
 
-public class ExampleService {
+public class RpcxService {
 
     private String prefix;
     private String suffix;
 
-    public ExampleService(String prefix, String suffix) {
+    public RpcxService(String prefix, String suffix) {
         this.prefix = prefix;
         this.suffix = suffix;
     }
