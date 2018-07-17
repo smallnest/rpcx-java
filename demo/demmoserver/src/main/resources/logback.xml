@@ -2,7 +2,7 @@
 <configuration scan="true" scanPeriod="5 seconds">
 
     <appender name="fileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/rpcx/demo.log</file>
+        <file>logs/rpcx/demo_server.log</file>
         <encoder>
             <pattern>%d|%-5level|%thread|%logger{40}|%L|%msg%n</pattern>
         </encoder>
@@ -13,7 +13,7 @@
 
 
     <appender name="errorAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/rpcx/demo_error.log</file>
+        <file>logs/rpcx/demo_server_error.log</file>
         <encoder>
             <pattern>%d|%-5level|%thread|%logger{40}|%L|%msg%n</pattern>
         </encoder>

@@ -1,7 +1,6 @@
-package com.colobu.rpcx.springboot;
+package com.colobu.rpcx.bootstrap;
 
 import com.colobu.rpcx.service.IArith;
-import com.colobu.rpcx.spring.RpcxService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -16,26 +15,22 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class Bootstrap {
 
-
     public static void main(String... args) {
         SpringApplication.run(Bootstrap.class, args);
     }
 
-    @Autowired
-    private RpcxService exampleService;
-
-
-    @Autowired
-    private IArith arith;
+//    @Autowired
+//    private IArith arith;
 
 
     @Autowired
     private ApplicationContext context;
 
+
     @GetMapping("/input")
     public String input(String word) {
+        IArith arith = context.getBean(IArith.class);
         String s = arith.hi("aaa");
-        System.out.println(exampleService.wrap(word + s));
         return s;
     }
 }

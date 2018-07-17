@@ -209,7 +209,7 @@ public class NettyServer extends NettyRemotingAbstract {
 
         try {
             String inetHost = RemotingUtil.getLocalAddress();
-            ChannelFuture sync = this.serverBootstrap.bind(inetHost, 6380).sync();
+            ChannelFuture sync = this.serverBootstrap.bind(inetHost, 0).sync();
             InetSocketAddress addr = (InetSocketAddress) sync.channel().localAddress();
             this.port = addr.getPort();
             this.addr = addr.getHostString();
