@@ -10,8 +10,8 @@
 /server/target/
 /demo/api/target/
 /demo/demmoserver/target/
-/demo/demmoclient/target/
-/demo/demmoclient/logs/
+/demo/democlient/target/
+/demo/democlient/logs/
 /demo/logs/
 /container/target/
 /logs/
