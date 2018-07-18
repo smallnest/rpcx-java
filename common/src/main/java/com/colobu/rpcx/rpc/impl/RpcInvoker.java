@@ -1,5 +1,7 @@
 package com.colobu.rpcx.rpc.impl;
 
+import com.colobu.rpcx.common.retry.RetryNTimes;
+import com.colobu.rpcx.common.retry.RetryPolicy;
 import com.colobu.rpcx.netty.IClient;
 import com.colobu.rpcx.protocol.CompressType;
 import com.colobu.rpcx.protocol.Message;
@@ -19,7 +21,6 @@ public class RpcInvoker<T> implements Invoker<T> {
     private static final Logger logger = LoggerFactory.getLogger(RpcInvoker.class);
 
     private final AtomicInteger seq = new AtomicInteger();
-
 
     private IClient client;
 
@@ -45,24 +46,30 @@ public class RpcInvoker<T> implements Invoker<T> {
         req.setOneway(false);
         req.setCompressType(CompressType.None);
         req.setSerializeType(SerializeType.SerializeNone);
-        req.setSeq(seq.incrementAndGet());
         req.metadata.put("language", "java");
 
+        byte[] data = HessianUtils.write(invocation);
+        req.payload = data;
 
-        try {
-            byte[] data = HessianUtils.write(invocation);
-            req.payload = data;
-            Message res = client.call(req,invocation.getTimeOut());
-            byte[] d = res.payload;
-            if (d.length > 0) {
-                Object r = HessianUtils.read(d);
-                result.setValue(r);
+        RetryPolicy retryPolicy = new RetryNTimes(invocation.getRetryNum());//重试策略
+        boolean retryResult = retryPolicy.retry((n) -> {
+            try {
+                req.setSeq(seq.incrementAndGet());//每次重发需要加1
+                Message res = client.call(req, invocation.getTimeOut());
+                byte[] d = res.payload;
+                if (d.length > 0) {
+                    Object r = HessianUtils.read(d);
+                    result.setValue(r);
+                }
+                return true;
+            } catch (Throwable e) {
+                result.setThrowable(e);
+                logger.info("client call error need retry n:{}",n);
+                return false;
             }
-        } catch (Throwable e) {
-            result.setThrowable(e);
-        }
+        });
 
-        logger.info("class:{} method:{}", className, method);
+        logger.info("class:{} method:{} retryResult:{}", className, method, retryResult);
         return result;
     }
 }

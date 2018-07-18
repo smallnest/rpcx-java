@@ -22,8 +22,7 @@ public class ConsumerConfig {
 
     @Bean
     public ITestService testService() {
-        ConsumerConfigBuilder builder = new ConsumerConfigBuilder();
-        builder.setTimeout(1000);//指定超时
-        return rpcxConsumer.wrap(ITestService.class, builder);
+        //设置超时时间1000 重试次数3
+        return rpcxConsumer.wrap(ITestService.class, new ConsumerConfigBuilder().setTimeout(1000).setRetryNum(3));
     }
 }

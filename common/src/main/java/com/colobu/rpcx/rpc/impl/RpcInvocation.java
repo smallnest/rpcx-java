@@ -25,7 +25,11 @@ public class RpcInvocation implements Invocation, Serializable {
 
     private transient Invoker<?> invoker;
 
+    //超时时间
     private long timeOut;
+
+    //重试次数
+    private int retryNum = 1;
 
     public RpcInvocation() {
     }
@@ -118,5 +122,13 @@ public class RpcInvocation implements Invocation, Serializable {
 
     public void setTimeOut(long timeOut) {
         this.timeOut = timeOut;
+    }
+
+    public int getRetryNum() {
+        return retryNum;
+    }
+
+    public void setRetryNum(int retryNum) {
+        this.retryNum = retryNum;
     }
 }

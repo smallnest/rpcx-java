@@ -1,5 +1,7 @@
 package com.colobu.rpcx.common;
 
+import com.colobu.rpcx.common.retry.RetryNTimes;
+import com.colobu.rpcx.common.retry.RetryPolicy;
 import com.colobu.rpcx.rpc.A;
 import com.colobu.rpcx.rpc.HessianUtils;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
@@ -16,6 +18,19 @@ import java.util.concurrent.TimeUnit;
  * Created by zhangzhiyong on 2018/7/5.
  */
 public class CommonTest {
+
+
+    @Test
+    public void testRetry() {
+        RetryPolicy retryPolicy = new RetryNTimes(10);
+        retryPolicy.retry((i)->{
+            System.out.println(i);
+            if (i == 3) {
+                return true;
+            }
+            return false;
+        });
+    }
 
 
     @Test

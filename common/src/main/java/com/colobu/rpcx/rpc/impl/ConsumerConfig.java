@@ -15,6 +15,8 @@ public class ConsumerConfig {
 
     private long timeOut = TimeUnit.SECONDS.toMillis(2);
 
+    private int retryNum = 3;
+
     public ConsumerConfig() {
     }
 
@@ -36,6 +38,11 @@ public class ConsumerConfig {
             return this;
         }
 
+        public ConsumerConfigBuilder setRetryNum(int retryNum) {
+            this.config.retryNum = retryNum;
+            return this;
+        }
+
         public ConsumerConfig build() {
             return this.config;
         }
@@ -50,6 +57,7 @@ public class ConsumerConfig {
             invocation.setArguments(args);
             invocation.setMethodName(method.getName());
             invocation.setTimeOut(timeOut);
+            invocation.setRetryNum(retryNum);
 
             Class<?>[] types = method.getParameterTypes();
             invocation.parameterTypeNames = Stream.of(types).map(it -> ReflectUtils.getDesc(it)).toArray(String[]::new);

@@ -34,10 +34,8 @@ public class RpcxAutoConfigure {
 
     private static final Logger logger = LoggerFactory.getLogger(RpcxAutoConfigure.class);
 
-
     @Autowired
     private ApplicationContext context;
-
 
     @Value("${rpcx.package.path}")
     private String rpcxPackagePath;
