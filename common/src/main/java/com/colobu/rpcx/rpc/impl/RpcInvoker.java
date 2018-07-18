@@ -50,7 +50,7 @@ public class RpcInvoker<T> implements Invoker<T> {
         try {
             byte[] data = HessianUtils.write(invocation);
             req.payload = data;
-            Message res = client.call(req);
+            Message res = client.call(req,invocation.getTimeOut());
             byte[] d = res.payload;
             if (d.length > 0) {
                 Object r = HessianUtils.read(d);

@@ -15,4 +15,7 @@ public class RpcxConsumer {
         return (T) new ConsumerConfig(client).refer(clazz);
     }
 
+    public <T> T wrap(Class clazz, ConsumerConfig.ConsumerConfigBuilder config) {
+        return (T) config.setClient(client).build().refer(clazz);
+    }
 }

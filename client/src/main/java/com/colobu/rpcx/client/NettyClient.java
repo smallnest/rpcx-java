@@ -134,11 +134,11 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
     }
 
 
-    public Message call(Message req) throws Exception {
+    public Message call(Message req, long timeoutMillis) throws Exception {
+        logger.info("remote call:{} begin", req.getServiceMethod());
         long begin = System.currentTimeMillis();
         final RemotingCommand request = RemotingCommand.createRequestCommand(1);
         request.setMessage(req);
-        long timeoutMillis = CallTimeOut;
 
         List<String> serviceList = this.serviceDiscovery.getServices(req.getServicePath());
 
@@ -146,7 +146,6 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
             logger.warn("call service list=0 service:{} method:{}", req.servicePath, req.serviceMethod);
             return new Message();
         }
-
 
         String addr = new RandomSelector().select(req.servicePath, req.serviceMethod, serviceList);
         if (null == addr) {

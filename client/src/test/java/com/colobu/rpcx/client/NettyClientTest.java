@@ -51,7 +51,7 @@ public class NettyClientTest {
 
         ZkServiceDiscovery serviceDiscovery = new ZkServiceDiscovery("/youpin/services/","Arith");//发现golang的服务
         NettyClient client = new NettyClient(serviceDiscovery);
-        Message res = client.call(req);
+        Message res = client.call(req,2000);
         System.out.println(new String(res.payload));
     }
 

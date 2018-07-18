@@ -25,6 +25,8 @@ public class RpcInvocation implements Invocation, Serializable {
 
     private transient Invoker<?> invoker;
 
+    private long timeOut;
+
     public RpcInvocation() {
     }
 
@@ -108,5 +110,13 @@ public class RpcInvocation implements Invocation, Serializable {
 
     public void setParameterTypeNames(String[] parameterTypeNames) {
         this.parameterTypeNames = parameterTypeNames;
+    }
+
+    public long getTimeOut() {
+        return timeOut;
+    }
+
+    public void setTimeOut(long timeOut) {
+        this.timeOut = timeOut;
     }
 }
