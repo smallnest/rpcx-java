@@ -1,5 +1,6 @@
 package com.colobu.rpcx.utils;
 
+import com.colobu.rpcx.common.Config;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -37,6 +38,7 @@ public class ZkClient {
 
     private ZkClient() {
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
+        String cs = Config.ins().get("zk.connect.string");
         client =
                 CuratorFrameworkFactory.builder()
                         .connectString("127.0.0.1:2181")
