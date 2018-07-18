@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 
 
 @Service
-@Provider
+@Provider(name = "TestService", version = "0.0.2")
 public class TestService implements ITestService {
 
 

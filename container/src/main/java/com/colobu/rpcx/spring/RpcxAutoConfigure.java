@@ -10,6 +10,7 @@ import com.colobu.rpcx.server.NettyServer;
 import com.colobu.rpcx.server.ZkServiceRegister;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +28,7 @@ import java.util.UUID;
 
 
 @Configuration
-//@Aspect
+@Aspect
 @ConditionalOnClass(RpcxConsumer.class)
 public class RpcxAutoConfigure {
 
@@ -73,21 +74,20 @@ public class RpcxAutoConfigure {
     }
 
 
-    //    @Around(value = "@annotation(provider)")
     @Around("execution(public * *(..)) && within(@com.colobu.rpcx.rpc.annotation.Provider *)")
     public Object aroundProvider(ProceedingJoinPoint joinPoint) {
         Provider provider = joinPoint.getTarget().getClass().getAnnotation(Provider.class);
-        String taskUuid = UUID.randomUUID().toString();
+        String uuid = UUID.randomUUID().toString();
         Object[] o = joinPoint.getArgs();
-        logger.info("task_aop begin name:{} version:{} id:{} params:{}", provider.name(), provider.version());
+        logger.info("provider execute begin name:{} version:{}  id:{} params:{}", provider.name(), provider.version(), uuid, joinPoint.getArgs());
         long startTime = System.currentTimeMillis();
         try {
             Object result = joinPoint.proceed();
             long useTime = System.currentTimeMillis() - startTime;
-//            logger.info("task_aop finish name:{} id:{} result:{} useTime:{}", provider.name(), taskUuid);
+            logger.info("provider execute finish name:{} version:{} id:{} result:{} useTime:{}", provider.name(), provider.version(), uuid, result, useTime);
             return result;
         } catch (Throwable throwable) {
-//            logger.warn("task_aop finish name:{} id:{} error:{}", provider.name(), taskUuid, throwable.getMessage());
+            logger.warn("provider execute finish name:{} version:{} id:{} error:{}", provider.name(), provider.version(), uuid, throwable.getMessage());
             return null;
         }
     }

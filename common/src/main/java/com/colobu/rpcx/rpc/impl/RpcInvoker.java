@@ -47,6 +47,8 @@ public class RpcInvoker<T> implements Invoker<T> {
         req.setSerializeType(SerializeType.SerializeNone);
         req.setSeq(seq.incrementAndGet());
         req.metadata.put("language", "java");
+
+
         try {
             byte[] data = HessianUtils.write(invocation);
             req.payload = data;
@@ -57,7 +59,6 @@ public class RpcInvoker<T> implements Invoker<T> {
                 result.setValue(r);
             }
         } catch (Throwable e) {
-            logger.error(e.getMessage(), e);
             result.setThrowable(e);
         }
 

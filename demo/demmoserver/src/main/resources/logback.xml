@@ -7,7 +7,7 @@
             <pattern>%d|%-5level|%thread|%logger{40}|%L|%msg%n</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/push.log.%d{yyyy-MM-dd-HH}</fileNamePattern>
+            <fileNamePattern>logs/rpcx/demo_server.log.%d{yyyy-MM-dd-HH}</fileNamePattern>
         </rollingPolicy>
     </appender>
 
@@ -18,7 +18,7 @@
             <pattern>%d|%-5level|%thread|%logger{40}|%L|%msg%n</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/error.log.%d{yyyy-MM-dd-HH}</fileNamePattern>
+            <fileNamePattern>logs/rpcx/demo_error.log.%d{yyyy-MM-dd-HH}</fileNamePattern>
         </rollingPolicy>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>ERROR</level>
