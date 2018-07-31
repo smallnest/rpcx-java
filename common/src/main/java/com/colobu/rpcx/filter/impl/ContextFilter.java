@@ -9,6 +9,8 @@ import com.colobu.rpcx.rpc.RpcContext;
 import com.colobu.rpcx.rpc.RpcException;
 import com.colobu.rpcx.rpc.annotation.RpcFilter;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,10 +18,14 @@ import java.util.Map;
 /**
  * ContextInvokerFilter
  */
-//@RpcFilter
+@RpcFilter(order = -2000)
 public class ContextFilter implements Filter {
 
+    private static final Logger logger = LoggerFactory.getLogger(ContextFilter.class);
+
+
     public Result invoke(Invoker<?> invoker, RpcInvocation invocation) throws RpcException {
+        logger.info("ContextFilter begin");
         Map<String, String> attachments = invocation.getAttachments();
         if (attachments != null) {
             attachments = new HashMap<>(attachments);
@@ -42,6 +48,7 @@ public class ContextFilter implements Filter {
             return invoker.invoke(invocation);
         } finally {
             RpcContext.removeContext();
+            logger.info("ContextFilter end");
         }
     }
 }

@@ -24,8 +24,6 @@ public class AccessLogFilter implements Filter {
 
     private static final Logger logger = LoggerFactory.getLogger(AccessLogFilter.class);
 
-    private static final String ACCESS_LOG_KEY = "dubbo.accesslog";
-
     private static final String FILE_DATE_FORMAT = "yyyyMMdd";
 
     private static final String MESSAGE_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
@@ -36,7 +34,7 @@ public class AccessLogFilter implements Filter {
 
     private final ConcurrentMap<String, Set<String>> logQueue = new ConcurrentHashMap<String, Set<String>>();
 
-    private final ScheduledExecutorService logScheduled = Executors.newScheduledThreadPool(2, new NamedThreadFactory("Dubbo-Access-Log", true));
+    private final ScheduledExecutorService logScheduled = Executors.newScheduledThreadPool(2, new NamedThreadFactory("Rcpx-Access-Log", true));
 
     private volatile ScheduledFuture<?> logFuture = null;
 

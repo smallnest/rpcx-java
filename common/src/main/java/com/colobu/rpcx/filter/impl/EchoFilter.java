@@ -6,12 +6,14 @@ import com.colobu.rpcx.filter.Filter;
 import com.colobu.rpcx.rpc.Invoker;
 import com.colobu.rpcx.rpc.Result;
 import com.colobu.rpcx.rpc.RpcException;
+import com.colobu.rpcx.rpc.annotation.RpcFilter;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
 import com.colobu.rpcx.rpc.impl.RpcResult;
 
 /**
  * EchoInvokerFilter
  */
+@RpcFilter(order = -997)
 public class EchoFilter implements Filter {
 
 	public Result invoke(Invoker<?> invoker, RpcInvocation inv) throws RpcException {

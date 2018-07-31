@@ -34,7 +34,7 @@ public class CacheFilter implements Filter {
                 if (cache != null && key != null) {
                     Object value = cache.get(key);
                     if (value != null) {
-                        logger.info("------>CacheFilter end");
+                        logger.info("------>CacheFilter end get from cache");
                         return new RpcResult(value);
                     }
                     Result result = invoker.invoke(invocation);

@@ -24,4 +24,9 @@ public class TestService implements ITestService {
         return "hi " + str;
     }
 
+    //不会调过来
+    public String $echo(String str) {
+        return null;
+    }
+
 }

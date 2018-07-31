@@ -130,18 +130,23 @@ public class NettyServer extends NettyRemotingAbstract {
                 Invoker<Object> invoker = new RpcProviderInvoker<>(useSpring, getBeanFunc, invocation);
 
                 Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", "");
+
+                RemotingCommand res = RemotingCommand.createResponseCommand();
+                Message resMessage = new Message();
+                resMessage.servicePath = invocation.servicePath;
+                resMessage.serviceMethod = invocation.serviceMethod;
+
+                resMessage.setMessageType(MessageType.Response);
+                resMessage.setSeq(invocation.opaque);
+
                 try {
-                    Result res = wrapperInvoker.invoke(invocation);
-                    return (RemotingCommand) res.getValue();
+                    Result res0 = wrapperInvoker.invoke(invocation);
+                    resMessage.payload = HessianUtils.write(res0.getValue());
+                    res.setMessage(resMessage);
+                    return res;
                 } catch (Throwable throwable) {
-                    RemotingCommand res = RemotingCommand.createResponseCommand();
-                    Message resMessage = new Message();
                     resMessage.metadata.put("_error_code", "2");
                     resMessage.metadata.put("_error_message", throwable.getMessage());
-                    resMessage.servicePath = invocation.servicePath;
-                    resMessage.serviceMethod = invocation.serviceMethod;
-                    resMessage.setMessageType(MessageType.Response);
-                    resMessage.setSeq(invocation.opaque);
                     res.setMessage(resMessage);
                     return res;
                 }

@@ -22,4 +22,15 @@ public class TestController {
         return s;
     }
 
+    /**
+     * 测试echo
+     * @param word
+     * @return
+     */
+    @GetMapping("/echo")
+    public String echo(String word) {
+        String s = testService.$echo(word);
+        return s;
+    }
+
 }

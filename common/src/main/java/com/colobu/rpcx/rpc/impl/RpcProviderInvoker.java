@@ -58,7 +58,6 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
     @Override
     public Result invoke(RpcInvocation invocation) throws RpcException {
         Object obj = null;
-        RemotingCommand res = RemotingCommand.createResponseCommand();
         Result rpcResult = new RpcResult();
         try {
             String method = invocation.getMethodName();
@@ -77,16 +76,7 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
             } else {//不使用容器
                 obj = m.invoke(clazz.newInstance(), invocation.getArguments());
             }
-
-            Message resMessage = new Message();
-            resMessage.servicePath = invocation.servicePath;
-            resMessage.serviceMethod = invocation.serviceMethod;
-
-            resMessage.setMessageType(MessageType.Response);
-            resMessage.setSeq(invocation.opaque);
-            resMessage.payload = HessianUtils.write(obj);
-            res.setMessage(resMessage);
-            ((RpcResult) rpcResult).setValue(res);
+            ((RpcResult) rpcResult).setValue(obj);
             return rpcResult;
 
         } catch (Throwable throwable) {
