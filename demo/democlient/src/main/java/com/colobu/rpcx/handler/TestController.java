@@ -15,6 +15,7 @@ public class TestController {
     @Autowired
     private ApplicationContext context;
 
+    //curl "http://127.0.0.1:8015/hi?word=abc"
     @GetMapping("/hi")
     public String input(String word) {
         String s = testService.hi(word);

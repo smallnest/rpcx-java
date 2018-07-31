@@ -7,7 +7,7 @@ public enum CompressType {
 
     private final int v;
 
-    private CompressType(int v) {
+    CompressType(int v) {
         this.v = v;
     }
 

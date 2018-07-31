@@ -17,22 +17,22 @@ public class ZkServiceRegister implements IServiceRegister {
     private static final Logger logger = LoggerFactory.getLogger(ZkServiceRegister.class);
 
     private String basePath;
-    private Set<String> serviceName;
+    private Set<String> serviceNameSet;
     private String addr;
 
     public ZkServiceRegister(String basePath, String addr, String providerPackage) {
         this.basePath = basePath;
         this.addr = addr;
 
-        logger.info("export service names:{}", this.serviceName);
-        this.serviceName = new Exporter().export(providerPackage);//导出所有有注解的service
+        logger.info("export service names:{}", this.serviceNameSet);
+        this.serviceNameSet = new Exporter().export(providerPackage);//导出所有有注解的service
     }
 
     //服务注册
     @Override
     public void register() {
         try {
-            ZkClient.ins().create(this.basePath, this.serviceName, this.addr);
+            ZkClient.ins().create(this.basePath, this.serviceNameSet, this.addr);
         } catch (Exception e) {
             e.printStackTrace();
         }

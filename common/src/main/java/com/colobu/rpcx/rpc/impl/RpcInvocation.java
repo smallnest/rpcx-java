@@ -13,6 +13,8 @@ public class RpcInvocation implements Invocation, Serializable {
 
     private String methodName;
 
+    public int opaque;
+
     private Class<?>[] parameterTypes;
 
     private Class<?> resultType;
@@ -24,6 +26,9 @@ public class RpcInvocation implements Invocation, Serializable {
     private Map<String, String> attachments;
 
     private transient Invoker<?> invoker;
+
+    public String servicePath;
+    public String serviceMethod;
 
     //超时时间
     private long timeOut;

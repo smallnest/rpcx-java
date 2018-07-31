@@ -54,7 +54,7 @@ public class RpcxAutoConfigure {
 
         NettyServer server = new NettyServer();
         server.setUseSpring(true);
-        server.setGetBean((clazz) -> {
+        server.setGetBeanFunc((clazz) -> {
             return context.getBean(clazz);
         });
         server.start();

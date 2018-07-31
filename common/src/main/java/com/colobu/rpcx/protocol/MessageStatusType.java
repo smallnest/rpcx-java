@@ -7,7 +7,7 @@ public enum MessageStatusType {
 
     private final int v;
 
-    private MessageStatusType(int v) {
+    MessageStatusType(int v) {
         this.v = v;
     }
 

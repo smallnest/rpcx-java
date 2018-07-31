@@ -10,6 +10,13 @@ public class RpcResult implements Result {
 
     private Throwable throwable;
 
+    public RpcResult(Object value) {
+        this.value = value;
+    }
+
+    public RpcResult() {
+    }
+
     public void setValue(Object value) {
         this.value = value;
     }

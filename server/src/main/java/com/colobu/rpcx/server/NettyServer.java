@@ -6,13 +6,9 @@ import com.colobu.rpcx.netty.*;
 import com.colobu.rpcx.protocol.Message;
 import com.colobu.rpcx.protocol.MessageType;
 import com.colobu.rpcx.protocol.RemotingCommand;
-import com.colobu.rpcx.rpc.HessianUtils;
-import com.colobu.rpcx.rpc.Invocation;
-import com.colobu.rpcx.rpc.ReflectUtils;
-import com.colobu.rpcx.rpc.RpcException;
+import com.colobu.rpcx.rpc.*;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.colobu.rpcx.rpc.impl.RpcProviderInvoker;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
@@ -22,7 +18,6 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import lombok.Getter;
-import org.msgpack.MessagePack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +30,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 /**
  * Created by zhangzhiyong on 2018/7/4.
@@ -63,7 +57,7 @@ public class NettyServer extends NettyRemotingAbstract {
 
     private boolean useSpring;
 
-    private Function<Class,Object> getBean;
+    private Function<Class, Object> getBeanFunc;
 
     public NettyServer() {
         nettyServerConfig = new NettyServerConfig();
@@ -126,39 +120,15 @@ public class NettyServer extends NettyRemotingAbstract {
 
 
                 //java 调用
-                Object obj = null;
-                try {
-                    Invocation invocation = (Invocation) HessianUtils.read(request.getMessage().payload);
-                    String method = invocation.getMethodName();
-                    Class<?> clazz = Class.forName(invocation.getClassName());
-                    Class[] clazzArray = Stream.of(invocation.getParameterTypeNames()).map(it -> {
-                        try {
-                            return ReflectUtils.name2class(ReflectUtils.desc2name(it));
-                        } catch (ClassNotFoundException e) {
-                            throw new RpcException(e);
-                        }
-                    }).toArray(Class[]::new);
-                    Method m = clazz.getMethod(method, clazzArray);
-                    if (useSpring) {//使用spring容器
-                        Object b = getBean.apply(clazz);
-                        obj = m.invoke(b,invocation.getArguments());
-                    } else {//不使用容器
-                        obj = m.invoke(clazz.newInstance(), invocation.getArguments());
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                RpcInvocation invocation = (RpcInvocation) HessianUtils.read(request.getMessage().payload);
+                invocation.opaque = request.getOpaque();
+                invocation.servicePath = request.getMessage().servicePath;
+                invocation.serviceMethod = request.getMessage().serviceMethod;
 
-                RemotingCommand res = RemotingCommand.createResponseCommand();
-                Message resMessage = new Message();
-                resMessage.servicePath = req.servicePath;
-                resMessage.serviceMethod = req.serviceMethod;
+                Invoker<Object> invoker = new RpcProviderInvoker<>(useSpring, getBeanFunc);
 
-                resMessage.setMessageType(MessageType.Response);
-                resMessage.setSeq(request.getOpaque());
-                resMessage.payload = HessianUtils.write(obj);
-                res.setMessage(resMessage);
-                return res;
+                Result res = invoker.invoke(invocation);
+                return (RemotingCommand) res.getValue();
             }
 
             @Override
@@ -256,7 +226,7 @@ public class NettyServer extends NettyRemotingAbstract {
         this.useSpring = useSpring;
     }
 
-    public void setGetBean(Function<Class, Object> getBean) {
-        this.getBean = getBean;
+    public void setGetBeanFunc(Function<Class, Object> getBeanFunc) {
+        this.getBeanFunc = getBeanFunc;
     }
 }

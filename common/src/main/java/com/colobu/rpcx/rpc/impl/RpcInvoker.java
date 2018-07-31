@@ -7,10 +7,7 @@ import com.colobu.rpcx.protocol.CompressType;
 import com.colobu.rpcx.protocol.Message;
 import com.colobu.rpcx.protocol.MessageType;
 import com.colobu.rpcx.protocol.SerializeType;
-import com.colobu.rpcx.rpc.HessianUtils;
-import com.colobu.rpcx.rpc.Invoker;
-import com.colobu.rpcx.rpc.Result;
-import com.colobu.rpcx.rpc.RpcException;
+import com.colobu.rpcx.rpc.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,5 +68,20 @@ public class RpcInvoker<T> implements Invoker<T> {
 
         logger.info("class:{} method:{} retryResult:{}", className, method, retryResult);
         return result;
+    }
+
+    @Override
+    public URL getUrl() {
+        return null;
+    }
+
+    @Override
+    public boolean isAvailable() {
+        return false;
+    }
+
+    @Override
+    public void destroy() {
+
     }
 }
