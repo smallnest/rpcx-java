@@ -7,16 +7,16 @@ import java.util.concurrent.TimeUnit;
 
 
 @Service
-@Provider(name = "TestService", version = "0.0.2", token = "zzy123")
+@Provider(name = "TestService", version = "0.0.2", token = "zzy123", timeout = 1000)
 public class TestService implements ITestService {
 
 
     public String hi(String str) {
-//        try {
-//            TimeUnit.SECONDS.sleep(2);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            TimeUnit.SECONDS.sleep(5);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return "hi " + str;
     }
 

@@ -16,7 +16,7 @@ import java.util.Map;
 /**
  * ContextInvokerFilter
  */
-@RpcFilter
+//@RpcFilter
 public class ContextFilter implements Filter {
 
     public Result invoke(Invoker<?> invoker, RpcInvocation invocation) throws RpcException {

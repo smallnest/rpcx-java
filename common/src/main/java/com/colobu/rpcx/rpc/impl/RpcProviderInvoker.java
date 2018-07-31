@@ -1,5 +1,6 @@
 package com.colobu.rpcx.rpc.impl;
 
+import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.protocol.Message;
 import com.colobu.rpcx.protocol.MessageType;
 import com.colobu.rpcx.protocol.RemotingCommand;
@@ -29,7 +30,8 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
         Class clazz = getClass0(invocation);
         this._interface = clazz;
         Provider provider = (Provider) clazz.getAnnotation(Provider.class);
-        parameters.put("token", provider.token());
+        parameters.put(Constants.TOKEN_KEY, provider.token());
+        parameters.put(Constants.TIMEOUT_KEY, String.valueOf(provider.timeout()));
 
         url = new URL("", "", 0, parameters);
     }

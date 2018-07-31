@@ -13,7 +13,7 @@ import com.colobu.rpcx.rpc.impl.RpcInvocation;
 
 import java.util.Map;
 
-@RpcFilter
+//@RpcFilter
 public class TokenFilter implements Filter {
 
     public Result invoke(Invoker<?> invoker, RpcInvocation inv)
