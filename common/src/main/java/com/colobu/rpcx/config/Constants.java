@@ -40,4 +40,8 @@ public class Constants {
 
     public static final String PATH_KEY = "path";
 
+    public static final String CACHE_KEY = "cache";
+
+    public static final String COMMA_SEPARATOR = ",";
+
 }

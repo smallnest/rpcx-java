@@ -63,7 +63,7 @@ public final class URL implements Serializable {
 
 	private final int port;
 
-	private final String path;
+	private String path;
 
     private final Map<String, String> parameters;
     
@@ -363,8 +363,8 @@ public final class URL implements Serializable {
         return new URL(protocol, username, password, host, port, path, getParameters());
     }
 
-    public URL setPath(String path) {
-        return new URL(protocol, username, password, host, port, path, getParameters());
+    public void setPath(String path) {
+	    this.path = path;
     }
 
     public Map<String, String> getParameters() {

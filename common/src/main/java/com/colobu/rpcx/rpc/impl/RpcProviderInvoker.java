@@ -32,8 +32,11 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
         Provider provider = (Provider) clazz.getAnnotation(Provider.class);
         parameters.put(Constants.TOKEN_KEY, provider.token());
         parameters.put(Constants.TIMEOUT_KEY, String.valueOf(provider.timeout()));
+        parameters.put(Constants.CACHE_KEY,String.valueOf(provider.cache()));
 
         url = new URL("", "", 0, parameters);
+        url.setServiceInterface(invocation.getClassName()+""+invocation.getMethodName());
+        url.setPath(invocation.getClassName()+"."+invocation.getMethodName());
     }
 
     @Override

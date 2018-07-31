@@ -1,5 +1,6 @@
 package com.colobu.rpcx.rpc;
 
+import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -189,6 +190,20 @@ public class ReflectUtils {
             NAME_CLASS_CACHE.put(name, clazz);
         }
         return clazz;
+    }
+
+
+    public static boolean isPrimitives(Class<?> cls) {
+        if (cls.isArray()) {
+            return isPrimitive(cls.getComponentType());
+        }
+        return isPrimitive(cls);
+    }
+
+
+    public static boolean isPrimitive(Class<?> cls) {
+        return cls.isPrimitive() || cls == String.class || cls == Boolean.class || cls == Character.class
+                || Number.class.isAssignableFrom(cls) || Date.class.isAssignableFrom(cls);
     }
 
 

@@ -16,7 +16,7 @@ import java.util.Arrays;
 /**
  * 如果执行timeout，则log记录下，不干涉服务的运行
  */
-@RpcFilter
+//@RpcFilter
 public class TimeoutFilter implements Filter {
 
     private static final Logger logger = LoggerFactory.getLogger(TimeoutFilter.class);
