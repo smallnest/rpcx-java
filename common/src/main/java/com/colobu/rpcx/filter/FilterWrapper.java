@@ -8,7 +8,6 @@ import com.colobu.rpcx.rpc.impl.RpcFilterFinder;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class FilterWrapper {
@@ -18,8 +17,9 @@ public class FilterWrapper {
 
     private FilterWrapper() {
         RpcFilterFinder finder = new RpcFilterFinder("com.colobu");//TODO $---
-        Set<Class<?>> set = finder.find();
-        this.filters = set.stream().map(it -> {
+        List<Class> list = finder.find();
+        System.out.println("################" + list);
+        this.filters = list.stream().map(it -> {
             try {
                 return (Filter) it.newInstance();
             } catch (InstantiationException e) {

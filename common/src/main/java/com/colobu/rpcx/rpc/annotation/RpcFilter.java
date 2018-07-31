@@ -7,4 +7,8 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
 @Documented
 public @interface RpcFilter {
+
+
+    int order() default 0;
+
 }
