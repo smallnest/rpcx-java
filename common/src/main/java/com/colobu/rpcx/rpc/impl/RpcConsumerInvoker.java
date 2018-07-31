@@ -13,17 +13,19 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class RpcInvoker<T> implements Invoker<T> {
+public class RpcConsumerInvoker<T> implements Invoker<T> {
 
-    private static final Logger logger = LoggerFactory.getLogger(RpcInvoker.class);
+    private static final Logger logger = LoggerFactory.getLogger(RpcConsumerInvoker.class);
 
     private final AtomicInteger seq = new AtomicInteger();
 
     private IClient client;
 
-    public RpcInvoker(IClient client) {
+    public RpcConsumerInvoker(IClient client) {
         this.client = client;
     }
+
+    private URL url;
 
     @Override
     public Class<T> getInterface() {
@@ -32,6 +34,8 @@ public class RpcInvoker<T> implements Invoker<T> {
 
     @Override
     public Result invoke(RpcInvocation invocation) throws RpcException {
+        url = new URL("easy_go", "111111", 2222);
+
         String className = invocation.getClassName();
         String method = invocation.getMethodName();
         RpcResult result = new RpcResult();
@@ -44,6 +48,7 @@ public class RpcInvoker<T> implements Invoker<T> {
         req.setCompressType(CompressType.None);
         req.setSerializeType(SerializeType.SerializeNone);
         req.metadata.put("language", "java");
+        req.metadata.put("url", this.url.toFullString());
 
         byte[] data = HessianUtils.write(invocation);
         req.payload = data;
@@ -53,15 +58,25 @@ public class RpcInvoker<T> implements Invoker<T> {
             try {
                 req.setSeq(seq.incrementAndGet());//每次重发需要加1
                 Message res = client.call(req, invocation.getTimeOut());
-                byte[] d = res.payload;
-                if (d.length > 0) {
-                    Object r = HessianUtils.read(d);
-                    result.setValue(r);
+
+                if (res.metadata.containsKey("_error_code")) {
+                    int code = Integer.parseInt(res.metadata.get("_error_code"));
+                    String message = res.metadata.get("_error_message");
+                    logger.warn("client call error:{}:{}", code, message);
+                    RpcException error = new RpcException(message, code);
+                    result.setThrowable(error);
+                    return false;
+                } else {
+                    byte[] d = res.payload;
+                    if (d.length > 0) {
+                        Object r = HessianUtils.read(d);
+                        result.setValue(r);
+                    }
+                    return true;
                 }
-                return true;
             } catch (Throwable e) {
                 result.setThrowable(e);
-                logger.info("client call error need retry n:{}",n);
+                logger.info("client call error need retry n:{}", n);
                 return false;
             }
         });
@@ -72,12 +87,12 @@ public class RpcInvoker<T> implements Invoker<T> {
 
     @Override
     public URL getUrl() {
-        return null;
+        return url;
     }
 
     @Override
     public boolean isAvailable() {
-        return false;
+        return true;
     }
 
     @Override

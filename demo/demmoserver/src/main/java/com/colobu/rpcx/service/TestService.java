@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 
 @Service
-@Provider(name = "TestService", version = "0.0.2")
+@Provider(name = "TestService", version = "0.0.2", token = "zzy123")
 public class TestService implements ITestService {
 
 

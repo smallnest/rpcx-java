@@ -2,6 +2,7 @@ package com.colobu.rpcx.rpc.impl;
 
 import com.colobu.rpcx.rpc.Invocation;
 import com.colobu.rpcx.rpc.Invoker;
+import com.colobu.rpcx.rpc.URL;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -29,6 +30,8 @@ public class RpcInvocation implements Invocation, Serializable {
 
     public String servicePath;
     public String serviceMethod;
+
+    public URL url;
 
     //超时时间
     private long timeOut;

@@ -19,7 +19,7 @@ public class TokenFilter implements Filter {
     public Result invoke(Invoker<?> invoker, RpcInvocation inv)
             throws RpcException {
         String token = invoker.getUrl().getParameter(Constants.TOKEN_KEY);
-        if (StringUtils.isEmpty(token)) {
+        if (!StringUtils.isEmpty(token)) {
             Class<?> serviceType = invoker.getInterface();
             Map<String, String> attachments = inv.getAttachments();
             String remoteToken = attachments == null ? null : attachments.get(Constants.TOKEN_KEY);

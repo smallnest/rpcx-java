@@ -4,8 +4,11 @@ import com.colobu.rpcx.protocol.Message;
 import com.colobu.rpcx.protocol.MessageType;
 import com.colobu.rpcx.protocol.RemotingCommand;
 import com.colobu.rpcx.rpc.*;
+import com.colobu.rpcx.rpc.annotation.Provider;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -15,15 +18,36 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
 
     private Function<Class, Object> getBean;
 
+    private URL url;
 
-    public RpcProviderInvoker(boolean useSpring, Function<Class, Object> getBean) {
+    private Class _interface;
+
+    public RpcProviderInvoker(boolean useSpring, Function<Class, Object> getBean, RpcInvocation invocation) {
         this.useSpring = useSpring;
         this.getBean = getBean;
+        Map<String, String> parameters = new HashMap<>();
+        Class clazz = getClass0(invocation);
+        this._interface = clazz;
+        Provider provider = (Provider) clazz.getAnnotation(Provider.class);
+        parameters.put("token", provider.token());
+
+        url = new URL("", "", 0, parameters);
     }
 
     @Override
     public Class<T> getInterface() {
-        return null;
+        return _interface;
+    }
+
+
+    private Class getClass0(RpcInvocation invocation) {
+        Class<?> clazz = null;
+        try {
+            clazz = Class.forName(invocation.getClassName());
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return clazz;
     }
 
     @Override
@@ -33,7 +57,7 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
         Result rpcResult = new RpcResult();
         try {
             String method = invocation.getMethodName();
-            Class<?> clazz = Class.forName(invocation.getClassName());
+            Class<?> clazz = getClass0(invocation);
             Class[] clazzArray = Stream.of(invocation.getParameterTypeNames()).map(it -> {
                 try {
                     return ReflectUtils.name2class(ReflectUtils.desc2name(it));
@@ -60,7 +84,7 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
             ((RpcResult) rpcResult).setValue(res);
             return rpcResult;
 
-        }catch (Throwable throwable) {
+        } catch (Throwable throwable) {
             ((RpcResult) rpcResult).setThrowable(throwable);
             return rpcResult;
         }
@@ -68,7 +92,7 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
 
     @Override
     public URL getUrl() {
-        return null;
+        return url;
     }
 
     @Override

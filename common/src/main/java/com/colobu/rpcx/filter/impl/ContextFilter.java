@@ -7,6 +7,7 @@ import com.colobu.rpcx.rpc.Invoker;
 import com.colobu.rpcx.rpc.Result;
 import com.colobu.rpcx.rpc.RpcContext;
 import com.colobu.rpcx.rpc.RpcException;
+import com.colobu.rpcx.rpc.annotation.RpcFilter;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
 
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import java.util.Map;
 /**
  * ContextInvokerFilter
  */
+@RpcFilter
 public class ContextFilter implements Filter {
 
     public Result invoke(Invoker<?> invoker, RpcInvocation invocation) throws RpcException {

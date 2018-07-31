@@ -11,4 +11,6 @@ public @interface Provider {
 
     String version() default "0.0.1";
 
+    String token() default "";
+
 }

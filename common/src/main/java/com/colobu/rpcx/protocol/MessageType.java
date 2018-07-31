@@ -7,7 +7,7 @@ public enum MessageType {
 
     private final int value;
 
-    private MessageType(int value) {
+    MessageType(int value) {
         this.value = value;
     }
 

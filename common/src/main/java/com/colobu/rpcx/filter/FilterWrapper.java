@@ -4,16 +4,44 @@ import com.colobu.rpcx.rpc.Invoker;
 import com.colobu.rpcx.rpc.Result;
 import com.colobu.rpcx.rpc.RpcException;
 import com.colobu.rpcx.rpc.URL;
+import com.colobu.rpcx.rpc.impl.RpcFilterFinder;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-public abstract class FilterWrapper {
+public class FilterWrapper {
+
+    private List<Filter> filters;
 
 
-    private static <T> Invoker<T> buildInvokerChain(final Invoker<T> invoker, String key, String group) {
+    private FilterWrapper() {
+        RpcFilterFinder finder = new RpcFilterFinder("com.colobu");//TODO $---
+        Set<Class<?>> set = finder.find();
+        this.filters = set.stream().map(it -> {
+            try {
+                return (Filter) it.newInstance();
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }).collect(Collectors.toList());
+    }
+
+    private static class LazyHolder {
+        public static FilterWrapper ins = new FilterWrapper();
+    }
+
+    public static FilterWrapper ins() {
+        return LazyHolder.ins;
+    }
+
+
+    public <T> Invoker<T> buildInvokerChain(final Invoker<T> invoker, String key, String group) {
         Invoker<T> last = invoker;
-        List<Filter> filters = getFilterList();
         if (filters.size() > 0) {
             for (int i = filters.size() - 1; i >= 0; i--) {
                 final Filter filter = filters.get(i);
@@ -50,9 +78,5 @@ public abstract class FilterWrapper {
         return last;
     }
 
-    private static List<Filter> getFilterList() {
-
-        return null;
-    }
 
 }

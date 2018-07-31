@@ -114,6 +114,7 @@ public class RemotingCommand {
     public static RemotingCommand createResponseCommand(int systemError, String s) {
         RemotingCommand cmd = new RemotingCommand();
         cmd.markResponseType();
+        cmd.setCode(systemError);
         return cmd;
     }
 }

@@ -1,11 +1,14 @@
 package com.colobu.rpcx.rpc.impl;
 
+import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.netty.IClient;
 import com.colobu.rpcx.rpc.CglibProxy;
 import com.colobu.rpcx.rpc.ReflectUtils;
 import com.colobu.rpcx.rpc.Result;
 import com.colobu.rpcx.rpc.annotation.Consumer;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -16,6 +19,8 @@ public class ConsumerConfig {
     private long timeOut = TimeUnit.SECONDS.toMillis(2);
 
     private int retryNum = 3;
+
+    private String token = "";
 
     public ConsumerConfig() {
     }
@@ -43,6 +48,12 @@ public class ConsumerConfig {
             return this;
         }
 
+        public ConsumerConfigBuilder setToken(String token) {
+            this.config.token = token;
+            return this;
+        }
+
+
         public ConsumerConfig build() {
             return this.config;
         }
@@ -59,12 +70,16 @@ public class ConsumerConfig {
             invocation.setTimeOut(timeOut);
             invocation.setRetryNum(retryNum);
 
+            Map<String,String> attachments = new HashMap<>();
+            attachments.put(Constants.TOKEN_KEY,token);
+            invocation.setAttachments(attachments);
+
             Class<?>[] types = method.getParameterTypes();
             invocation.parameterTypeNames = Stream.of(types).map(it -> ReflectUtils.getDesc(it)).toArray(String[]::new);
             invocation.setParameterTypes(types);
             invocation.setResultType(method.getReturnType());
 
-            RpcInvoker invoker = new RpcInvoker(client);
+            RpcConsumerInvoker invoker = new RpcConsumerInvoker(client);
             Result result = invoker.invoke(invocation);
             return result.getValue();
         });

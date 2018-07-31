@@ -2,6 +2,7 @@ package com.colobu.rpcx.server;
 
 import com.colobu.rpcx.common.Pair;
 import com.colobu.rpcx.common.RemotingUtil;
+import com.colobu.rpcx.filter.FilterWrapper;
 import com.colobu.rpcx.netty.*;
 import com.colobu.rpcx.protocol.Message;
 import com.colobu.rpcx.protocol.MessageType;
@@ -124,11 +125,26 @@ public class NettyServer extends NettyRemotingAbstract {
                 invocation.opaque = request.getOpaque();
                 invocation.servicePath = request.getMessage().servicePath;
                 invocation.serviceMethod = request.getMessage().serviceMethod;
+                invocation.url = URL.valueOf(request.getMessage().metadata.get("url"));
 
-                Invoker<Object> invoker = new RpcProviderInvoker<>(useSpring, getBeanFunc);
+                Invoker<Object> invoker = new RpcProviderInvoker<>(useSpring, getBeanFunc, invocation);
 
-                Result res = invoker.invoke(invocation);
-                return (RemotingCommand) res.getValue();
+                Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", "");
+                try {
+                    Result res = wrapperInvoker.invoke(invocation);
+                    return (RemotingCommand) res.getValue();
+                } catch (Throwable throwable) {
+                    RemotingCommand res = RemotingCommand.createResponseCommand();
+                    Message resMessage = new Message();
+                    resMessage.metadata.put("_error_code", "2");
+                    resMessage.metadata.put("_error_message", throwable.getMessage());
+                    resMessage.servicePath = invocation.servicePath;
+                    resMessage.serviceMethod = invocation.serviceMethod;
+                    resMessage.setMessageType(MessageType.Response);
+                    resMessage.setSeq(invocation.opaque);
+                    res.setMessage(resMessage);
+                    return res;
+                }
             }
 
             @Override
