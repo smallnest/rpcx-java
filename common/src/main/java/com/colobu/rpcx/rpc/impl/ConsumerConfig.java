@@ -72,8 +72,8 @@ public class ConsumerConfig {
             invocation.setTimeOut(timeOut);
             invocation.setRetryNum(retryNum);
 
-            Map<String,String> attachments = new HashMap<>();
-            attachments.put(Constants.TOKEN_KEY,token);
+            Map<String, String> attachments = new HashMap<>();
+            attachments.put(Constants.TOKEN_KEY, token);
             invocation.setAttachments(attachments);
 
             Class<?>[] types = method.getParameterTypes();
@@ -81,10 +81,15 @@ public class ConsumerConfig {
             invocation.setParameterTypes(types);
             invocation.setResultType(method.getReturnType());
 
-            RpcConsumerInvoker invoker = new RpcConsumerInvoker(client,invocation);
+            RpcConsumerInvoker invoker = new RpcConsumerInvoker(client, invocation);
             Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.CONSUMER);
 
             Result result = wrapperInvoker.invoke(invocation);
+
+            if (result.hasException()) {
+                throw new RuntimeException(result.getException());
+            }
+
             return result.getValue();
         });
     }

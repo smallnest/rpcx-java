@@ -1,5 +1,6 @@
 package com.colobu.rpcx.filter;
 
+import com.colobu.rpcx.common.Config;
 import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.rpc.Invoker;
 import com.colobu.rpcx.rpc.Result;
@@ -18,13 +19,18 @@ public class FilterWrapper {
 
 
     private FilterWrapper() {
-        this.providerFilters = this.findFilters(Constants.PROVIDER);
-        this.consumerFilters = this.findFilters(Constants.CONSUMER);
+        this.providerFilters = this.findFilters("com.colobu", Constants.PROVIDER);
+        this.consumerFilters = this.findFilters("com.colobu", Constants.CONSUMER);
+
+        String p = Config.ins().get("filter_package");
+
+        this.providerFilters.addAll(this.findFilters(p,Constants.PROVIDER));
+        this.providerFilters.addAll(this.findFilters(p,Constants.CONSUMER));
     }
 
 
-    private List<Filter> findFilters(String group) {
-        RpcFilterFinder finder = new RpcFilterFinder("com.colobu", group);
+    private List<Filter> findFilters(String packageName, String group) {
+        RpcFilterFinder finder = new RpcFilterFinder(packageName, group);
         List<Class> list = finder.find();
         System.out.println("################" + group + " " + list);
         return list.stream().map(it -> {
