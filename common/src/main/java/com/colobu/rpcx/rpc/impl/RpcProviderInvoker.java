@@ -18,19 +18,15 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(RpcProviderInvoker.class);
 
-    //使用spring 容器
-    private boolean useSpring;
-
     //如果是基于ioc容器的,需要提供获取bean 的function
-    private Function<Class, Object> getBean;
+    private Function<Class, Object> getBeanFunc;
 
     private URL url;
 
     private Class _interface;
 
-    public RpcProviderInvoker(boolean useSpring, Function<Class, Object> getBean, RpcInvocation invocation) {
-        this.useSpring = useSpring;
-        this.getBean = getBean;
+    public RpcProviderInvoker(Function<Class, Object> getBeanFunc, RpcInvocation invocation) {
+        this.getBeanFunc = getBeanFunc;
         Map<String, String> parameters = new HashMap<>();
         Class clazz = ClassUtils.getClassByName(invocation.getClassName());
         this._interface = clazz;
@@ -71,8 +67,8 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
                 }
             }).toArray(Class[]::new);
             Method m = clazz.getMethod(method, clazzArray);
-            if (useSpring) {//使用spring容器
-                Object b = getBean.apply(clazz);
+            if (null != this.getBeanFunc) {//使用容器
+                Object b = getBeanFunc.apply(clazz);
                 obj = m.invoke(b, invocation.getArguments());
             } else {//不使用容器
                 obj = m.invoke(clazz.newInstance(), invocation.getArguments());

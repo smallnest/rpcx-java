@@ -53,10 +53,7 @@ public class RpcxAutoConfigure {
         });
 
         NettyServer server = new NettyServer();
-        server.setUseSpring(true);
-        server.setGetBeanFunc((clazz) -> {
-            return context.getBean(clazz);
-        });
+        server.setGetBeanFunc((clazz) -> context.getBean(clazz));
         server.start();
         IServiceRegister reg = new ZkServiceRegister(rpcxBasePath, server.getAddr() + ":" + server.getPort(), rpcxPackagePath);
         reg.register();

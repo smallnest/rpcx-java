@@ -26,7 +26,7 @@ public class CacheFilter implements Filter {
     private static LruCacheFactory factory = new LruCacheFactory();
 
     public Result invoke(Invoker<?> invoker, RpcInvocation invocation) throws RpcException {
-        logger.info("------>CacheFilter begin");
+        logger.debug("CacheFilter begin");
         if (invoker.getUrl().getParameter(Constants.CACHE_KEY).equals("true")) {
             Cache cache = factory.getCache(invoker.getUrl());
             if (cache != null) {
@@ -34,19 +34,19 @@ public class CacheFilter implements Filter {
                 if (cache != null && key != null) {
                     Object value = cache.get(key);
                     if (value != null) {
-                        logger.info("------>CacheFilter end get from cache");
+                        logger.info("CacheFilter end get from cache");
                         return new RpcResult(value);
                     }
                     Result result = invoker.invoke(invocation);
                     if (!result.hasException()) {
                         cache.put(key, result.getValue());
                     }
-                    logger.info("------>CacheFilter end");
+                    logger.debug("CacheFilter end");
                     return result;
                 }
             }
         }
-        logger.info("------>CacheFilter end");
+        logger.debug("CacheFilter end");
         return invoker.invoke(invocation);
     }
 

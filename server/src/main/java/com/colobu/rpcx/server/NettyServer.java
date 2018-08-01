@@ -1,6 +1,5 @@
 package com.colobu.rpcx.server;
 
-import com.colobu.rpcx.common.ClassUtils;
 import com.colobu.rpcx.common.Pair;
 import com.colobu.rpcx.common.RemotingUtil;
 import com.colobu.rpcx.config.Constants;
@@ -10,7 +9,10 @@ import com.colobu.rpcx.protocol.LanguageCode;
 import com.colobu.rpcx.protocol.Message;
 import com.colobu.rpcx.protocol.MessageType;
 import com.colobu.rpcx.protocol.RemotingCommand;
-import com.colobu.rpcx.rpc.*;
+import com.colobu.rpcx.rpc.HessianUtils;
+import com.colobu.rpcx.rpc.Invoker;
+import com.colobu.rpcx.rpc.Result;
+import com.colobu.rpcx.rpc.URL;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
 import com.colobu.rpcx.rpc.impl.RpcProviderInvoker;
 import io.netty.bootstrap.ServerBootstrap;
@@ -20,13 +22,11 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
-import io.netty.util.Constant;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -60,8 +60,7 @@ public class NettyServer extends NettyRemotingAbstract {
     private final EventLoopGroup eventLoopGroupSelector;
     private final NettyServerConfig nettyServerConfig;
 
-    private boolean useSpring;
-
+    //如果使用ioc容器,这里需要注入获取bean的 function
     private Function<Class, Object> getBeanFunc;
 
     public NettyServer() {
@@ -124,7 +123,7 @@ public class NettyServer extends NettyRemotingAbstract {
                     invocation.languageCode = LanguageCode.JAVA;
                 }
 
-                Invoker<Object> invoker = new RpcProviderInvoker<>(useSpring, getBeanFunc, invocation);
+                Invoker<Object> invoker = new RpcProviderInvoker<>(getBeanFunc, invocation);
 
                 Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.PROVIDER);
 
@@ -244,10 +243,6 @@ public class NettyServer extends NettyRemotingAbstract {
         }
     }
 
-
-    public void setUseSpring(boolean useSpring) {
-        this.useSpring = useSpring;
-    }
 
     public void setGetBeanFunc(Function<Class, Object> getBeanFunc) {
         this.getBeanFunc = getBeanFunc;
