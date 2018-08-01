@@ -1,6 +1,5 @@
 package com.colobu.rpcx.common;
 
-import com.colobu.rpcx.rpc.impl.RpcInvocation;
 
 public abstract class ClassUtils {
 

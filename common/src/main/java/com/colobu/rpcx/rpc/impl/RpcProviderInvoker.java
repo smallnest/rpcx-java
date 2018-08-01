@@ -4,6 +4,8 @@ import com.colobu.rpcx.common.ClassUtils;
 import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.rpc.*;
 import com.colobu.rpcx.rpc.annotation.Provider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -13,6 +15,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class RpcProviderInvoker<T> implements Invoker<T> {
+
+    private static final Logger logger = LoggerFactory.getLogger(RpcProviderInvoker.class);
 
     //使用spring 容器
     private boolean useSpring;
@@ -28,7 +32,7 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
         this.useSpring = useSpring;
         this.getBean = getBean;
         Map<String, String> parameters = new HashMap<>();
-        Class clazz = getClass0(invocation);
+        Class clazz = ClassUtils.getClassByName(invocation.getClassName());
         this._interface = clazz;
         Provider provider = (Provider) clazz.getAnnotation(Provider.class);
         parameters.put(Constants.TOKEN_KEY, provider.token());
@@ -51,15 +55,6 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
     }
 
 
-    private Class getClass0(RpcInvocation invocation) {
-        Class<?> clazz = null;
-        try {
-            clazz = Class.forName(invocation.getClassName());
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        return clazz;
-    }
 
     @Override
     public Result invoke(RpcInvocation invocation) throws RpcException {
@@ -86,6 +81,7 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
             return rpcResult;
 
         } catch (Throwable throwable) {
+            logger.error(throwable.getMessage(),throwable);
             ((RpcResult) rpcResult).setThrowable(throwable);
             return rpcResult;
         }

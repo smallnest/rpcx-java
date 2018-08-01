@@ -4,6 +4,7 @@ import com.colobu.rpcx.common.retry.RetryNTimes;
 import com.colobu.rpcx.common.retry.RetryPolicy;
 import com.colobu.rpcx.rpc.A;
 import com.colobu.rpcx.rpc.HessianUtils;
+import com.colobu.rpcx.rpc.ReflectUtils;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -13,11 +14,20 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by zhangzhiyong on 2018/7/5.
  */
 public class CommonTest {
+
+
+    @Test
+    public void getDesc() {
+         String desc = ReflectUtils.getDesc(new byte[]{}.getClass());
+         System.out.println(desc);
+    }
 
 
     @Test

@@ -6,6 +6,7 @@ import com.colobu.rpcx.common.RemotingUtil;
 import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.filter.FilterWrapper;
 import com.colobu.rpcx.netty.*;
+import com.colobu.rpcx.protocol.LanguageCode;
 import com.colobu.rpcx.protocol.Message;
 import com.colobu.rpcx.protocol.MessageType;
 import com.colobu.rpcx.protocol.RemotingCommand;
@@ -99,44 +100,29 @@ public class NettyServer extends NettyRemotingAbstract {
                 Message req = request.getMessage();
                 String language = req.metadata.get("language");
 
+                RpcInvocation invocation = null;
                 //golang 调用
-                if (null == language || !language.equals("java")) {
+                if (null == language || !language.equals("java")) {//golang 自己组装invocation
                     Message reqMsg = request.getMessage();
-                    String method = reqMsg.serviceMethod;
-                    String className = reqMsg.servicePath;
-
-                    Object v = null;
-                    if (useSpring) {//使用spring容器
-                        Class<?> clazz = ClassUtils.getClassByName(className);
-                        Object b = getBeanFunc.apply(clazz);
-                        Method m = clazz.getMethod(method, new byte[]{}.getClass());
-                        v = m.invoke(b, reqMsg.payload);
-                    } else {//直接反射调用
-                        Class<?> c = Class.forName(className);
-                        Object obj = c.newInstance();
-                        Method m = c.getMethod(method, new byte[]{}.getClass());
-                        v = m.invoke(obj, reqMsg.payload);
-                    }
-
-
-                    RemotingCommand res = RemotingCommand.createResponseCommand();
-                    Message message = new Message();
-                    message.serviceMethod = reqMsg.serviceMethod;
-                    message.servicePath = reqMsg.servicePath;
-                    message.setMessageType(MessageType.Response);
-                    message.setSeq(request.getOpaque());
-                    message.payload = (byte[]) v;
-                    res.setMessage(message);
-                    return res;
+                    invocation = new RpcInvocation();
+                    invocation.setClassName(reqMsg.servicePath);
+                    invocation.setMethodName(reqMsg.serviceMethod);
+                    invocation.opaque = request.getOpaque();
+                    invocation.servicePath = request.getMessage().servicePath;
+                    invocation.serviceMethod = request.getMessage().serviceMethod;
+                    invocation.setParameterTypeNames(new String[]{"[B"});//golang 参数是byte[]
+                    invocation.setArguments(new Object[]{request.getMessage().payload});// 参数就是payload数据
+                    invocation.url = new URL("rpcx", "", 0);
+                    invocation.languageCode = LanguageCode.GO;
+                } else {
+                    //java 调用
+                    invocation = (RpcInvocation) HessianUtils.read(request.getMessage().payload);
+                    invocation.opaque = request.getOpaque();
+                    invocation.servicePath = request.getMessage().servicePath;
+                    invocation.serviceMethod = request.getMessage().serviceMethod;
+                    invocation.url = URL.valueOf(request.getMessage().metadata.get("url"));
+                    invocation.languageCode = LanguageCode.JAVA;
                 }
-
-
-                //java 调用
-                RpcInvocation invocation = (RpcInvocation) HessianUtils.read(request.getMessage().payload);
-                invocation.opaque = request.getOpaque();
-                invocation.servicePath = request.getMessage().servicePath;
-                invocation.serviceMethod = request.getMessage().serviceMethod;
-                invocation.url = URL.valueOf(request.getMessage().metadata.get("url"));
 
                 Invoker<Object> invoker = new RpcProviderInvoker<>(useSpring, getBeanFunc, invocation);
 
@@ -152,10 +138,15 @@ public class NettyServer extends NettyRemotingAbstract {
 
                 try {
                     Result res0 = wrapperInvoker.invoke(invocation);
-                    resMessage.payload = HessianUtils.write(res0.getValue());
+                    if (invocation.languageCode.equals(LanguageCode.JAVA)) {
+                        resMessage.payload = HessianUtils.write(res0.getValue());
+                    } else {
+                        resMessage.payload = (byte[])res0.getValue();
+                    }
                     res.setMessage(resMessage);
                     return res;
                 } catch (Throwable throwable) {
+                    logger.error(throwable.getMessage(), throwable);
                     resMessage.metadata.put("_error_code", "2");
                     resMessage.metadata.put("_error_message", throwable.getMessage());
                     res.setMessage(resMessage);

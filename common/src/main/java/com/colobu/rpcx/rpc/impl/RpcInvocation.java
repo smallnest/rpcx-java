@@ -1,5 +1,6 @@
 package com.colobu.rpcx.rpc.impl;
 
+import com.colobu.rpcx.protocol.LanguageCode;
 import com.colobu.rpcx.rpc.Invocation;
 import com.colobu.rpcx.rpc.Invoker;
 import com.colobu.rpcx.rpc.URL;
@@ -38,6 +39,8 @@ public class RpcInvocation implements Invocation, Serializable {
 
     //重试次数
     private int retryNum = 1;
+
+    public LanguageCode languageCode;
 
     public RpcInvocation() {
     }
