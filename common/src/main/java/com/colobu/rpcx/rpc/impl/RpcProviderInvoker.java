@@ -33,6 +33,8 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
         parameters.put(Constants.TOKEN_KEY, provider.token());
         parameters.put(Constants.TIMEOUT_KEY, String.valueOf(provider.timeout()));
         parameters.put(Constants.CACHE_KEY,String.valueOf(provider.cache()));
+        parameters.put(Constants.TPS_LIMIT_RATE_KEY,String.valueOf(provider.tps()));
+
 
         url = new URL("", "", 0, parameters);
         url.setServiceInterface(invocation.getClassName()+""+invocation.getMethodName());

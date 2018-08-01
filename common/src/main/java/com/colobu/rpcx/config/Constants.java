@@ -44,4 +44,10 @@ public class Constants {
 
     public static final String COMMA_SEPARATOR = ",";
 
+    public static final String TPS_LIMIT_RATE_KEY = "tps";
+
+    public static final String TPS_LIMIT_INTERVAL_KEY = "tps.interval";
+
+    public static final long DEFAULT_TPS_LIMIT_INTERVAL = 60 * 1000;
+
 }

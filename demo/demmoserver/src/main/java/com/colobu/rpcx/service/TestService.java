@@ -9,7 +9,8 @@ import java.util.concurrent.TimeUnit;
 
 
 @Service
-@Provider(name = "TestService", version = "0.0.2", token = "zzy123", timeout = 1000, cache = true)
+//@Provider(name = "TestService", version = "0.0.2", token = "zzy123", timeout = 1000, cache = true)
+@Provider(name = "TestService", version = "0.0.2", token = "zzy123", tps = 1)
 public class TestService implements ITestService {
 
     private static final Logger logger = LoggerFactory.getLogger(TestService.class);
@@ -24,7 +25,7 @@ public class TestService implements ITestService {
         return "hi " + str;
     }
 
-    //不会调过来
+    //不会调过来(echo 的会呗echo filter 拦截下来)
     public String $echo(String str) {
         return null;
     }
