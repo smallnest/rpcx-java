@@ -1,5 +1,6 @@
 package com.colobu.rpcx.config;
 
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 public class Constants {
@@ -8,17 +9,13 @@ public class Constants {
 
     public static final String GROUP_KEY = "group";
 
-
     public static final String BACKUP_KEY = "backup";
 
     public static final String DEFAULT_KEY_PREFIX = "default.";
 
-
-    public static final Pattern COMMA_SPLIT_PATTERN = Pattern
-            .compile("\\s*[,]+\\s*");
+    public static final Pattern COMMA_SPLIT_PATTERN = Pattern.compile("\\s*[,]+\\s*");
 
     public static final String INTERFACE_KEY = "interface";
-
 
     public static final String LOCALHOST_KEY = "localhost";
 
@@ -30,9 +27,7 @@ public class Constants {
 
     public static final String RETURN_KEY = "return";
 
-
     public static final String $ECHO = "$echo";
-
 
     public static final String TOKEN_KEY = "token";
 
@@ -48,6 +43,22 @@ public class Constants {
 
     public static final String TPS_LIMIT_INTERVAL_KEY = "tps.interval";
 
-    public static final long DEFAULT_TPS_LIMIT_INTERVAL = 60 * 1000;
+    public static final long DEFAULT_TPS_LIMIT_INTERVAL = TimeUnit.MINUTES.toMillis(1);
+
+    public static final String MONITOR_KEY = "monitor";
+
+    public static final String APPLICATION_KEY = "application";
+
+    public static final String INPUT_KEY = "input";
+
+    public static final String OUTPUT_KEY = "output";
+
+    public static final String SIDE_KEY = "side";
+
+    public static final String PROVIDER_SIDE = "provider";
+
+    public static final String CONSUMER_SIDE = "consumer";
+
+    public static final String COUNT_PROTOCOL = "count";
 
 }

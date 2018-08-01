@@ -1,9 +1,6 @@
 package com.colobu.rpcx.rpc.impl;
 
 import com.colobu.rpcx.config.Constants;
-import com.colobu.rpcx.protocol.Message;
-import com.colobu.rpcx.protocol.MessageType;
-import com.colobu.rpcx.protocol.RemotingCommand;
 import com.colobu.rpcx.rpc.*;
 import com.colobu.rpcx.rpc.annotation.Provider;
 
@@ -15,8 +12,10 @@ import java.util.stream.Stream;
 
 public class RpcProviderInvoker<T> implements Invoker<T> {
 
+    //使用spring 容器
     private boolean useSpring;
 
+    //如果是基于ioc容器的,需要提供获取bean 的function
     private Function<Class, Object> getBean;
 
     private URL url;
@@ -32,13 +31,15 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
         Provider provider = (Provider) clazz.getAnnotation(Provider.class);
         parameters.put(Constants.TOKEN_KEY, provider.token());
         parameters.put(Constants.TIMEOUT_KEY, String.valueOf(provider.timeout()));
-        parameters.put(Constants.CACHE_KEY,String.valueOf(provider.cache()));
-        parameters.put(Constants.TPS_LIMIT_RATE_KEY,String.valueOf(provider.tps()));
+        parameters.put(Constants.CACHE_KEY, String.valueOf(provider.cache()));
+        parameters.put(Constants.TPS_LIMIT_RATE_KEY, String.valueOf(provider.tps()));
+        parameters.put(Constants.MONITOR_KEY, String.valueOf(provider.monitor()));
+        parameters.put(Constants.SIDE_KEY,Constants.PROVIDER_SIDE);
 
 
-        url = new URL("", "", 0, parameters);
-        url.setServiceInterface(invocation.getClassName()+""+invocation.getMethodName());
-        url.setPath(invocation.getClassName()+"."+invocation.getMethodName());
+        url = new URL("rpcx", "", 0, parameters);
+        url.setServiceInterface(invocation.getClassName() + "" + invocation.getMethodName());
+        url.setPath(invocation.getClassName() + "." + invocation.getMethodName());
     }
 
     @Override

@@ -110,6 +110,11 @@ Then you can write the java client:
 - 3.x: support develop services in Java
 
 
+## 借鉴项目
+- dubbo
+- rocketmq
+
 ## feature
 - 可以和spring集成
 - 抽象服务发现和服务注册
+- 支持filter

@@ -32,8 +32,11 @@ public @interface Provider {
      */
     boolean cache() default false;
 
+    boolean monitor() default false;
+
     /**
      * 一分钟内tps 能达到的上限  -1 是没有上限
+     *
      * @return
      */
     int tps() default -1;
