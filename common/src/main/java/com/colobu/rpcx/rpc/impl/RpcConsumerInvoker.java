@@ -17,9 +17,11 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(RpcConsumerInvoker.class);
 
-    private final AtomicInteger seq = new AtomicInteger();
+    private static final AtomicInteger seq = new AtomicInteger();
 
     private IClient client;
+
+    private URL url;
 
     public RpcConsumerInvoker(IClient client, RpcInvocation invocation) {
         this.client = client;
@@ -27,8 +29,6 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
         this.url.setServiceInterface(invocation.getClassName());
         this.url.setPath(invocation.getClassName() + "." + invocation.getMethodName());
     }
-
-    private URL url;
 
     @Override
     public Class<T> getInterface() {
