@@ -1,5 +1,6 @@
 package com.colobu.rpcx.rpc.impl;
 
+import com.colobu.rpcx.common.ClassUtils;
 import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.rpc.*;
 import com.colobu.rpcx.rpc.annotation.Provider;
@@ -66,7 +67,7 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
         Result rpcResult = new RpcResult();
         try {
             String method = invocation.getMethodName();
-            Class<?> clazz = getClass0(invocation);
+            Class<?> clazz = ClassUtils.getClassByName(invocation.getClassName());
             Class[] clazzArray = Stream.of(invocation.getParameterTypeNames()).map(it -> {
                 try {
                     return ReflectUtils.name2class(ReflectUtils.desc2name(it));

@@ -1,5 +1,7 @@
 package com.colobu.rpcx.common;
 
+import com.colobu.rpcx.rpc.impl.RpcInvocation;
+
 public abstract class ClassUtils {
 
     public static ClassLoader getDefaultClassLoader() {
@@ -22,6 +24,17 @@ public abstract class ClassUtils {
             }
         }
         return cl;
+    }
+
+
+    public static Class getClassByName(String name) {
+        Class<?> clazz = null;
+        try {
+            clazz = Class.forName(name);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return clazz;
     }
 
 

@@ -1,5 +1,6 @@
 package com.colobu.rpcx.server;
 
+import com.colobu.rpcx.common.ClassUtils;
 import com.colobu.rpcx.common.Pair;
 import com.colobu.rpcx.common.RemotingUtil;
 import com.colobu.rpcx.config.Constants;
@@ -102,13 +103,21 @@ public class NettyServer extends NettyRemotingAbstract {
                 if (null == language || !language.equals("java")) {
                     Message reqMsg = request.getMessage();
                     String method = reqMsg.serviceMethod;
-                    String clazz = reqMsg.servicePath;
+                    String className = reqMsg.servicePath;
 
-                    Class<?> c = Class.forName(clazz);
-                    Object obj = c.newInstance();
+                    Object v = null;
+                    if (useSpring) {//使用spring容器
+                        Class<?> clazz = ClassUtils.getClassByName(className);
+                        Object b = getBeanFunc.apply(clazz);
+                        Method m = clazz.getMethod(method, new byte[]{}.getClass());
+                        v = m.invoke(b, reqMsg.payload);
+                    } else {//直接反射调用
+                        Class<?> c = Class.forName(className);
+                        Object obj = c.newInstance();
+                        Method m = c.getMethod(method, new byte[]{}.getClass());
+                        v = m.invoke(obj, reqMsg.payload);
+                    }
 
-                    Method m = c.getMethod(method, new byte[]{}.getClass());
-                    Object v = m.invoke(obj, reqMsg.payload);
 
                     RemotingCommand res = RemotingCommand.createResponseCommand();
                     Message message = new Message();
@@ -159,7 +168,7 @@ public class NettyServer extends NettyRemotingAbstract {
                 return false;
             }
 
-        }, Executors.newFixedThreadPool(10));
+        }, Executors.newFixedThreadPool(50));
 
 
         DefaultEventExecutorGroup defaultEventExecutorGroup = new DefaultEventExecutorGroup(//

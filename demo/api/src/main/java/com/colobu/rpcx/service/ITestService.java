@@ -9,4 +9,6 @@ public interface ITestService {
 
     String $echo(String str);
 
+    byte[] golangHi(byte[] data);
+
 }
