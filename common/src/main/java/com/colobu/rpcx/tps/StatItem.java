@@ -3,9 +3,6 @@ package com.colobu.rpcx.tps;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * @author <a href="mailto:gang.lvg@alibaba-inc.com">kimi</a>
- */
 class StatItem {
 
     private String name;
