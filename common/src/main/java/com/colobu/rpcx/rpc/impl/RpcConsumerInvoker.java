@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class RpcConsumerInvoker<T> implements Invoker<T> {
 
@@ -26,8 +28,9 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
     public RpcConsumerInvoker(IClient client, RpcInvocation invocation) {
         this.client = client;
         this.url = new URL("rpcx", "", 0);
+        String params = Stream.of(invocation.getParameterTypeNames()).collect(Collectors.joining(","));
         this.url.setServiceInterface(invocation.getClassName());
-        this.url.setPath(invocation.getClassName() + "." + invocation.getMethodName());
+        this.url.setPath(invocation.getClassName() + "." + invocation.getMethodName()+"("+params+")");
     }
 
     @Override

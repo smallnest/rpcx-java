@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class RpcProviderInvoker<T> implements Invoker<T> {
@@ -34,12 +35,13 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
         parameters.put(Constants.CACHE_KEY, String.valueOf(provider.cache()));
         parameters.put(Constants.TPS_LIMIT_RATE_KEY, String.valueOf(provider.tps()));
         parameters.put(Constants.MONITOR_KEY, String.valueOf(provider.monitor()));
-        parameters.put(Constants.SIDE_KEY,Constants.PROVIDER_SIDE);
+        parameters.put(Constants.SIDE_KEY, Constants.PROVIDER_SIDE);
 
 
         url = new URL("rpcx", "", 0, parameters);
         url.setServiceInterface(invocation.getClassName() + "" + invocation.getMethodName());
-        url.setPath(invocation.getClassName() + "." + invocation.getMethodName());
+        String params = Stream.of(invocation.getParameterTypeNames()).collect(Collectors.joining(","));
+        url.setPath(invocation.getClassName() + "." + invocation.getMethodName() + "(" + params + ")");
     }
 
     @Override
