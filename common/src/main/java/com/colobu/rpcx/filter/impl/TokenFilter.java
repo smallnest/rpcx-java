@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-@RpcFilter(order = -999)
+@RpcFilter(order = -999, group = {Constants.PROVIDER})
 public class TokenFilter implements Filter {
 
     private static final Logger logger = LoggerFactory.getLogger(TokenFilter.class);

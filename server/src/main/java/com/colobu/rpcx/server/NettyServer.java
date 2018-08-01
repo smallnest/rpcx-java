@@ -2,6 +2,7 @@ package com.colobu.rpcx.server;
 
 import com.colobu.rpcx.common.Pair;
 import com.colobu.rpcx.common.RemotingUtil;
+import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.filter.FilterWrapper;
 import com.colobu.rpcx.netty.*;
 import com.colobu.rpcx.protocol.Message;
@@ -17,6 +18,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.util.Constant;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -129,7 +131,7 @@ public class NettyServer extends NettyRemotingAbstract {
 
                 Invoker<Object> invoker = new RpcProviderInvoker<>(useSpring, getBeanFunc, invocation);
 
-                Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", "");
+                Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.PROVIDER);
 
                 RemotingCommand res = RemotingCommand.createResponseCommand();
                 Message resMessage = new Message();

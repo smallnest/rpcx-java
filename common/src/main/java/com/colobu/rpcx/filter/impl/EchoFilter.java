@@ -13,14 +13,14 @@ import com.colobu.rpcx.rpc.impl.RpcResult;
 /**
  * EchoInvokerFilter
  */
-@RpcFilter(order = -997)
+@RpcFilter(order = -997, group = {Constants.PROVIDER})
 public class EchoFilter implements Filter {
 
-	public Result invoke(Invoker<?> invoker, RpcInvocation inv) throws RpcException {
-		if(inv.getMethodName().equals(Constants.$ECHO) && inv.getArguments() != null && inv.getArguments().length == 1 ) {
-			return new RpcResult(inv.getArguments()[0]);
-		}
-		return invoker.invoke(inv);
-	}
+    public Result invoke(Invoker<?> invoker, RpcInvocation inv) throws RpcException {
+        if (inv.getMethodName().equals(Constants.$ECHO) && inv.getArguments() != null && inv.getArguments().length == 1) {
+            return new RpcResult(inv.getArguments()[0]);
+        }
+        return invoker.invoke(inv);
+    }
 
 }

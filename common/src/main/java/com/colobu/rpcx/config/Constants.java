@@ -61,4 +61,8 @@ public class Constants {
 
     public static final String COUNT_PROTOCOL = "count";
 
+    public static final String PROVIDER = "provider";
+
+    public static final String CONSUMER = "consumer";
+
 }

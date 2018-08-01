@@ -1,5 +1,6 @@
 package com.colobu.rpcx.filter;
 
+import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.rpc.Invoker;
 import com.colobu.rpcx.rpc.Result;
 import com.colobu.rpcx.rpc.RpcException;
@@ -12,14 +13,21 @@ import java.util.stream.Collectors;
 
 public class FilterWrapper {
 
-    private List<Filter> filters;
+    private List<Filter> providerFilters;
+    private List<Filter> consumerFilters;
 
 
     private FilterWrapper() {
-        RpcFilterFinder finder = new RpcFilterFinder("com.colobu");//TODO $---
+        this.providerFilters = this.findFilters(Constants.PROVIDER);
+        this.consumerFilters = this.findFilters(Constants.CONSUMER);
+    }
+
+
+    private List<Filter> findFilters(String group) {
+        RpcFilterFinder finder = new RpcFilterFinder("com.colobu", group);
         List<Class> list = finder.find();
-        System.out.println("################" + list);
-        this.filters = list.stream().map(it -> {
+        System.out.println("################" + group + " " + list);
+        return list.stream().map(it -> {
             try {
                 return (Filter) it.newInstance();
             } catch (InstantiationException e) {
@@ -30,6 +38,7 @@ public class FilterWrapper {
             return null;
         }).collect(Collectors.toList());
     }
+
 
     private static class LazyHolder {
         public static FilterWrapper ins = new FilterWrapper();
@@ -42,9 +51,15 @@ public class FilterWrapper {
 
     public <T> Invoker<T> buildInvokerChain(final Invoker<T> invoker, String key, String group) {
         Invoker<T> last = invoker;
-        if (filters.size() > 0) {
-            for (int i = filters.size() - 1; i >= 0; i--) {
-                final Filter filter = filters.get(i);
+        List<Filter> list = null;
+        if (group.equals(Constants.PROVIDER)) {
+            list = providerFilters;
+        } else {
+            list = consumerFilters;
+        }
+        if (list.size() > 0) {
+            for (int i = list.size() - 1; i >= 0; i--) {
+                final Filter filter = list.get(i);
                 final Invoker<T> next = last;
                 last = new Invoker<T>() {
 

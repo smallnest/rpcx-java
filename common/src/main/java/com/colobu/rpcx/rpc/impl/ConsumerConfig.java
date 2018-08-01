@@ -1,8 +1,10 @@
 package com.colobu.rpcx.rpc.impl;
 
 import com.colobu.rpcx.config.Constants;
+import com.colobu.rpcx.filter.FilterWrapper;
 import com.colobu.rpcx.netty.IClient;
 import com.colobu.rpcx.rpc.CglibProxy;
+import com.colobu.rpcx.rpc.Invoker;
 import com.colobu.rpcx.rpc.ReflectUtils;
 import com.colobu.rpcx.rpc.Result;
 import com.colobu.rpcx.rpc.annotation.Consumer;
@@ -79,8 +81,10 @@ public class ConsumerConfig {
             invocation.setParameterTypes(types);
             invocation.setResultType(method.getReturnType());
 
-            RpcConsumerInvoker invoker = new RpcConsumerInvoker(client);
-            Result result = invoker.invoke(invocation);
+            RpcConsumerInvoker invoker = new RpcConsumerInvoker(client,invocation);
+            Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.CONSUMER);
+
+            Result result = wrapperInvoker.invoke(invocation);
             return result.getValue();
         });
     }

@@ -21,8 +21,11 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
 
     private IClient client;
 
-    public RpcConsumerInvoker(IClient client) {
+    public RpcConsumerInvoker(IClient client, RpcInvocation invocation) {
         this.client = client;
+        this.url = new URL("rpcx", "", 0);
+        this.url.setServiceInterface(invocation.getClassName());
+        this.url.setPath(invocation.getClassName() + "." + invocation.getMethodName());
     }
 
     private URL url;
@@ -34,8 +37,6 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
 
     @Override
     public Result invoke(RpcInvocation invocation) throws RpcException {
-        url = new URL("easy_go", "111111", 2222);
-
         String className = invocation.getClassName();
         String method = invocation.getMethodName();
         RpcResult result = new RpcResult();

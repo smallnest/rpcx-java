@@ -18,7 +18,7 @@ import java.util.Map;
 /**
  * ContextInvokerFilter
  */
-@RpcFilter(order = -2000)
+@RpcFilter(order = -2000, group = {Constants.PROVIDER})
 public class ContextFilter implements Filter {
 
     private static final Logger logger = LoggerFactory.getLogger(ContextFilter.class);

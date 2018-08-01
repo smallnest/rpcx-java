@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * MonitorFilter.
  */
-@RpcFilter
+@RpcFilter(group = {Constants.PROVIDER})
 public class MonitorFilter implements Filter {
 
     private static final Logger logger = LoggerFactory.getLogger(MonitorFilter.class);

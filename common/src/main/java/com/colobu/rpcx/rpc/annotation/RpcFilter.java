@@ -11,4 +11,6 @@ public @interface RpcFilter {
     //数字越小的越先执行
     int order() default 0;
 
+    String[] group() default {};
+
 }

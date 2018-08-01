@@ -17,6 +17,7 @@
 package com.colobu.rpcx.filter.impl;
 
 
+import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.filter.Filter;
 import com.colobu.rpcx.rpc.Invoker;
 import com.colobu.rpcx.rpc.Result;
@@ -29,7 +30,7 @@ import com.colobu.rpcx.tps.TPSLimiter;
 /**
  * 限制 service 或方法的 tps.
  */
-@RpcFilter
+@RpcFilter(group = {Constants.PROVIDER})
 public class TpsLimitFilter implements Filter {
 
     private static final TPSLimiter tpsLimiter = new DefaultTPSLimiter();
