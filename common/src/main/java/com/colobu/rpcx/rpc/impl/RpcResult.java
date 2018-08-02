@@ -1,7 +1,7 @@
 package com.colobu.rpcx.rpc.impl;
 
 import com.colobu.rpcx.rpc.Result;
-
+import java.util.HashMap;
 import java.util.Map;
 
 public class RpcResult implements Result {
@@ -10,11 +10,18 @@ public class RpcResult implements Result {
 
     private Throwable throwable;
 
+    private Map<String, String> attachments = new HashMap<>();
+
     public RpcResult(Object value) {
         this.value = value;
     }
 
     public RpcResult() {
+    }
+
+
+    public RpcResult(Throwable throwable) {
+        this.throwable = throwable;
     }
 
     public void setValue(Object value) {
@@ -42,16 +49,20 @@ public class RpcResult implements Result {
 
     @Override
     public Map<String, String> getAttachments() {
-        return null;
+        return attachments;
     }
 
     @Override
     public String getAttachment(String key) {
-        return null;
+        return this.attachments.get(key);
     }
 
     @Override
     public String getAttachment(String key, String defaultValue) {
-        return null;
+        String result = attachments.get(key);
+        if (result == null || result.length() == 0) {
+            result = defaultValue;
+        }
+        return result;
     }
 }

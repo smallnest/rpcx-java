@@ -63,9 +63,9 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
                 req.setSeq(seq.incrementAndGet());//每次重发需要加1
                 Message res = client.call(req, invocation.getTimeOut());
 
-                if (res.metadata.containsKey("_error_code")) {
-                    int code = Integer.parseInt(res.metadata.get("_error_code"));
-                    String message = res.metadata.get("_error_message");
+                if (res.metadata.containsKey("_rpcx_error_code")) {
+                    int code = Integer.parseInt(res.metadata.get("_rpcx_error_code"));
+                    String message = res.metadata.get("_rpcx_error_message");
                     logger.warn("client call error:{}:{}", code, message);
                     RpcException error = new RpcException(message, code);
                     result.setThrowable(error);

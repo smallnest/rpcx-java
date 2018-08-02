@@ -16,4 +16,6 @@ public interface Result {
 
     String getAttachment(String key, String defaultValue);
 
+    void setThrowable(Throwable throwable);
+
 }

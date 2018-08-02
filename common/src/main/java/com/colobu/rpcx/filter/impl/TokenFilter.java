@@ -10,22 +10,14 @@ import com.colobu.rpcx.rpc.RpcContext;
 import com.colobu.rpcx.rpc.RpcException;
 import com.colobu.rpcx.rpc.annotation.RpcFilter;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
 @RpcFilter(order = -999, group = {Constants.PROVIDER})
 public class TokenFilter implements Filter {
 
-    private static final Logger logger = LoggerFactory.getLogger(TokenFilter.class);
-
     public Result invoke(Invoker<?> invoker, RpcInvocation inv)
             throws RpcException {
-
-
-        logger.info("------>TokenFilter begin");
-
         String token = invoker.getUrl().getParameter(Constants.TOKEN_KEY);
         if (!StringUtils.isEmpty(token)) {
             Class<?> serviceType = invoker.getInterface();
@@ -35,7 +27,6 @@ public class TokenFilter implements Filter {
                 throw new RpcException("Invalid token! Forbid invoke remote service " + serviceType + " method " + inv.getMethodName() + "() from consumer " + RpcContext.getContext().getRemoteHost() + " to provider " + RpcContext.getContext().getLocalHost());
             }
         }
-        logger.info("------>TokenFilter end");
         return invoker.invoke(inv);
     }
 

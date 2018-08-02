@@ -67,6 +67,7 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
                 }
             }).toArray(Class[]::new);
             Method m = clazz.getMethod(method, clazzArray);
+
             if (null != this.getBeanFunc) {//使用容器
                 Object b = getBeanFunc.apply(clazz);
                 obj = m.invoke(b, invocation.getArguments());
@@ -78,7 +79,7 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
 
         } catch (Throwable throwable) {
             logger.error(throwable.getMessage(),throwable);
-            ((RpcResult) rpcResult).setThrowable(throwable);
+            rpcResult.setThrowable(throwable);
             return rpcResult;
         }
     }

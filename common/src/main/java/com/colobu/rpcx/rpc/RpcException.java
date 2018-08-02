@@ -4,11 +4,14 @@ public class RpcException extends RuntimeException {
 
 
     private int code;
-    private String message;
 
     public RpcException(String message, int code) {
         super(message);
         this.code = code;
+    }
+
+    public RpcException(Throwable cause) {
+        super(cause);
     }
 
     public RpcException(String message) {

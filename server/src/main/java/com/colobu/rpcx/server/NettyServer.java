@@ -1,29 +1,21 @@
 package com.colobu.rpcx.server;
 
+import com.colobu.rpcx.common.NamedThreadFactory;
 import com.colobu.rpcx.common.Pair;
 import com.colobu.rpcx.common.RemotingUtil;
-import com.colobu.rpcx.config.Constants;
-import com.colobu.rpcx.filter.FilterWrapper;
 import com.colobu.rpcx.netty.*;
-import com.colobu.rpcx.protocol.LanguageCode;
-import com.colobu.rpcx.protocol.Message;
-import com.colobu.rpcx.protocol.MessageType;
-import com.colobu.rpcx.protocol.RemotingCommand;
-import com.colobu.rpcx.rpc.HessianUtils;
-import com.colobu.rpcx.rpc.Invoker;
-import com.colobu.rpcx.rpc.Result;
-import com.colobu.rpcx.rpc.URL;
-import com.colobu.rpcx.rpc.impl.RpcInvocation;
-import com.colobu.rpcx.rpc.impl.RpcProviderInvoker;
+import com.colobu.rpcx.processor.RpcProcessor;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
-import io.netty.channel.*;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
-import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,8 +24,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 /**
@@ -45,16 +35,13 @@ public class NettyServer extends NettyRemotingAbstract {
 
     private final ServerBootstrap serverBootstrap;
 
-    @Getter
     private String addr;
 
-    @Getter
     private int port;
 
     private final CountDownLatch latch = new CountDownLatch(1);
 
     private final Timer timer = new Timer("ServerHouseKeepingService", true);
-
 
     private final EventLoopGroup eventLoopGroupBoss;
     private final EventLoopGroup eventLoopGroupSelector;
@@ -66,111 +53,16 @@ public class NettyServer extends NettyRemotingAbstract {
     public NettyServer() {
         nettyServerConfig = new NettyServerConfig();
         this.serverBootstrap = new ServerBootstrap();
-
-        this.eventLoopGroupBoss = new NioEventLoopGroup(1, new ThreadFactory() {
-            private AtomicInteger threadIndex = new AtomicInteger(0);
-
-            @Override
-            public Thread newThread(Runnable r) {
-                return new Thread(r, String.format("NettyBoss_%d", this.threadIndex.incrementAndGet()));
-            }
-        });
-
-        this.eventLoopGroupSelector = new NioEventLoopGroup(nettyServerConfig.getServerSelectorThreads(), new ThreadFactory() {
-            private AtomicInteger threadIndex = new AtomicInteger(0);
-            private int threadTotal = nettyServerConfig.getServerSelectorThreads();
-
-
-            @Override
-            public Thread newThread(Runnable r) {
-                return new Thread(r, String.format("NettyServerNIOSelector_%d_%d", threadTotal, this.threadIndex.incrementAndGet()));
-            }
-        });
-
+        this.eventLoopGroupBoss = new NioEventLoopGroup(1, new NamedThreadFactory("NettyBoss_", false));
+        this.eventLoopGroupSelector = new NioEventLoopGroup(nettyServerConfig.getServerSelectorThreads(), new NamedThreadFactory("NettyServerNIOSelector", false));
     }
 
 
     public void start() {
         //默认的处理器
-        this.defaultRequestProcessor = new Pair<>(new NettyRequestProcessor() {
-            @Override
-            public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request) throws Exception {
-
-                Message req = request.getMessage();
-                String language = req.metadata.get("language");
-
-                RpcInvocation invocation = null;
-                //golang 调用
-                if (null == language || !language.equals("java")) {//golang 自己组装invocation
-                    Message reqMsg = request.getMessage();
-                    invocation = new RpcInvocation();
-                    invocation.setClassName(reqMsg.servicePath);
-                    invocation.setMethodName(reqMsg.serviceMethod);
-                    invocation.opaque = request.getOpaque();
-                    invocation.servicePath = request.getMessage().servicePath;
-                    invocation.serviceMethod = request.getMessage().serviceMethod;
-                    invocation.setParameterTypeNames(new String[]{"[B"});//golang 参数是byte[]
-                    invocation.setArguments(new Object[]{request.getMessage().payload});// 参数就是payload数据
-                    invocation.url = new URL("rpcx", "", 0);
-                    invocation.languageCode = LanguageCode.GO;
-                } else {
-                    //java 调用
-                    invocation = (RpcInvocation) HessianUtils.read(request.getMessage().payload);
-                    invocation.opaque = request.getOpaque();
-                    invocation.servicePath = request.getMessage().servicePath;
-                    invocation.serviceMethod = request.getMessage().serviceMethod;
-                    invocation.url = URL.valueOf(request.getMessage().metadata.get("url"));
-                    invocation.languageCode = LanguageCode.JAVA;
-                }
-
-                Invoker<Object> invoker = new RpcProviderInvoker<>(getBeanFunc, invocation);
-
-                Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.PROVIDER);
-
-                RemotingCommand res = RemotingCommand.createResponseCommand();
-                Message resMessage = new Message();
-                resMessage.servicePath = invocation.servicePath;
-                resMessage.serviceMethod = invocation.serviceMethod;
-
-                resMessage.setMessageType(MessageType.Response);
-                resMessage.setSeq(invocation.opaque);
-
-                try {
-                    Result res0 = wrapperInvoker.invoke(invocation);
-                    if (invocation.languageCode.equals(LanguageCode.JAVA)) {
-                        resMessage.payload = HessianUtils.write(res0.getValue());
-                    } else {
-                        resMessage.payload = (byte[])res0.getValue();
-                    }
-                    res.setMessage(resMessage);
-                    return res;
-                } catch (Throwable throwable) {
-                    logger.error(throwable.getMessage(), throwable);
-                    resMessage.metadata.put("_error_code", "2");
-                    resMessage.metadata.put("_error_message", throwable.getMessage());
-                    res.setMessage(resMessage);
-                    return res;
-                }
-            }
-
-            @Override
-            public boolean rejectRequest() {
-                return false;
-            }
-
-        }, Executors.newFixedThreadPool(50));
-
-
+        this.defaultRequestProcessor = new Pair<>(new RpcProcessor(this.getBeanFunc), Executors.newFixedThreadPool(50));
         DefaultEventExecutorGroup defaultEventExecutorGroup = new DefaultEventExecutorGroup(//
-                nettyServerConfig.getServerWorkerThreads(), //
-                new ThreadFactory() {
-                    private AtomicInteger threadIndex = new AtomicInteger(0);
-
-                    @Override
-                    public Thread newThread(Runnable r) {
-                        return new Thread(r, "NettyServerCodecThread_" + this.threadIndex.incrementAndGet());
-                    }
-                });
+                nettyServerConfig.getServerWorkerThreads(), new NamedThreadFactory("NettyServerCodecThread_",false));
 
 
         ServerBootstrap childHandler = //
@@ -234,7 +126,6 @@ public class NettyServer extends NettyRemotingAbstract {
 
     }
 
-
     public void await() {
         try {
             latch.await();
@@ -243,8 +134,15 @@ public class NettyServer extends NettyRemotingAbstract {
         }
     }
 
-
     public void setGetBeanFunc(Function<Class, Object> getBeanFunc) {
         this.getBeanFunc = getBeanFunc;
+    }
+
+    public String getAddr() {
+        return addr;
+    }
+
+    public int getPort() {
+        return port;
     }
 }

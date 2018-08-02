@@ -115,6 +115,7 @@ Then you can write the java client:
 - rocketmq
 
 ## feature
-- 可以和spring集成
-- 抽象服务发现和服务注册
-- 支持filter
+- 可以和spring-boot的无缝集成
+- 支持服务发现和注册
+- 支持filter模式扩展
+- 支持多语言调用
