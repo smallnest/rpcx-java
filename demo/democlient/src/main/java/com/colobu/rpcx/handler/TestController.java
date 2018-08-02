@@ -42,12 +42,11 @@ public class TestController {
 
 
     /**
-     * 泛华调用
-     * @param word
+     * 泛化调用
      * @return
      */
     @GetMapping("/generic")
-    public String generic(String word) {
+    public String generic() {
         Object s = consumer.invoke("com.colobu.rpcx.service.TestService", "sum", new String[]{"int","int"}, new String[]{"11","22"});
         return s.toString();
     }
