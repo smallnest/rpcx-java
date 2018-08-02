@@ -14,8 +14,6 @@ public class RpcInvocation implements Invocation, Serializable {
 
     private String methodName;
 
-    public int opaque;
-
     private Class<?>[] parameterTypes;
 
     private Class<?> resultType;
@@ -149,4 +147,5 @@ public class RpcInvocation implements Invocation, Serializable {
     public void setUrl(URL url) {
         this.url = url;
     }
+
 }

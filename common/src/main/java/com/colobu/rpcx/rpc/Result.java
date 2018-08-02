@@ -4,6 +4,8 @@ import java.util.Map;
 
 public interface Result {
 
+    void setValue(Object value);
+
     Object getValue();
 
     Throwable getException();

@@ -1,6 +1,7 @@
 package com.colobu.rpcx.handler;
 
 import com.colobu.rpcx.service.ITestService;
+import com.colobu.rpcx.spring.RpcxConsumer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,11 @@ public class TestController {
     @Autowired
     private ApplicationContext context;
 
+
+    @Autowired
+    private RpcxConsumer consumer;
+
+
     //curl "http://127.0.0.1:8015/hi?word=abc"
     @GetMapping("/hi")
     public String input(String word) {
@@ -24,6 +30,7 @@ public class TestController {
 
     /**
      * 测试echo
+     *
      * @param word
      * @return
      */
@@ -31,6 +38,18 @@ public class TestController {
     public String echo(String word) {
         String s = testService.$echo(word);
         return s;
+    }
+
+
+    /**
+     * 泛华调用
+     * @param word
+     * @return
+     */
+    @GetMapping("/generic")
+    public String generic(String word) {
+        Object s = consumer.invoke("com.colobu.rpcx.service.TestService", "sum", new String[]{"int","int"}, new String[]{"11","22"});
+        return s.toString();
     }
 
 }

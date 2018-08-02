@@ -22,9 +22,7 @@ public class TimeoutFilter implements Filter {
     private static final Logger logger = LoggerFactory.getLogger(TimeoutFilter.class);
 
     public Result invoke(Invoker<?> invoker, RpcInvocation invocation) throws RpcException {
-
-        logger.info("------>TimeoutFilter begin");
-
+        logger.info("TimeoutFilter begin");
         long start = System.currentTimeMillis();
         Result result = invoker.invoke(invocation);
         long elapsed = System.currentTimeMillis() - start;
@@ -35,7 +33,7 @@ public class TimeoutFilter implements Filter {
                     + "arguments: " + Arrays.toString(invocation.getArguments()) + " , url is "
                     + invoker.getUrl() + ", invoke elapsed " + elapsed + " ms.");
         }
-        logger.info("------>TimeoutFilter end");
+        logger.info("TimeoutFilter end");
         return result;
     }
 

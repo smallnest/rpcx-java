@@ -55,6 +55,11 @@ public class ReflectUtils {
     public static final char JVM_SHORT = 'S';
 
 
+    public static String getName(Class<?> c) {
+        String desc = getDesc(c);
+        return desc2name(desc);
+    }
+
     public static String getDesc(Class<?> c) {
         StringBuilder ret = new StringBuilder();
 

@@ -35,4 +35,8 @@ public class TestService implements ITestService {
         return ("hi " + new String(data)).getBytes();
     }
 
+    public int sum(int a, int b) {
+        return a + b;
+    }
+
 }

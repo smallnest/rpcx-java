@@ -24,6 +24,24 @@ public class CommonTest {
 
 
     @Test
+    public void testClassUtils() throws ClassNotFoundException {
+
+        String desc = ReflectUtils.getDesc(int.class);
+        System.out.println(desc);
+
+        System.out.println(ReflectUtils.desc2name(desc));
+
+
+
+        System.out.println(ReflectUtils.getName(int.class));
+
+        System.out.println(ReflectUtils.name2class("int"));
+
+//        System.out.println(ClassUtils.getClassByName("int.class"));
+    }
+
+
+    @Test
     public void getDesc() {
          String desc = ReflectUtils.getDesc(new byte[]{}.getClass());
          System.out.println(desc);
@@ -100,6 +118,9 @@ public class CommonTest {
     public void testClazz() {
         int i = 12;
         System.out.println(new Object[]{i}[0].getClass().getTypeName());
+
+
+        System.out.println(int.class.getName());
     }
 
 
@@ -110,6 +131,14 @@ public class CommonTest {
         invocation.setClassName("name");
         String data = gson.toJson(invocation);
         System.out.println(data);
+
+
+        int i = 12;
+        String str = new Gson().toJson(i);
+        System.out.println(str);
+
+        int i2 = new Gson().fromJson(str,int.class);
+        System.out.println(i2);
     }
 
 
