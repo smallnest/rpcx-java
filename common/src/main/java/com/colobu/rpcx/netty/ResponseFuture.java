@@ -1,33 +1,17 @@
-/**
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
 package com.colobu.rpcx.netty;
-
 
 
 import com.colobu.rpcx.common.InvokeCallback;
 import com.colobu.rpcx.common.SemaphoreReleaseOnlyOnce;
 import com.colobu.rpcx.protocol.RemotingCommand;
+import com.colobu.rpcx.rpc.HessianUtils;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
-public class ResponseFuture {
+public class ResponseFuture<T> {
     private final int opaque;
     private final long timeoutMillis;
     private final InvokeCallback invokeCallback;
@@ -141,5 +125,11 @@ public class ResponseFuture {
                 + ", cause=" + cause + ", opaque=" + opaque + ", timeoutMillis=" + timeoutMillis
                 + ", invokeCallback=" + invokeCallback + ", beginTimestamp=" + beginTimestamp
                 + ", countDownLatch=" + countDownLatch + "]";
+    }
+
+    public T get(long timeoutMillis) throws InterruptedException {
+        RemotingCommand res = this.waitResponse(timeoutMillis);
+        byte[] data = res.getMessage().payload;
+        return (T) HessianUtils.read(data);
     }
 }

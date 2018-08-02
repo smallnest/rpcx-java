@@ -15,6 +15,7 @@ import java.util.zip.GZIPOutputStream;
  */
 @Data
 public class Message {
+
     public static byte magicNumber = 0x08;
 
     byte[] header;

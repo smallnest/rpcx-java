@@ -20,9 +20,11 @@ public class ConsumerConfig {
 
     private long timeOut = TimeUnit.SECONDS.toMillis(2);
 
-    private int retryNum = 3;
+    private int retryNum = 1;
 
     private String token = "";
+
+    private String sendType = Constants.SYNC_KEY;
 
     public ConsumerConfig() {
     }
@@ -55,6 +57,11 @@ public class ConsumerConfig {
             return this;
         }
 
+        public ConsumerConfigBuilder setSendType(String sendType) {
+            this.config.sendType = sendType;
+            return this;
+        }
+
 
         public ConsumerConfig build() {
             return this.config;
@@ -71,6 +78,7 @@ public class ConsumerConfig {
             invocation.setMethodName(method.getName());
             invocation.setTimeOut(timeOut);
             invocation.setRetryNum(retryNum);
+            invocation.setSendType(sendType);
 
             Map<String, String> attachments = new HashMap<>();
             attachments.put(Constants.TOKEN_KEY, token);

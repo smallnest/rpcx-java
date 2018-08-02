@@ -1,12 +1,18 @@
 package com.colobu.rpcx.client;
 
 import com.colobu.rpcx.client.impl.RandomSelector;
+import com.colobu.rpcx.common.InvokeCallback;
+import com.colobu.rpcx.common.RemotingHelper;
+import com.colobu.rpcx.common.SemaphoreReleaseOnlyOnce;
+import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.config.NettyClientConfig;
 import com.colobu.rpcx.exception.RemotingSendRequestException;
 import com.colobu.rpcx.exception.RemotingTimeoutException;
+import com.colobu.rpcx.exception.RemotingTooMuchRequestException;
 import com.colobu.rpcx.netty.*;
 import com.colobu.rpcx.protocol.Message;
 import com.colobu.rpcx.protocol.RemotingCommand;
+import com.colobu.rpcx.rpc.RpcContext;
 import com.colobu.rpcx.rpc.RpcException;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -23,6 +29,7 @@ import java.net.SocketAddress;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -48,7 +55,11 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
 
     private final IServiceDiscovery serviceDiscovery;
 
+    protected final Semaphore semaphoreAsync;
+
+
     public NettyClient(IServiceDiscovery serviceDiscovery) {
+        this.semaphoreAsync = new Semaphore(1000, true);
         this.serviceDiscovery = serviceDiscovery;
         this.eventLoopGroupWorker = new NioEventLoopGroup(1, new ThreadFactory() {
             private AtomicInteger threadIndex = new AtomicInteger(0);
@@ -165,15 +176,23 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
         String host = "";
         int port = 0;
         if (channel.localAddress() instanceof InetSocketAddress) {
-            host = ((InetSocketAddress)channel.localAddress()).getAddress().toString();
-            port = ((InetSocketAddress)channel.localAddress()).getPort();
+            host = ((InetSocketAddress) channel.localAddress()).getAddress().toString();
+            port = ((InetSocketAddress) channel.localAddress()).getPort();
         }
 
         req.metadata.put("_host", host);
         req.metadata.put("_port", String.valueOf(port));
 
-        RemotingCommand response = this.invokeSyncImpl(channel, request, timeoutMillis);//* 同步执行
-        Message res = response.getMessage();
+        Message res = null;
+
+        if (req.metadata.get("sendType").equals(Constants.ASYNC_KEY)) {//异步调用
+            ResponseFuture future = this.invokeAsyncImpl(channel, request, timeoutMillis, null);
+            res = new Message();
+            RpcContext.getContext().setFuture(future);
+        } else if (req.metadata.get("sendType").equals(Constants.SYNC_KEY)) {//同步调用
+            RemotingCommand response = this.invokeSyncImpl(channel, request, timeoutMillis);
+            res = response.getMessage();
+        }
         logger.info("remote call:{} use time:{}", req.getServiceMethod(), (System.currentTimeMillis() - begin));
         return res;
     }
@@ -248,6 +267,60 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
         String[] s = addr.split(":");
         InetSocketAddress isa = new InetSocketAddress(s[0], Integer.parseInt(s[1]));
         return isa;
+    }
+
+
+    //* 异步执行  可以放入回调 执行回调
+    public ResponseFuture invokeAsyncImpl(final Channel channel, final RemotingCommand request, final long timeoutMillis,
+                                final InvokeCallback invokeCallback)
+            throws InterruptedException, RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException {
+        final int opaque = request.getOpaque();
+        boolean acquired = this.semaphoreAsync.tryAcquire(timeoutMillis, TimeUnit.MILLISECONDS);//* 达到限流作用
+        if (acquired) {
+            final SemaphoreReleaseOnlyOnce once = new SemaphoreReleaseOnlyOnce(this.semaphoreAsync);//* 用来保证只释放1次的
+
+            final ResponseFuture responseFuture = new ResponseFuture(opaque, timeoutMillis, invokeCallback, once);
+            this.responseTable.put(opaque, responseFuture);
+            try {
+                channel.writeAndFlush(request).addListener(new ChannelFutureListener() {
+                    @Override
+                    public void operationComplete(ChannelFuture f) throws Exception {
+                        if (f.isSuccess()) {
+                            responseFuture.setSendRequestOK(true);
+                            return;
+                        } else {
+                            responseFuture.setSendRequestOK(false);
+                        }
+
+                        responseFuture.putResponse(null);//* 发送失败会解除阻塞
+                        responseTable.remove(opaque);
+                        try {
+                            responseFuture.executeInvokeCallback();
+                        } catch (Throwable e) {
+                            logger.warn("excute callback in writeAndFlush addListener, and callback throw", e);
+                        } finally {
+                            responseFuture.release();
+                        }
+
+                        logger.warn("send a request command to channel <{}> failed.", RemotingHelper.parseChannelRemoteAddr(channel));
+                    }
+                });
+            } catch (Exception e) {
+                responseFuture.release();
+                logger.warn("send a request command to channel <" + RemotingHelper.parseChannelRemoteAddr(channel) + "> Exception", e);
+                throw new RemotingSendRequestException(RemotingHelper.parseChannelRemoteAddr(channel), e);
+            }
+            return responseFuture;
+        } else {
+            String info =
+                    String.format("invokeAsyncImpl tryAcquire semaphore timeout, %dms, waiting thread nums: %d semaphoreAsyncValue: %d", //
+                            timeoutMillis, //
+                            this.semaphoreAsync.getQueueLength(), //
+                            this.semaphoreAsync.availablePermits()//
+                    );
+            logger.warn(info);
+            throw new RemotingTooMuchRequestException(info);
+        }
     }
 
 

@@ -4,7 +4,6 @@ import com.colobu.rpcx.protocol.LanguageCode;
 import com.colobu.rpcx.rpc.Invocation;
 import com.colobu.rpcx.rpc.Invoker;
 import com.colobu.rpcx.rpc.URL;
-
 import java.io.Serializable;
 import java.util.Map;
 
@@ -27,6 +26,7 @@ public class RpcInvocation implements Invocation, Serializable {
     private transient Invoker<?> invoker;
 
     public String servicePath;
+
     public String serviceMethod;
 
     public URL url;
@@ -36,6 +36,8 @@ public class RpcInvocation implements Invocation, Serializable {
 
     //重试次数
     private int retryNum = 1;
+
+    private String sendType;
 
     public LanguageCode languageCode;
 
@@ -148,4 +150,11 @@ public class RpcInvocation implements Invocation, Serializable {
         this.url = url;
     }
 
+    public String getSendType() {
+        return sendType;
+    }
+
+    public void setSendType(String sendType) {
+        this.sendType = sendType;
+    }
 }

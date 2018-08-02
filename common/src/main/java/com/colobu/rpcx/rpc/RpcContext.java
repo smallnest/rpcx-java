@@ -3,6 +3,7 @@ package com.colobu.rpcx.rpc;
 
 import com.colobu.rpcx.common.NetUtils;
 import com.colobu.rpcx.config.Constants;
+import com.colobu.rpcx.netty.ResponseFuture;
 
 import java.net.InetSocketAddress;
 import java.util.*;
@@ -42,7 +43,7 @@ public class RpcContext {
 	    LOCAL.remove();
 	}
 
-    private Future<?> future;
+    private ResponseFuture future;
 
     private List<URL> urls;
 
@@ -124,13 +125,10 @@ public class RpcContext {
 
     /**
      * get future.
-     * 
-     * @param <T>
      * @return future
      */
-    @SuppressWarnings("unchecked")
-    public <T> Future<T> getFuture() {
-        return (Future<T>) future;
+    public ResponseFuture getFuture() {
+        return this.future;
     }
 
     /**
@@ -138,7 +136,7 @@ public class RpcContext {
      * 
      * @param future
      */
-    public void setFuture(Future<?> future) {
+    public void setFuture(ResponseFuture future) {
         this.future = future;
     }
 

@@ -2,6 +2,7 @@ package com.colobu.rpcx.rpc.impl;
 
 import com.colobu.rpcx.common.retry.RetryNTimes;
 import com.colobu.rpcx.common.retry.RetryPolicy;
+import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.netty.IClient;
 import com.colobu.rpcx.protocol.CompressType;
 import com.colobu.rpcx.protocol.Message;
@@ -30,7 +31,7 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
         this.url = new URL("rpcx", "", 0);
         url.setServiceInterface(invocation.getClassName() + "" + invocation.getMethodName());
         String params = Stream.of(invocation.getParameterTypeNames()).collect(Collectors.joining(","));
-        this.url.setPath(invocation.getClassName() + "." + invocation.getMethodName()+"("+params+")");
+        this.url.setPath(invocation.getClassName() + "." + invocation.getMethodName() + "(" + params + ")");
     }
 
     @Override
@@ -52,6 +53,7 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
         req.setCompressType(CompressType.None);
         req.setSerializeType(SerializeType.SerializeNone);
         req.metadata.put("language", "java");
+        req.metadata.put("sendType", invocation.getSendType());
         invocation.setUrl(this.url);
         byte[] data = HessianUtils.write(invocation);
         req.payload = data;
@@ -60,7 +62,7 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
         boolean retryResult = retryPolicy.retry((n) -> {
             try {
                 req.setSeq(seq.incrementAndGet());//每次重发需要加1
-                Message res = client.call(req, invocation.getTimeOut());
+                Message res = client.call(req, invocation.getTimeOut());//同步调用
 
                 if (res.metadata.containsKey("_rpcx_error_code")) {
                     int code = Integer.parseInt(res.metadata.get("_rpcx_error_code"));

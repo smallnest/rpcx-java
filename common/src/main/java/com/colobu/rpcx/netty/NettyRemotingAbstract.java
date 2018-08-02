@@ -11,10 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -223,7 +220,7 @@ public class NettyRemotingAbstract {
         final int opaque = cmd.getOpaque();//* 获取request带过去的唯一码
         final ResponseFuture responseFuture = this.responseTable.get(opaque);//* 查询responseFuture
         if (responseFuture != null) {
-            responseFuture.setResponseCommand(cmd);
+            responseFuture.setResponseCommand(cmd);//这里并不解除阻塞
             responseFuture.release();
             this.responseTable.remove(opaque);
             if (responseFuture.getInvokeCallback() != null) {
@@ -262,9 +259,10 @@ public class NettyRemotingAbstract {
         }
     }
 
+    private ExecutorService callbackExecutor = Executors.newFixedThreadPool(5);
 
     private ExecutorService getCallbackExecutor() {
-        return null;
+        return callbackExecutor;
     }
 
     public boolean hasEventListener() {
