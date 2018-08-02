@@ -69,6 +69,7 @@ public class RpcProcessor implements NettyRequestProcessor {
         resMessage.setSeq(request.getOpaque());
 
         Result rpcResult = wrapperInvoker.invoke(invocation);
+
         if (invocation.languageCode.equals(LanguageCode.JAVA)) {
             resMessage.payload = HessianUtils.write(rpcResult.getValue());
         } else {

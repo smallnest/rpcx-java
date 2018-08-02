@@ -66,11 +66,17 @@ public class NettyDecoder extends ReplayingDecoder<DecoderState> {
                 message.payload = payload;
                 MessageType type = message.getMessageType();
                 RemotingCommand command = null;
+
                 if (type == MessageType.Request) {
                     command = RemotingCommand.createRequestCommand(2);//request
                 } else {
                     command = RemotingCommand.createResponseCommand();//response
                 }
+
+                if (message.isOneway()) {
+                    command.markOnewayRPC();
+                }
+
                 command.setMessage(message);
                 checkpoint(DecoderState.MagicNumber);
                 out.add(command);

@@ -18,11 +18,11 @@ public class TestService implements ITestService {
 
     public String hi(String str) {
         logger.info("-------------->call hi:{}", str);
-        try {
-            TimeUnit.SECONDS.sleep(5);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            TimeUnit.SECONDS.sleep(5);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
         return "hi " + str;
     }
 

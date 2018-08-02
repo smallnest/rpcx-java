@@ -5,8 +5,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class RemotingCommand {
 
-    private static final int RPC_TYPE = 0; // 0, REQUEST_COMMAND
-    private static final int RPC_ONEWAY = 1; // 0, RPC
+    private static final int RPC_TYPE = 0;
+    private static final int RPC_ONEWAY = 1;
 
 
     private static AtomicInteger requestId = new AtomicInteger(0);
@@ -27,7 +27,7 @@ public class RemotingCommand {
 
     public void setMessage(Message message) {
         this.message = message;
-        this.setOpaque((int)this.message.getSeq());
+        this.setOpaque((int) this.message.getSeq());
     }
 
     protected RemotingCommand() {
@@ -56,7 +56,6 @@ public class RemotingCommand {
         int bits = 1 << RPC_TYPE;
         this.flag |= bits;
     }
-
 
 
     public static int createNewRequestId() {
@@ -93,9 +92,9 @@ public class RemotingCommand {
     }
 
 
-
     public boolean isOnewayRPC() {
-        return false;
+        int bits = 1 << RPC_ONEWAY;
+        return (this.flag & bits) == bits;
     }
 
 
@@ -109,6 +108,14 @@ public class RemotingCommand {
     public boolean isResponseType() {
         int bits = 1 << RPC_TYPE;
         return (this.flag & bits) == bits;
+    }
+
+    public void markOnewayRPC() {
+        int bits = 1 << RPC_ONEWAY;
+        this.flag |= bits;
+        if (null != message) {
+            this.message.setOneway(true);
+        }
     }
 
     public static RemotingCommand createResponseCommand(int systemError, String s) {

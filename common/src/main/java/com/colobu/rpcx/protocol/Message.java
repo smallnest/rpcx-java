@@ -93,7 +93,7 @@ public class Message {
     }
 
     public boolean isOneway() {
-        return (header[2] & 0x40) != 0;
+        return (header[2] & 0x20) != 0;
     }
 
     public void setOneway(boolean oneway) {

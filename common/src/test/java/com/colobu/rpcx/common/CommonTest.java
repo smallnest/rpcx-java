@@ -2,6 +2,7 @@ package com.colobu.rpcx.common;
 
 import com.colobu.rpcx.common.retry.RetryNTimes;
 import com.colobu.rpcx.common.retry.RetryPolicy;
+import com.colobu.rpcx.protocol.RemotingCommand;
 import com.colobu.rpcx.rpc.A;
 import com.colobu.rpcx.rpc.HessianUtils;
 import com.colobu.rpcx.rpc.ReflectUtils;
@@ -21,6 +22,14 @@ import java.util.stream.Stream;
  * Created by zhangzhiyong on 2018/7/5.
  */
 public class CommonTest {
+
+
+    @Test
+    public void testCode() {
+        RemotingCommand c =  RemotingCommand.createResponseCommand();
+        c.markOnewayRPC();
+        System.out.println(c.isOnewayRPC());
+    }
 
 
     @Test

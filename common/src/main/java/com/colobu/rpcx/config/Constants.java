@@ -27,6 +27,8 @@ public class Constants {
 
     public static final String SYNC_KEY = "sync";
 
+    public static final String ONE_WAY_KEY= "oneway";
+
     public static final String RETURN_KEY = "return";
 
     public static final String $ECHO = "$echo";

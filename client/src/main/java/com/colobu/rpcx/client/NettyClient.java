@@ -57,8 +57,11 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
 
     protected final Semaphore semaphoreAsync;
 
+    protected final Semaphore semaphoreOneway;
+
 
     public NettyClient(IServiceDiscovery serviceDiscovery) {
+        this.semaphoreOneway = new Semaphore(1000, true);
         this.semaphoreAsync = new Semaphore(1000, true);
         this.serviceDiscovery = serviceDiscovery;
         this.eventLoopGroupWorker = new NioEventLoopGroup(1, new ThreadFactory() {
@@ -192,6 +195,9 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
         } else if (req.metadata.get("sendType").equals(Constants.SYNC_KEY)) {//同步调用
             RemotingCommand response = this.invokeSyncImpl(channel, request, timeoutMillis);
             res = response.getMessage();
+        } else if (req.metadata.get("sendType").equals(Constants.ONE_WAY_KEY)) {
+            this.invokeOnewayImpl(channel, request, timeoutMillis);
+            res = new Message();
         }
         logger.info("remote call:{} use time:{}", req.getServiceMethod(), (System.currentTimeMillis() - begin));
         return res;
@@ -269,10 +275,47 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
         return isa;
     }
 
+    public void invokeOnewayImpl(final Channel channel, final RemotingCommand request, final long timeoutMillis)
+            throws InterruptedException, RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException {
+        request.markOnewayRPC();
+        boolean acquired = this.semaphoreOneway.tryAcquire(timeoutMillis, TimeUnit.MILLISECONDS);//* 限流
+        if (acquired) {
+            final SemaphoreReleaseOnlyOnce once = new SemaphoreReleaseOnlyOnce(this.semaphoreOneway);
+            try {
+                channel.writeAndFlush(request).addListener(new ChannelFutureListener() {
+                    @Override
+                    public void operationComplete(ChannelFuture f) throws Exception {
+                        once.release();//* 释放一次限流次数
+                        if (!f.isSuccess()) {
+                            logger.warn("send a request command to channel <" + channel.remoteAddress() + "> failed.");
+                        }
+                    }
+                });
+            } catch (Exception e) {
+                once.release();
+                logger.warn("write send a request command to channel <" + channel.remoteAddress() + "> failed.");
+                throw new RemotingSendRequestException(RemotingHelper.parseChannelRemoteAddr(channel), e);
+            }
+        } else {
+            if (timeoutMillis <= 0) {
+                throw new RemotingTooMuchRequestException("invokeOnewayImpl invoke too fast");
+            } else {
+                String info = String.format(
+                        "invokeOnewayImpl tryAcquire semaphore timeout, %dms, waiting thread nums: %d semaphoreAsyncValue: %d", //
+                        timeoutMillis, //
+                        this.semaphoreAsync.getQueueLength(), //
+                        this.semaphoreAsync.availablePermits()//
+                );
+                logger.warn(info);
+                throw new RemotingTimeoutException(info);
+            }
+        }
+    }
+
 
     //* 异步执行  可以放入回调 执行回调
     public ResponseFuture invokeAsyncImpl(final Channel channel, final RemotingCommand request, final long timeoutMillis,
-                                final InvokeCallback invokeCallback)
+                                          final InvokeCallback invokeCallback)
             throws InterruptedException, RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException {
         final int opaque = request.getOpaque();
         boolean acquired = this.semaphoreAsync.tryAcquire(timeoutMillis, TimeUnit.MILLISECONDS);//* 达到限流作用
