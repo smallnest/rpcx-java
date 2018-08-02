@@ -59,13 +59,32 @@ public final class URL implements Serializable {
 
 	private final String password;
 
-	private final String host;
+	private String host;
 
-	private final int port;
+	private int port;
 
 	private String path;
 
-    private final Map<String, String> parameters;
+    private Map<String, String> parameters;
+
+    public void setParameters(Map<String, String> parameters) {
+        this.parameters = parameters;
+    }
+
+    public URL copy() {
+        URL url = new URL();
+        url.setPort(this.port);
+        url.setHost(this.host);
+        url.setPath(this.path);
+
+        if (this.parameters == null) {
+            url.setParameters(new HashMap<>());
+        } else {
+            url.setParameters(new HashMap<>(this.parameters));
+        }
+        return url;
+    }
+
     
     // ==== cache ====
     
@@ -355,12 +374,12 @@ public final class URL implements Serializable {
         return new URL(protocol, username, password, host, port, path, getParameters());
     }
 
-    public URL setHost(String host) {
-        return new URL(protocol, username, password, host, port, path, getParameters());
+    public void setHost(String host) {
+	    this.host = host;
     }
 
-    public URL setPort(int port) {
-        return new URL(protocol, username, password, host, port, path, getParameters());
+    public void setPort(int port) {
+	    this.port = port;
     }
 
     public void setPath(String path) {

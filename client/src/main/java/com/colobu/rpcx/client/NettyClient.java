@@ -7,6 +7,7 @@ import com.colobu.rpcx.exception.RemotingTimeoutException;
 import com.colobu.rpcx.netty.*;
 import com.colobu.rpcx.protocol.Message;
 import com.colobu.rpcx.protocol.RemotingCommand;
+import com.colobu.rpcx.rpc.RpcException;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -41,9 +42,7 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
 
     private final long CallTimeOut = TimeUnit.SECONDS.toMillis(3);
 
-
     protected final NettyEventExecuter nettyEventExecuter = new NettyEventExecuter();
-
 
     private Bootstrap bootstrap;
 
@@ -133,6 +132,16 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
         return response.getMessage();
     }
 
+    @Override
+    public String host() {
+        return null;
+    }
+
+    @Override
+    public int port() {
+        return 0;
+    }
+
 
     public Message call(Message req, long timeoutMillis) throws Exception {
         logger.info("remote call:{} begin", req.getServiceMethod());
@@ -144,7 +153,7 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
 
         if (0 == serviceList.size()) {
             logger.warn("call service list=0 service:{} method:{}", req.servicePath, req.serviceMethod);
-            return new Message();
+            throw new RpcException("service list = 0");
         }
 
         String addr = new RandomSelector().select(req.servicePath, req.serviceMethod, serviceList);
@@ -152,6 +161,17 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
             throw new RuntimeException("addr error");
         }
         final Channel channel = this.getAndCreateChannel(addr);//* 获取或者创建channel
+
+        String host = "";
+        int port = 0;
+        if (channel.localAddress() instanceof InetSocketAddress) {
+            host = ((InetSocketAddress)channel.localAddress()).getAddress().toString();
+            port = ((InetSocketAddress)channel.localAddress()).getPort();
+        }
+
+        req.metadata.put("_host", host);
+        req.metadata.put("_port", String.valueOf(port));
+
         RemotingCommand response = this.invokeSyncImpl(channel, request, timeoutMillis);//* 同步执行
         Message res = response.getMessage();
         logger.info("remote call:{} use time:{}", req.getServiceMethod(), (System.currentTimeMillis() - begin));

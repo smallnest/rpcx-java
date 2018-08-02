@@ -28,8 +28,8 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
     public RpcConsumerInvoker(IClient client, RpcInvocation invocation) {
         this.client = client;
         this.url = new URL("rpcx", "", 0);
+        url.setServiceInterface(invocation.getClassName() + "" + invocation.getMethodName());
         String params = Stream.of(invocation.getParameterTypeNames()).collect(Collectors.joining(","));
-        this.url.setServiceInterface(invocation.getClassName());
         this.url.setPath(invocation.getClassName() + "." + invocation.getMethodName()+"("+params+")");
     }
 
@@ -52,8 +52,7 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
         req.setCompressType(CompressType.None);
         req.setSerializeType(SerializeType.SerializeNone);
         req.metadata.put("language", "java");
-        req.metadata.put("url", this.url.toFullString());
-
+        invocation.setUrl(this.url);
         byte[] data = HessianUtils.write(invocation);
         req.payload = data;
 

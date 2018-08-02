@@ -7,6 +7,8 @@ import java.lang.annotation.*;
 @Documented
 public @interface Provider {
 
+    String group() default "";
+
     String name() default "";
 
     String version() default "0.0.1";

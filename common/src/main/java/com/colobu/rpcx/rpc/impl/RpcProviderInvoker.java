@@ -1,6 +1,7 @@
 package com.colobu.rpcx.rpc.impl;
 
 import com.colobu.rpcx.common.ClassUtils;
+import com.colobu.rpcx.common.NetUtils;
 import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.rpc.*;
 import com.colobu.rpcx.rpc.annotation.Provider;
@@ -8,10 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class RpcProviderInvoker<T> implements Invoker<T> {
@@ -27,29 +26,30 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
 
     public RpcProviderInvoker(Function<Class, Object> getBeanFunc, RpcInvocation invocation) {
         this.getBeanFunc = getBeanFunc;
-        Map<String, String> parameters = new HashMap<>();
+
         Class clazz = ClassUtils.getClassByName(invocation.getClassName());
         this._interface = clazz;
         Provider provider = (Provider) clazz.getAnnotation(Provider.class);
+
+
+        this.url = invocation.getUrl().copy();
+        this.url.setHost(NetUtils.getLocalHost());
+        this.url.setPort(0);
+        Map<String, String> parameters = this.url.getParameters();
         parameters.put(Constants.TOKEN_KEY, provider.token());
         parameters.put(Constants.TIMEOUT_KEY, String.valueOf(provider.timeout()));
         parameters.put(Constants.CACHE_KEY, String.valueOf(provider.cache()));
         parameters.put(Constants.TPS_LIMIT_RATE_KEY, String.valueOf(provider.tps()));
         parameters.put(Constants.MONITOR_KEY, String.valueOf(provider.monitor()));
         parameters.put(Constants.SIDE_KEY, Constants.PROVIDER_SIDE);
-
-
-        url = new URL("rpcx", "", 0, parameters);
-        url.setServiceInterface(invocation.getClassName() + "" + invocation.getMethodName());
-        String params = Stream.of(invocation.getParameterTypeNames()).collect(Collectors.joining(","));
-        url.setPath(invocation.getClassName() + "." + invocation.getMethodName() + "(" + params + ")");
+        parameters.put(Constants.GROUP_KEY, String.valueOf(provider.group()));
+        parameters.put(Constants.VERSION_KEY, String.valueOf(provider.version()));
     }
 
     @Override
     public Class<T> getInterface() {
         return _interface;
     }
-
 
 
     @Override
@@ -78,7 +78,7 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
             return rpcResult;
 
         } catch (Throwable throwable) {
-            logger.error(throwable.getMessage(),throwable);
+            logger.error(throwable.getMessage(), throwable);
             rpcResult.setThrowable(throwable);
             return rpcResult;
         }
@@ -86,7 +86,7 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
 
     @Override
     public URL getUrl() {
-        return url;
+        return this.url;
     }
 
     @Override

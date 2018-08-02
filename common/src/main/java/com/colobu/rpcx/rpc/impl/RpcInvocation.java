@@ -10,7 +10,6 @@ import java.util.Map;
 
 public class RpcInvocation implements Invocation, Serializable {
 
-
     private String className;
 
     private String methodName;
@@ -141,5 +140,13 @@ public class RpcInvocation implements Invocation, Serializable {
 
     public void setRetryNum(int retryNum) {
         this.retryNum = retryNum;
+    }
+
+    public URL getUrl() {
+        return url;
+    }
+
+    public void setUrl(URL url) {
+        this.url = url;
     }
 }

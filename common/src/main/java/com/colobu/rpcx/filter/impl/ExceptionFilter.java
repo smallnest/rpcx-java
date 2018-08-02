@@ -21,6 +21,10 @@ public class ExceptionFilter implements Filter {
     public Result invoke(Invoker<?> invoker, RpcInvocation invocation) throws RpcException {
         try {
             Result result = invoker.invoke(invocation);
+            //没有异常不需要处理
+            if (!result.hasException()) {
+                return result;
+            }
             try {
                 Throwable exception = result.getException();
                 // 如果是checked异常，直接抛出
@@ -64,6 +68,7 @@ public class ExceptionFilter implements Filter {
                 return result;
             }
         } catch (Throwable e) {//filter 之间没有捕获的异常,这里处理掉
+            logger.error(e.getMessage(), e);
             Result result = new RpcResult(e);
             return result;
         }

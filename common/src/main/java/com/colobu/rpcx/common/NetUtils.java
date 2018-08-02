@@ -145,7 +145,8 @@ public class NetUtils {
         if (host.contains("://")) {
             URL u = URL.valueOf(host);
             if (NetUtils.isInvalidLocalHost(u.getHost())) {
-                return u.setHost(NetUtils.getLocalHost()).toFullString();
+                u.setHost(NetUtils.getLocalHost());
+                return u.toFullString();
             }
         } else if (host.contains(":")) {
             int i = host.lastIndexOf(':');

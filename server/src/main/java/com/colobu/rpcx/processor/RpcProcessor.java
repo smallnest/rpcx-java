@@ -54,7 +54,8 @@ public class RpcProcessor implements NettyRequestProcessor {
             invocation.opaque = request.getOpaque();
             invocation.servicePath = request.getMessage().servicePath;
             invocation.serviceMethod = request.getMessage().serviceMethod;
-            invocation.url = URL.valueOf(request.getMessage().metadata.get("url"));
+            invocation.url.setHost(req.metadata.get("_host"));
+            invocation.url.setPort(Integer.parseInt(req.metadata.get("_port")));
             invocation.languageCode = LanguageCode.JAVA;
         }
 

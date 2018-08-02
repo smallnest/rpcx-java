@@ -39,6 +39,7 @@ public class ContextFilter implements Filter {
                 .setInvoker(invoker)
                 .setInvocation(invocation)
                 .setAttachments(attachments)
+                .setRemoteAddress(invocation.getUrl().getAddress(),invocation.getUrl().getPort())
                 .setLocalAddress(invoker.getUrl().getHost(),
                         invoker.getUrl().getPort());
         if (invocation instanceof RpcInvocation) {

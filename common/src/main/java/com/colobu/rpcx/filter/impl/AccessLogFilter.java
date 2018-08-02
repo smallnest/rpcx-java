@@ -6,6 +6,7 @@ import com.colobu.rpcx.concurrent.ConcurrentHashSet;
 import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.filter.Filter;
 import com.colobu.rpcx.rpc.*;
+import com.colobu.rpcx.rpc.annotation.RpcFilter;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
@@ -20,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.*;
 
+@RpcFilter(group = {Constants.PROVIDER})
 public class AccessLogFilter implements Filter {
 
     private static final Logger logger = LoggerFactory.getLogger(AccessLogFilter.class);
@@ -32,12 +34,15 @@ public class AccessLogFilter implements Filter {
 
     private static final long LOG_OUTPUT_INTERVAL = 5000;
 
-    private final ConcurrentMap<String, Set<String>> logQueue = new ConcurrentHashMap<String, Set<String>>();
+    private final static ConcurrentMap<String, Set<String>> logQueue = new ConcurrentHashMap<>();
 
-    private final ScheduledExecutorService logScheduled = Executors.newScheduledThreadPool(2, new NamedThreadFactory("Rcpx-Access-Log", true));
+    private final static ScheduledExecutorService logScheduled = Executors.newScheduledThreadPool(2, new NamedThreadFactory("Rcpx-Access-Log", true));
 
     private volatile ScheduledFuture<?> logFuture = null;
 
+    /**
+     * 非阻塞
+     */
     private class LogTask implements Runnable {
         public void run() {
             try {
@@ -50,9 +55,6 @@ public class AccessLogFilter implements Filter {
                             File dir = file.getParentFile();
                             if (null != dir && !dir.exists()) {
                                 dir.mkdirs();
-                            }
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("Append log to " + accesslog);
                             }
                             if (file.exists()) {
                                 String now = new SimpleDateFormat(FILE_DATE_FORMAT).format(new Date());
@@ -95,15 +97,15 @@ public class AccessLogFilter implements Filter {
         }
     }
 
-    private void log(String accesslog, String logmessage) {
+    private void log(String accesslog, String message) {
         init();
         Set<String> logSet = logQueue.get(accesslog);
         if (logSet == null) {
-            logQueue.putIfAbsent(accesslog, new ConcurrentHashSet<String>());
+            logQueue.putIfAbsent(accesslog, new ConcurrentHashSet<>());
             logSet = logQueue.get(accesslog);
         }
         if (logSet.size() < LOG_MAX_BUFFER) {
-            logSet.add(logmessage);
+            logSet.add(message);
         }
     }
 

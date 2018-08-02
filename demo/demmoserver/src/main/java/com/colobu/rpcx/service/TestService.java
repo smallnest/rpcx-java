@@ -10,8 +10,8 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 //@Provider(name = "TestService", version = "0.0.2", token = "zzy123", timeout = 1000, cache = true)
-@Provider(name = "TestService", version = "0.0.2", token = "zzy123$$$", tps = 1)
-//@Provider(name = "TestService", version = "0.0.2")
+//@Provider(name = "TestService", version = "0.0.2", token = "zzy123", tps = 1)
+@Provider(name = "TestService", version = "0.0.2")
 public class TestService implements ITestService {
 
     private static final Logger logger = LoggerFactory.getLogger(TestService.class);

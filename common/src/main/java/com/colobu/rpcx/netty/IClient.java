@@ -16,6 +16,11 @@ public interface IClient {
     //指定超时时间
     Message call(String addr, Message req, long timeOut) throws Exception;
 
+
+    String host();
+
+    int port();
+
 }
 
 
