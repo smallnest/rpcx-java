@@ -117,12 +117,12 @@ Then you can write the java client:
 ## feature
 - 支持和spring-boot的集成
 - 支持服务发现和注册
-- 支持filter扩展(client 和 server都可扩展)
+- 支持扩展(client 和 server都可扩展)
 - 支持多语言调用
 - 支持qps限流
 - 支持accesslog记录
 - 支持泛化调用
-- 支持同步 异步 onway调用方式
+- 支持同步 异步 onway调用
 - 支持token调用
 - 支持client端重试
 - 支持调用数据采集
