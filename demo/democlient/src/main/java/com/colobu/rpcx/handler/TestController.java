@@ -9,9 +9,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-
 /**
  * @author goodjava@qq.com
  */
@@ -29,7 +26,6 @@ public class TestController {
     private RpcxConsumer consumer;
 
 
-    //curl "http://127.0.0.1:8015/hi?word=abc"
     @GetMapping("/hi")
     public String input(String word) {
         String s = testService.hi(word);
@@ -68,18 +64,16 @@ public class TestController {
     }
 
     /**
-     * 异步模式
+     * 异步模式(必须consumer 开启 异步模式)
      * @return
      * @throws InterruptedException
      */
-    @GetMapping("/async")
+//    @GetMapping("/async")
     public String async() throws InterruptedException {
         testService.hi("abc");
         ResponseFuture<String> f1 = RpcContext.getContext().getFuture();
-        System.out.println(111111111111L);
         testService.hi("def");
         ResponseFuture<String> f2 = RpcContext.getContext().getFuture();
-        System.out.println(2222222222L);
         String s1 = f1.get(6000);
         String s2 = f2.get(6000);
         String result = s1 + s2;
