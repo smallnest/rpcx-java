@@ -4,6 +4,10 @@ import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+
+/**
+ * Created by goodjava@qq.com.
+ */
 public class ReflectUtils {
 
     private static final ConcurrentMap<String, Class<?>> NAME_CLASS_CACHE = new ConcurrentHashMap<String, Class<?>>();

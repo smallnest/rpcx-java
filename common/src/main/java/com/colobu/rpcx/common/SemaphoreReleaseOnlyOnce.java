@@ -3,7 +3,9 @@ package com.colobu.rpcx.common;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-
+/**
+ * Created by goodjava@qq.com.
+ */
 public class SemaphoreReleaseOnlyOnce {
     private final AtomicBoolean released = new AtomicBoolean(false);
     private final Semaphore semaphore;

@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Created by zhangzhiyong on 2018/7/3.
+ * Created by goodjava@qq.com.
  */
 public class NettyClient extends NettyRemotingAbstract implements IClient {
 

@@ -1,5 +1,8 @@
 package com.colobu.rpcx.protocol;
 
+/**
+ * Created by goodjava@qq.com.
+ */
 public enum CompressType {
     None(0),
     Gzip(1);

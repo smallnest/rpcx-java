@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Created by zhangzhiyong on 2018/7/5.
+ * Created by goodjava@qq.com.
  */
 public class CommonTest {
 

@@ -5,6 +5,9 @@ import net.sf.cglib.proxy.Enhancer;
 import java.lang.reflect.Method;
 import java.util.function.BiFunction;
 
+/**
+ * Created by goodjava@qq.com.
+ */
 public class CglibProxy {
 
 

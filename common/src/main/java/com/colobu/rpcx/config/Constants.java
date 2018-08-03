@@ -3,6 +3,9 @@ package com.colobu.rpcx.config;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
+/**
+ * Created by goodjava@qq.com.
+ */
 public class Constants {
 
     public static final String VERSION_KEY = "version";

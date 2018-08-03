@@ -4,7 +4,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 
 /**
- * Created by zhangzhiyong on 2018/7/3.
+ * Created by goodjava@qq.com.
  */
 public class ChannelWrapper {
 

@@ -3,6 +3,10 @@ package com.colobu.rpcx.io;
 import java.io.IOException;
 import java.io.Writer;
 
+
+/**
+ * Created by goodjava@qq.com.
+ */
 public class UnsafeStringWriter extends Writer
 {
 	private StringBuilder mBuffer;

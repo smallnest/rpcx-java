@@ -12,7 +12,7 @@ import com.colobu.rpcx.tps.DefaultTPSLimiter;
 import com.colobu.rpcx.tps.TPSLimiter;
 
 /**
- * 限制 service 或方法的 tps.
+ * Created by goodjava@qq.com.
  */
 @RpcFilter(group = {Constants.PROVIDER})
 public class TpsLimitFilter implements Filter {

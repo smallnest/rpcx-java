@@ -1,13 +1,14 @@
 package com.colobu.rpcx.monitor;
 
-
 import com.colobu.rpcx.monitor.impl.RpcxMonitor;
 import com.colobu.rpcx.rpc.URL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.List;
 
+/**
+ * Created by goodjava@qq.com.
+ */
 public class MonitorFactory {
 
     private static final Logger logger = LoggerFactory.getLogger(MonitorFactory.class);

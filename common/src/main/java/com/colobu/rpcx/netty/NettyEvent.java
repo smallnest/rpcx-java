@@ -2,8 +2,11 @@ package com.colobu.rpcx.netty;
 
 import io.netty.channel.Channel;
 
-
+/**
+ * Created by goodjava@qq.com.
+ */
 public class NettyEvent {
+
     private final NettyEventType type;
     private final String remoteAddr;
     private final Channel channel;

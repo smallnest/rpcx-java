@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Created by zhangzhiyong on 2018/7/4.
+ * Created by goodjava@qq.com.
  */
 public class RandomSelector implements Selector {
 

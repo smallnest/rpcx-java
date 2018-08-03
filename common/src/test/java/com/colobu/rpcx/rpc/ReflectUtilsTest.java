@@ -5,6 +5,9 @@ import org.junit.Test;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+/**
+ * Created by goodjava@qq.com.
+ */
 public class ReflectUtilsTest {
 
 

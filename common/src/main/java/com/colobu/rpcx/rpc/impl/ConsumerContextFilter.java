@@ -10,8 +10,9 @@ import com.colobu.rpcx.rpc.RpcContext;
 import com.colobu.rpcx.rpc.RpcException;
 import com.colobu.rpcx.rpc.annotation.RpcFilter;
 
+
 /**
- * ConsumerContextInvokerFilter
+ * Created by goodjava@qq.com.
  */
 @RpcFilter(group = {Constants.CONSUMER})
 public class ConsumerContextFilter implements Filter {

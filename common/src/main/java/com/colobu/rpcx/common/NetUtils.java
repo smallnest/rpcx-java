@@ -13,12 +13,10 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
-/**
- * IP and Port Helper for RPC, 
- * 
- * @author shawn.qianx
- */
 
+/**
+ * Created by goodjava@qq.com.
+ */
 public class NetUtils {
     
     private static final Logger logger = LoggerFactory.getLogger(NetUtils.class);

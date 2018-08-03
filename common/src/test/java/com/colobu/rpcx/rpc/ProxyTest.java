@@ -2,6 +2,9 @@ package com.colobu.rpcx.rpc;
 
 import org.junit.Test;
 
+/**
+ * Created by goodjava@qq.com.
+ */
 public class ProxyTest {
 
 

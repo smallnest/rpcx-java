@@ -19,6 +19,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.function.Function;
 
+/**
+ * Created by goodjava@qq.com.
+ */
 public class RpcProcessor implements NettyRequestProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(RpcProcessor.class);

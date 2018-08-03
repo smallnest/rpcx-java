@@ -5,7 +5,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 /**
- * Created by zhangzhiyong on 2018/7/4.
+ * Created by goodjava@qq.com.
  */
 public class NettyServerHandler extends SimpleChannelInboundHandler<RemotingCommand> {
 

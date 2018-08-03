@@ -7,6 +7,7 @@ import java.io.UnsupportedEncodingException;
 
 import static org.junit.Assert.*;
 
+
 public class MessageTest {
 
 

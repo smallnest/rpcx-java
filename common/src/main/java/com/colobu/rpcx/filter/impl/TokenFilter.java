@@ -13,6 +13,9 @@ import com.colobu.rpcx.rpc.impl.RpcInvocation;
 
 import java.util.Map;
 
+/**
+ * Created by goodjava@qq.com.
+ */
 @RpcFilter(order = -999, group = {Constants.PROVIDER})
 public class TokenFilter implements Filter {
 

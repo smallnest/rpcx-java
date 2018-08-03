@@ -1,7 +1,6 @@
 package com.colobu.rpcx.filter.impl;
 
 
-import com.colobu.rpcx.common.ClassUtils;
 import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.filter.Filter;
 import com.colobu.rpcx.rpc.Invoker;
@@ -14,9 +13,9 @@ import com.google.gson.Gson;
 
 import java.util.stream.IntStream;
 
+
 /**
- * GenericInvokerFilter.
- * 泛化调用
+ * Created by goodjava@qq.com.
  */
 @RpcFilter(group = {Constants.PROVIDER})
 public class GenericFilter implements Filter {

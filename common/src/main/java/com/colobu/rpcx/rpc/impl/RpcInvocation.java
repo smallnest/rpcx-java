@@ -7,6 +7,10 @@ import com.colobu.rpcx.rpc.URL;
 import java.io.Serializable;
 import java.util.Map;
 
+
+/**
+ * Created by goodjava@qq.com.
+ */
 public class RpcInvocation implements Invocation, Serializable {
 
     private String className;

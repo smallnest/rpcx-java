@@ -2,7 +2,9 @@ package com.colobu.rpcx.protocol;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-
+/**
+ * Created by goodjava@qq.com.
+ */
 public class RemotingCommand {
 
     private static final int RPC_TYPE = 0;

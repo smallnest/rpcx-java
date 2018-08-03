@@ -3,7 +3,7 @@ package com.colobu.rpcx.netty;
 import com.colobu.rpcx.protocol.Message;
 
 /**
- * Created by zhangzhiyong on 2018/7/3.
+ * Created by goodjava@qq.com.
  */
 public interface IClient {
 

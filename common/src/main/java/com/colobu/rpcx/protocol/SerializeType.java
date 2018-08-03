@@ -1,5 +1,8 @@
 package com.colobu.rpcx.protocol;
 
+/**
+ * Created by goodjava@qq.com.
+ */
 public enum SerializeType {
     SerializeNone(0),
     JSON(1),
@@ -9,7 +12,7 @@ public enum SerializeType {
 
     private final int v;
 
-    private SerializeType(int v) {
+    SerializeType(int v) {
         this.v = v;
     }
 

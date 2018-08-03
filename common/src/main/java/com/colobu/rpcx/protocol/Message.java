@@ -11,7 +11,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * Message is a common class for requests and responses.
+ * Created by goodjava@qq.com.
  */
 @Data
 public class Message {

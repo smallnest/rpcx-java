@@ -7,7 +7,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created by zhangzhiyong on 2018/7/3.
+ * Created by goodjava@qq.com.
  */
 public class NettyEventExecuter implements Runnable {
 

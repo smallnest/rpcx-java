@@ -1,6 +1,9 @@
 package com.colobu.rpcx.common;
 
 
+/**
+ * Created by goodjava@qq.com.
+ */
 public abstract class ClassUtils {
 
     public static ClassLoader getDefaultClassLoader() {

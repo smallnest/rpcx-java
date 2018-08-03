@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * ContextInvokerFilter
+ * Created by goodjava@qq.com.
  */
 @RpcFilter(order = -2000, group = {Constants.PROVIDER})
 public class ContextFilter implements Filter {

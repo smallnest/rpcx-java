@@ -27,7 +27,9 @@ import javax.annotation.PostConstruct;
 import java.util.Set;
 import java.util.UUID;
 
-
+/**
+ * Created by goodjava@qq.com.
+ */
 @Configuration
 @Aspect
 @ConditionalOnClass(RpcxConsumer.class)

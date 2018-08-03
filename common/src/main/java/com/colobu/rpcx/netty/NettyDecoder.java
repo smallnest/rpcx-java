@@ -12,7 +12,9 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-
+/**
+ * Created by goodjava@qq.com.
+ */
 public class NettyDecoder extends ReplayingDecoder<DecoderState> {
 
     private Message message = new Message();

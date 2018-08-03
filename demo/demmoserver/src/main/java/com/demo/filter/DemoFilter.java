@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * 自定义filter
+ * Created by goodjava@qq.com.
  */
 @RpcFilter(group = {Constants.PROVIDER})
 public class DemoFilter implements Filter {

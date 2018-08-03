@@ -14,6 +14,10 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
+
+/**
+ * Created by goodjava@qq.com.
+ */
 public class ConsumerConfig {
 
     private IClient client;

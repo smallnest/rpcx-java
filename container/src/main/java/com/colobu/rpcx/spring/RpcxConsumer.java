@@ -9,6 +9,9 @@ import com.colobu.rpcx.rpc.impl.ConsumerConfig;
 import com.colobu.rpcx.rpc.impl.RpcConsumerInvoker;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
 
+/**
+ * Created by goodjava@qq.com.
+ */
 public class RpcxConsumer {
 
     private final IClient client;

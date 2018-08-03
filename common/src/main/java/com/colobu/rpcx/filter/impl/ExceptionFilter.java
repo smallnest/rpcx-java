@@ -13,6 +13,9 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 
+/**
+ * Created by goodjava@qq.com.
+ */
 @RpcFilter(group = {Constants.PROVIDER}, order = -1999)
 public class ExceptionFilter implements Filter {
 

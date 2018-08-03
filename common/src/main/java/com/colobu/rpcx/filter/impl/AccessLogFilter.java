@@ -21,6 +21,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.*;
 
+/**
+ * Created by goodjava@qq.com.
+ */
 @RpcFilter(group = {Constants.PROVIDER})
 public class AccessLogFilter implements Filter {
 

@@ -1,7 +1,7 @@
 package com.colobu.rpcx.netty;
 
 /**
- * Created by zhangzhiyong on 2018/7/5.
+ * Created by goodjava@qq.com.
  */
 public enum DecoderState {
     MagicNumber,

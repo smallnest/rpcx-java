@@ -1,7 +1,7 @@
 package com.colobu.rpcx.protocol;
 
 /**
- * Created by zhangzhiyong on 2018/7/3.
+ * Created by goodjava@qq.com.
  */
 public class CommandCustomHeader {
 }

@@ -7,9 +7,7 @@ import com.colobu.rpcx.rpc.URL;
 import java.util.List;
 
 /**
- * MonitorService. (SPI, Prototype, ThreadSafe)
- * 
- * @author william.liangf
+ * Created by goodjava@qq.com.
  */
 public interface MonitorService {
     

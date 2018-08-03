@@ -7,6 +7,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+/**
+ * Created by goodjava@qq.com.
+ */
 public abstract class HessianUtils {
 
     public static byte[] write(Object obj) {

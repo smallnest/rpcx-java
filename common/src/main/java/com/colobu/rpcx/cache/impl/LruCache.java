@@ -7,6 +7,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+/**
+ * Created by goodjava@qq.com.
+ */
 public class LruCache implements Cache {
     
     private final Map<Object, Object> store;

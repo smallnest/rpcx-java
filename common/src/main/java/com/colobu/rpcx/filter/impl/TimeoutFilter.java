@@ -13,8 +13,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 
+
 /**
- * 如果执行timeout，则log记录下，不干涉服务的运行
+ * Created by goodjava@qq.com.
  */
 @RpcFilter(order = -1000, group = {Constants.PROVIDER})
 public class TimeoutFilter implements Filter {

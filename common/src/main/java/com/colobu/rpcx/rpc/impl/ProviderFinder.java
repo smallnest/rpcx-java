@@ -5,6 +5,10 @@ import org.reflections.Reflections;
 
 import java.util.Set;
 
+
+/**
+ * Created by goodjava@qq.com.
+ */
 public class ProviderFinder {
 
     private final String providerPackage;

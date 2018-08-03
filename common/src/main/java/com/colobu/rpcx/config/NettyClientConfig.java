@@ -1,6 +1,8 @@
-
 package com.colobu.rpcx.config;
 
+/**
+ * Created by goodjava@qq.com.
+ */
 public class NettyClientConfig {
     private int clientWorkerThreads = 4;
     private int clientCallbackExecutorThreads = Runtime.getRuntime().availableProcessors();

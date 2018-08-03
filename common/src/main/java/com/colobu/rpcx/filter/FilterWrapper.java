@@ -8,11 +8,18 @@ import com.colobu.rpcx.rpc.RpcException;
 import com.colobu.rpcx.rpc.URL;
 import com.colobu.rpcx.rpc.impl.RpcFilterFinder;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Created by goodjava@qq.com.
+ */
 public class FilterWrapper {
+
+    private static final Logger logger = LoggerFactory.getLogger(FilterWrapper.class);
 
     private List<Filter> providerFilters;
     private List<Filter> consumerFilters;
@@ -24,15 +31,15 @@ public class FilterWrapper {
 
         String p = Config.ins().get("filter_package");
 
-        this.providerFilters.addAll(this.findFilters(p,Constants.PROVIDER));
-        this.providerFilters.addAll(this.findFilters(p,Constants.CONSUMER));
+        this.providerFilters.addAll(this.findFilters(p, Constants.PROVIDER));
+        this.providerFilters.addAll(this.findFilters(p, Constants.CONSUMER));
     }
 
 
     private List<Filter> findFilters(String packageName, String group) {
         RpcFilterFinder finder = new RpcFilterFinder(packageName, group);
         List<Class> list = finder.find();
-        System.out.println("################" + group + " " + list);
+        logger.info("################" + group + " " + list);
         return list.stream().map(it -> {
             try {
                 return (Filter) it.newInstance();

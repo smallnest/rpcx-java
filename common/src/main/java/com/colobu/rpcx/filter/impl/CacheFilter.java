@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * CacheFilter
+ * Created by goodjava@qq.com.
  */
 @RpcFilter(order = -998, group = {Constants.PROVIDER})
 public class CacheFilter implements Filter {

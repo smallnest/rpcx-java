@@ -6,8 +6,7 @@ import com.colobu.rpcx.server.ZkServiceRegister;
 
 
 /**
- * Created by zhangzhiyong on 2018/7/5.
- * 启动server
+ * Created by goodjava@qq.com.
  */
 public class Server {
 

@@ -11,6 +11,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
+/**
+ * Created by goodjava@qq.com.
+ */
 public class ResponseFuture<T> {
     private final int opaque;
     private final long timeoutMillis;

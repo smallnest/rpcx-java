@@ -8,6 +8,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Created by goodjava@qq.com.
+ */
 public class RpcFilterFinder {
 
     private final String filterPackage;

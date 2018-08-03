@@ -2,6 +2,10 @@ package com.colobu.rpcx.rpc;
 
 import java.util.Map;
 
+
+/**
+ * Created by goodjava@qq.com.
+ */
 public interface Result {
 
     void setValue(Object value);

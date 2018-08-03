@@ -26,8 +26,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 
+
 /**
- * Created by zhangzhiyong on 2018/7/4.
+ * Created by goodjava@qq.com.
  */
 public class NettyServer extends NettyRemotingAbstract {
 

@@ -17,8 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /**
- * Created by zhangzhiyong on 2018/7/4.
- * 服务发现者
+ * Created by goodjava@qq.com.
  */
 public class ZkServiceDiscovery implements IServiceDiscovery {
 

@@ -13,6 +13,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+/**
+ * Created by goodjava@qq.com.
+ */
 public class RpcProviderInvoker<T> implements Invoker<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(RpcProviderInvoker.class);

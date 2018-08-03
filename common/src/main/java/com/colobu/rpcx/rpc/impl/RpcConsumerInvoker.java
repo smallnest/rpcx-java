@@ -2,7 +2,6 @@ package com.colobu.rpcx.rpc.impl;
 
 import com.colobu.rpcx.common.retry.RetryNTimes;
 import com.colobu.rpcx.common.retry.RetryPolicy;
-import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.netty.IClient;
 import com.colobu.rpcx.protocol.CompressType;
 import com.colobu.rpcx.protocol.Message;
@@ -16,6 +15,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+
+/**
+ * Created by goodjava@qq.com.
+ */
 public class RpcConsumerInvoker<T> implements Invoker<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(RpcConsumerInvoker.class);

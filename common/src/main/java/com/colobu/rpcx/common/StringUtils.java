@@ -7,18 +7,14 @@ import com.colobu.rpcx.rpc.ReflectUtils;
 import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.PrintWriter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * StringUtils
- *
- * @author qian.lei
+ * Created by goodjava@qq.com.
  */
-
 public final class StringUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(StringUtils.class);

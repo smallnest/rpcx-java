@@ -1,6 +1,9 @@
 
 package com.colobu.rpcx.protocol;
 
+/**
+ * Created by goodjava@qq.com.
+ */
 public class RemotingSysResponseCode {
 
     public static final int SUCCESS = 0;

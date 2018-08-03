@@ -2,6 +2,9 @@ package com.colobu.rpcx.common;
 
 import java.util.*;
 
+/**
+ * Created by goodjava@qq.com.
+ */
 public class CollectionUtils {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

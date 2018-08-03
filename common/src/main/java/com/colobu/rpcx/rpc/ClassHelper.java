@@ -3,6 +3,10 @@ package com.colobu.rpcx.rpc;
 import java.lang.reflect.Array;
 import java.util.*;
 
+
+/**
+ * Created by goodjava@qq.com.
+ */
 public class ClassHelper {
 
     /**

@@ -3,6 +3,9 @@ package com.colobu.rpcx.common.retry;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
+/**
+ * Created by goodjava@qq.com.
+ */
 public class RetryNTimes implements RetryPolicy {
 
 

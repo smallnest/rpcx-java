@@ -2,7 +2,9 @@ package com.colobu.rpcx.common;
 
 import java.util.Properties;
 
-//配置读取
+/**
+ * Created by goodjava@qq.com.
+ */
 public class Config {
 
     private Properties properties;

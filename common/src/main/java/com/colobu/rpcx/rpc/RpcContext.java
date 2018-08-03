@@ -9,14 +9,9 @@ import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.concurrent.*;
 
+
 /**
- * Thread local context. (API, ThreadLocal, ThreadSafe)
- * 
- * 注意：RpcContext是一个临时状态记录器，当接收到RPC请求，或发起RPC请求时，RpcContext的状态都会变化。
- * 比如：A调B，B再调C，则B机器上，在B调C之前，RpcContext记录的是A调B的信息，在B调C之后，RpcContext记录的是B调C的信息。
- * 
- * @author william.liangf
- * @export
+ * Created by goodjava@qq.com.
  */
 public class RpcContext {
 	

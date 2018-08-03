@@ -8,6 +8,9 @@ import org.springframework.stereotype.Service;
 import java.util.concurrent.TimeUnit;
 
 
+/**
+ * Created by goodjava@qq.com.
+ */
 @Service
 //@Provider(name = "TestService", version = "0.0.2", token = "zzy123", timeout = 1000, cache = true)
 //@Provider(name = "TestService", version = "0.0.2", token = "zzy123", tps = 1)
