@@ -20,6 +20,7 @@ import java.util.stream.IntStream;
 @RpcFilter(group = {Constants.PROVIDER})
 public class GenericFilter implements Filter {
 
+    @Override
     public Result invoke(Invoker<?> invoker, RpcInvocation inv) throws RpcException {
         if (inv.getMethodName().equals(Constants.$INVOKE)) {
             String[] types = inv.getParameterTypeNames();

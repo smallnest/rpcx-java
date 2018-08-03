@@ -4,7 +4,12 @@ package com.colobu.rpcx.common;
 /**
  * Created by goodjava@qq.com.
  */
-public abstract class ClassUtils {
+public class ClassUtils {
+
+
+    private ClassUtils() {
+
+    }
 
     public static ClassLoader getDefaultClassLoader() {
         ClassLoader cl = null;

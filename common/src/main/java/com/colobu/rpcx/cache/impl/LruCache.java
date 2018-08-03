@@ -25,12 +25,14 @@ public class LruCache implements Cache {
         };
     }
 
+    @Override
     public void put(Object key, Object value) {
         synchronized (store) {
             store.put(key, value);
         }
     }
 
+    @Override
     public Object get(Object key) {
         synchronized (store) {
             return store.get(key);

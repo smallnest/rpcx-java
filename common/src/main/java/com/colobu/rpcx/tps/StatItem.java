@@ -48,6 +48,7 @@ class StatItem {
         return token.get();
     }
     
+    @Override
     public String toString() {
         return new StringBuilder(32).append("StatItem ")
             .append("[name=").append(name).append(", ")

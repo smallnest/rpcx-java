@@ -32,14 +32,24 @@ public class RequestTask implements Runnable {
 
     @Override
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (!(o instanceof RequestTask)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof RequestTask)) {
+            return false;
+        }
 
         final RequestTask that = (RequestTask) o;
 
-        if (getCreateTimestamp() != that.getCreateTimestamp()) return false;
-        if (isStopRun() != that.isStopRun()) return false;
-        if (channel != null ? !channel.equals(that.channel) : that.channel != null) return false;
+        if (getCreateTimestamp() != that.getCreateTimestamp()) {
+            return false;
+        }
+        if (isStopRun() != that.isStopRun()) {
+            return false;
+        }
+        if (channel != null ? !channel.equals(that.channel) : that.channel != null) {
+            return false;
+        }
         return request != null ? request.getOpaque() == that.request.getOpaque() : that.request == null;
 
     }
@@ -58,7 +68,9 @@ public class RequestTask implements Runnable {
 
     @Override
     public void run() {
-        if (!this.stopRun) this.runnable.run();
+        if (!this.stopRun) {
+            this.runnable.run();
+        }
     }
 
 }

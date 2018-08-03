@@ -75,8 +75,9 @@ public class NettyRemotingAbstract {
      * @param channel
      */
     public void closeChannel(final Channel channel) {
-        if (null == channel)
+        if (null == channel) {
             return;
+        }
 
         try {
             if (this.lockChannelTables.tryLock(LockTimeoutMillis, TimeUnit.MILLISECONDS)) {

@@ -10,7 +10,12 @@ import java.io.IOException;
 /**
  * Created by goodjava@qq.com.
  */
-public abstract class HessianUtils {
+public class HessianUtils {
+
+
+    private HessianUtils() {
+
+    }
 
     public static byte[] write(Object obj) {
         ByteArrayOutputStream os = new ByteArrayOutputStream();

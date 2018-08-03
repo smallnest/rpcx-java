@@ -16,6 +16,7 @@ import com.colobu.rpcx.rpc.impl.RpcResult;
 @RpcFilter(order = -997, group = {Constants.PROVIDER})
 public class EchoFilter implements Filter {
 
+    @Override
     public Result invoke(Invoker<?> invoker, RpcInvocation inv) throws RpcException {
         if (inv.getMethodName().equals(Constants.$ECHO) && inv.getArguments() != null && inv.getArguments().length == 1) {
             return new RpcResult(inv.getArguments()[0]);

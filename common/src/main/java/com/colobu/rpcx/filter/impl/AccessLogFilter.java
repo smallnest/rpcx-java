@@ -37,9 +37,9 @@ public class AccessLogFilter implements Filter {
 
     private static final long LOG_OUTPUT_INTERVAL = 5000;
 
-    private final static ConcurrentMap<String, Set<String>> logQueue = new ConcurrentHashMap<>();
+    private final static ConcurrentMap<String, Set<String>> LOG_QUEUE = new ConcurrentHashMap<>();
 
-    private final static ScheduledExecutorService logScheduled = Executors.newScheduledThreadPool(2, new NamedThreadFactory("Rcpx-Access-Log", true));
+    private final static ScheduledExecutorService LOG_SCHEDULED = Executors.newScheduledThreadPool(2, new NamedThreadFactory("Rcpx-Access-Log", true));
 
     private volatile ScheduledFuture<?> logFuture = null;
 
@@ -47,10 +47,11 @@ public class AccessLogFilter implements Filter {
      * 非阻塞
      */
     private class LogTask implements Runnable {
+        @Override
         public void run() {
             try {
-                if (logQueue != null && logQueue.size() > 0) {
-                    for (Map.Entry<String, Set<String>> entry : logQueue.entrySet()) {
+                if (LOG_QUEUE != null && LOG_QUEUE.size() > 0) {
+                    for (Map.Entry<String, Set<String>> entry : LOG_QUEUE.entrySet()) {
                         try {
                             String accesslog = entry.getKey();
                             Set<String> logSet = entry.getValue();
@@ -92,9 +93,9 @@ public class AccessLogFilter implements Filter {
 
     private void init() {
         if (logFuture == null) {
-            synchronized (logScheduled) {
+            synchronized (LOG_SCHEDULED) {
                 if (logFuture == null) {
-                    logFuture = logScheduled.scheduleWithFixedDelay(new LogTask(), LOG_OUTPUT_INTERVAL, LOG_OUTPUT_INTERVAL, TimeUnit.MILLISECONDS);
+                    logFuture = LOG_SCHEDULED.scheduleWithFixedDelay(new LogTask(), LOG_OUTPUT_INTERVAL, LOG_OUTPUT_INTERVAL, TimeUnit.MILLISECONDS);
                 }
             }
         }
@@ -102,16 +103,17 @@ public class AccessLogFilter implements Filter {
 
     private void log(String accesslog, String message) {
         init();
-        Set<String> logSet = logQueue.get(accesslog);
+        Set<String> logSet = LOG_QUEUE.get(accesslog);
         if (logSet == null) {
-            logQueue.putIfAbsent(accesslog, new ConcurrentHashSet<>());
-            logSet = logQueue.get(accesslog);
+            LOG_QUEUE.putIfAbsent(accesslog, new ConcurrentHashSet<>());
+            logSet = LOG_QUEUE.get(accesslog);
         }
         if (logSet.size() < LOG_MAX_BUFFER) {
             logSet.add(message);
         }
     }
 
+    @Override
     public Result invoke(Invoker<?> invoker, RpcInvocation inv) throws RpcException {
         try {
             RpcContext context = RpcContext.getContext();

@@ -4,7 +4,14 @@ package com.colobu.rpcx.protocol;
  * Created by goodjava@qq.com.
  */
 public enum MessageType {
+    /**
+     * 请求
+     */
     Request(0),
+
+    /**
+     * 应答
+     */
     Response(1);
 
 

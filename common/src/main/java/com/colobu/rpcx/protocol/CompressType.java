@@ -4,7 +4,13 @@ package com.colobu.rpcx.protocol;
  * Created by goodjava@qq.com.
  */
 public enum CompressType {
+    /**
+     * 不压缩
+     */
     None(0),
+    /**
+     * gzip压缩
+     */
     Gzip(1);
 
 

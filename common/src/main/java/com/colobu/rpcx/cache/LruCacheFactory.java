@@ -9,6 +9,7 @@ import com.colobu.rpcx.rpc.URL;
  */
 public class LruCacheFactory extends AbstractCacheFactory {
 
+    @Override
     protected Cache createCache(URL url) {
         return new LruCache();
     }

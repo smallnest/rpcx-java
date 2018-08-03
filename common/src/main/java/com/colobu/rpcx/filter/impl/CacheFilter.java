@@ -25,6 +25,7 @@ public class CacheFilter implements Filter {
 
     private static LruCacheFactory factory = new LruCacheFactory();
 
+    @Override
     public Result invoke(Invoker<?> invoker, RpcInvocation invocation) throws RpcException {
         logger.debug("CacheFilter begin");
         if (invoker.getUrl().getParameter(Constants.CACHE_KEY).equals("true")) {

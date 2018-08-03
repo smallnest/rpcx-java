@@ -21,6 +21,7 @@ public class ExceptionFilter implements Filter {
 
     private static final Logger logger = LoggerFactory.getLogger(ExceptionFilter.class);
 
+    @Override
     public Result invoke(Invoker<?> invoker, RpcInvocation invocation) throws RpcException {
         try {
             Result result = invoker.invoke(invocation);

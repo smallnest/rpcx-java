@@ -112,6 +112,7 @@ public class RpcxMonitor implements Monitor {
         }
     }
 
+    @Override
     public void collect(URL url) {
         // 读写统计变量
         int success = url.getParameter(MonitorService.SUCCESS, 0);
@@ -158,18 +159,22 @@ public class RpcxMonitor implements Monitor {
         } while (!reference.compareAndSet(current, update));
     }
 
+    @Override
     public List<URL> lookup(URL query) {
         return null;
     }
 
+    @Override
     public URL getUrl() {
         return null;
     }
 
+    @Override
     public boolean isAvailable() {
         return true;
     }
 
+    @Override
     public void destroy() {
         try {
             sendFuture.cancel(true);

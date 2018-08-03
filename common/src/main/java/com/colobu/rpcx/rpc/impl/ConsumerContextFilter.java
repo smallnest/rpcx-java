@@ -17,6 +17,7 @@ import com.colobu.rpcx.rpc.annotation.RpcFilter;
 @RpcFilter(group = {Constants.CONSUMER})
 public class ConsumerContextFilter implements Filter {
 
+    @Override
     public Result invoke(Invoker<?> invoker, RpcInvocation invocation) throws RpcException {
         RpcContext.getContext()
                 .setInvoker(invoker)

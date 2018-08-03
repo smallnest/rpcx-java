@@ -19,6 +19,7 @@ import java.util.Map;
 @RpcFilter(order = -999, group = {Constants.PROVIDER})
 public class TokenFilter implements Filter {
 
+    @Override
     public Result invoke(Invoker<?> invoker, RpcInvocation inv)
             throws RpcException {
         String token = invoker.getUrl().getParameter(Constants.TOKEN_KEY);

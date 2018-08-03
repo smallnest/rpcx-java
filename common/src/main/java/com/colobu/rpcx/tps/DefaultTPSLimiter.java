@@ -16,6 +16,7 @@ public class DefaultTPSLimiter implements TPSLimiter {
 
     private final ConcurrentMap<String, StatItem> stats = new ConcurrentHashMap<>();
 
+    @Override
     public boolean isAllowable(URL url, Invocation invocation) {
         int rate = url.getParameter(Constants.TPS_LIMIT_RATE_KEY, -1);
         //默认时间间隔是60秒

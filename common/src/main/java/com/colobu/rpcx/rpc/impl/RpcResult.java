@@ -27,6 +27,7 @@ public class RpcResult implements Result {
         this.throwable = throwable;
     }
 
+    @Override
     public void setValue(Object value) {
         this.value = value;
     }
@@ -41,6 +42,7 @@ public class RpcResult implements Result {
         return this.throwable;
     }
 
+    @Override
     public void setThrowable(Throwable throwable) {
         this.throwable = throwable;
     }

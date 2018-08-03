@@ -118,6 +118,7 @@ public class RpcInvocation implements Invocation, Serializable {
         this.className = className;
     }
 
+    @Override
     public Class<?> getResultType() {
         return resultType;
     }

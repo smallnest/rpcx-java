@@ -16,7 +16,8 @@ public class CollectionUtils {
 	}
 	
 	private static final Comparator<String> SIMPLE_NAME_COMPARATOR = new Comparator<String>() {
-		public int compare(String s1, String s2) {
+		@Override
+        public int compare(String s1, String s2) {
 			if (s1 == null && s2 == null) {
 				return 0;
 			}
@@ -164,7 +165,9 @@ public class CollectionUtils {
 	@SuppressWarnings("unchecked")
     public static <K, V> Map<K, V> toMap(Object ... pairs) {
 	    Map<K, V> ret = new HashMap<K, V>();
-	    if (pairs == null || pairs.length == 0) return ret;
+	    if (pairs == null || pairs.length == 0) {
+			return ret;
+		}
 	
         if (pairs.length % 2 != 0) {
             throw new IllegalArgumentException("Map pairs can not be odd number.");

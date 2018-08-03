@@ -4,7 +4,13 @@ package com.colobu.rpcx.protocol;
  * Created by goodjava@qq.com.
  */
 public enum MessageStatusType {
+    /**
+     * 一般
+     */
     Normal(0),
+    /**
+     * 错误
+     */
     Error(1);
 
 

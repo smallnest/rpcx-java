@@ -20,7 +20,9 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(RpcProviderInvoker.class);
 
-    //如果是基于ioc容器的,需要提供获取bean 的function
+    /**
+     * 如果是基于ioc容器的,需要提供获取bean 的function
+     */
     private Function<Class, Object> getBeanFunc;
 
     private URL url;
@@ -71,8 +73,8 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
             }).toArray(Class[]::new);
 
             Method m = clazz.getMethod(method, clazzArray);
-
-            if (null != this.getBeanFunc) {//使用容器
+            //使用容器
+            if (null != this.getBeanFunc) {
                 Object b = getBeanFunc.apply(clazz);
                 obj = m.invoke(b, invocation.getArguments());
             } else {//不使用容器

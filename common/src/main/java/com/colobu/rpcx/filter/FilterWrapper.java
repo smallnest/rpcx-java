@@ -76,22 +76,27 @@ public class FilterWrapper {
                 final Invoker<T> next = last;
                 last = new Invoker<T>() {
 
+                    @Override
                     public Class<T> getInterface() {
                         return invoker.getInterface();
                     }
 
+                    @Override
                     public URL getUrl() {
                         return invoker.getUrl();
                     }
 
+                    @Override
                     public boolean isAvailable() {
                         return invoker.isAvailable();
                     }
 
+                    @Override
                     public Result invoke(RpcInvocation invocation) throws RpcException {
                         return filter.invoke(next, invocation);
                     }
 
+                    @Override
                     public void destroy() {
                         invoker.destroy();
                     }

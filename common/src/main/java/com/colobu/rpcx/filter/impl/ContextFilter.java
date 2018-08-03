@@ -24,6 +24,7 @@ public class ContextFilter implements Filter {
     private static final Logger logger = LoggerFactory.getLogger(ContextFilter.class);
 
 
+    @Override
     public Result invoke(Invoker<?> invoker, RpcInvocation invocation) throws RpcException {
         logger.info("ContextFilter begin");
         Map<String, String> attachments = invocation.getAttachments();

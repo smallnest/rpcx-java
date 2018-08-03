@@ -74,15 +74,25 @@ public class ReflectUtils {
 
         if (c.isPrimitive()) {
             String t = c.getName();
-            if ("void".equals(t)) ret.append(JVM_VOID);
-            else if ("boolean".equals(t)) ret.append(JVM_BOOLEAN);
-            else if ("byte".equals(t)) ret.append(JVM_BYTE);
-            else if ("char".equals(t)) ret.append(JVM_CHAR);
-            else if ("double".equals(t)) ret.append(JVM_DOUBLE);
-            else if ("float".equals(t)) ret.append(JVM_FLOAT);
-            else if ("int".equals(t)) ret.append(JVM_INT);
-            else if ("long".equals(t)) ret.append(JVM_LONG);
-            else if ("short".equals(t)) ret.append(JVM_SHORT);
+            if ("void".equals(t)) {
+                ret.append(JVM_VOID);
+            } else if ("boolean".equals(t)) {
+                ret.append(JVM_BOOLEAN);
+            } else if ("byte".equals(t)) {
+                ret.append(JVM_BYTE);
+            } else if ("char".equals(t)) {
+                ret.append(JVM_CHAR);
+            } else if ("double".equals(t)) {
+                ret.append(JVM_DOUBLE);
+            } else if ("float".equals(t)) {
+                ret.append(JVM_FLOAT);
+            } else if ("int".equals(t)) {
+                ret.append(JVM_INT);
+            } else if ("long".equals(t)) {
+                ret.append(JVM_LONG);
+            } else if ("short".equals(t)) {
+                ret.append(JVM_SHORT);
+            }
         } else {
             ret.append('L');
             ret.append(c.getName().replace('.', '/'));
@@ -139,7 +149,9 @@ public class ReflectUtils {
         } else {
             sb.append(desc.substring(c + 1, desc.length() - 1).replace('/', '.'));
         }
-        while (c-- > 0) sb.append("[]");
+        while (c-- > 0) {
+            sb.append("[]");
+        }
         return sb.toString();
     }
 
@@ -165,34 +177,57 @@ public class ReflectUtils {
         }
         if (c > 0) {
             StringBuilder sb = new StringBuilder();
-            while (c-- > 0)
+            while (c-- > 0) {
                 sb.append("[");
+            }
 
-            if ("void".equals(name)) sb.append(JVM_VOID);
-            else if ("boolean".equals(name)) sb.append(JVM_BOOLEAN);
-            else if ("byte".equals(name)) sb.append(JVM_BYTE);
-            else if ("char".equals(name)) sb.append(JVM_CHAR);
-            else if ("double".equals(name)) sb.append(JVM_DOUBLE);
-            else if ("float".equals(name)) sb.append(JVM_FLOAT);
-            else if ("int".equals(name)) sb.append(JVM_INT);
-            else if ("long".equals(name)) sb.append(JVM_LONG);
-            else if ("short".equals(name)) sb.append(JVM_SHORT);
-            else sb.append('L').append(name).append(';'); // "java.lang.Object" ==> "Ljava.lang.Object;"
+            if ("void".equals(name)) {
+                sb.append(JVM_VOID);
+            } else if ("boolean".equals(name)) {
+                sb.append(JVM_BOOLEAN);
+            } else if ("byte".equals(name)) {
+                sb.append(JVM_BYTE);
+            } else if ("char".equals(name)) {
+                sb.append(JVM_CHAR);
+            } else if ("double".equals(name)) {
+                sb.append(JVM_DOUBLE);
+            } else if ("float".equals(name)) {
+                sb.append(JVM_FLOAT);
+            } else if ("int".equals(name)) {
+                sb.append(JVM_INT);
+            } else if ("long".equals(name)) {
+                sb.append(JVM_LONG);
+            } else if ("short".equals(name)) {
+                sb.append(JVM_SHORT);
+            } else {
+                sb.append('L').append(name).append(';'); // "java.lang.Object" ==> "Ljava.lang.Object;"
+            }
             name = sb.toString();
         } else {
-            if ("void".equals(name)) return void.class;
-            else if ("boolean".equals(name)) return boolean.class;
-            else if ("byte".equals(name)) return byte.class;
-            else if ("char".equals(name)) return char.class;
-            else if ("double".equals(name)) return double.class;
-            else if ("float".equals(name)) return float.class;
-            else if ("int".equals(name)) return int.class;
-            else if ("long".equals(name)) return long.class;
-            else if ("short".equals(name)) return short.class;
+            if ("void".equals(name)) {
+                return void.class;
+            } else if ("boolean".equals(name)) {
+                return boolean.class;
+            } else if ("byte".equals(name)) {
+                return byte.class;
+            } else if ("char".equals(name)) {
+                return char.class;
+            } else if ("double".equals(name)) {
+                return double.class;
+            } else if ("float".equals(name)) {
+                return float.class;
+            } else if ("int".equals(name)) {
+                return int.class;
+            } else if ("long".equals(name)) {
+                return long.class;
+            } else if ("short".equals(name)) {
+                return short.class;
+            }
         }
 
-        if (cl == null)
+        if (cl == null) {
             cl = ClassHelper.getClassLoader();
+        }
         Class<?> clazz = NAME_CLASS_CACHE.get(name);
         if (clazz == null) {
             clazz = Class.forName(name, true, cl);
