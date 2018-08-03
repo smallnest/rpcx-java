@@ -28,7 +28,7 @@ public class ConsumerConfig {
         //设置超时时间1000 重试次数3
         return rpcxConsumer.wrap(ITestService.class, new ConsumerConfigBuilder()
                 .setToken("zzy123")
-                .setSendType(Constants.ASYNC_KEY)
+                .setSendType(Constants.SYNC_KEY)
                 .setTimeout(6000)
                 .setRetryNum(1));
     }
