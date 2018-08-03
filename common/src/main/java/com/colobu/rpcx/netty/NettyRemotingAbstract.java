@@ -16,17 +16,16 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class NettyRemotingAbstract {
 
-
     private static final Logger plog = LoggerFactory.getLogger(NettyRemotingAbstract.class);
 
-    protected final ConcurrentHashMap<Integer /* opaque */, ResponseFuture> responseTable =
+    protected final ConcurrentHashMap<Integer, ResponseFuture> responseTable =
             new ConcurrentHashMap<>(256);
 
-    protected final HashMap<Integer/* request code */, Pair<NettyRequestProcessor, ExecutorService>> processorTable =
+    protected final HashMap<Integer, Pair<NettyRequestProcessor, ExecutorService>> processorTable =
             new HashMap<>(64);
 
     protected Pair<NettyRequestProcessor, ExecutorService> defaultRequestProcessor;
@@ -35,7 +34,7 @@ public class NettyRemotingAbstract {
 
     protected final ChannelEventListener channelEventListener = new ClientChannelEventListener();
 
-    protected final ConcurrentHashMap<String /* addr */, ChannelWrapper> channelTables = new ConcurrentHashMap<>();
+    protected final ConcurrentHashMap<String, ChannelWrapper> channelTables = new ConcurrentHashMap<>();
 
     protected final Lock lockChannelTables = new ReentrantLock();
 
@@ -48,7 +47,8 @@ public class NettyRemotingAbstract {
 
     public void scanResponseTable() {
         final List<ResponseFuture> rfList = new LinkedList<>();
-        Iterator<Map.Entry<Integer, ResponseFuture>> it = this.responseTable.entrySet().iterator();//* Integer 是协议对应号
+        //是协议对应号
+        Iterator<Map.Entry<Integer, ResponseFuture>> it = this.responseTable.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<Integer, ResponseFuture> next = it.next();
             ResponseFuture rep = next.getValue();
@@ -164,14 +164,11 @@ public class NettyRemotingAbstract {
                         }
                     }
                 } catch (Throwable e) {
-                    if (!"com.aliyun.openservices.ons.api.impl.authority.exception.AuthenticationException"
-                            .equals(e.getClass().getCanonicalName())) {
-                        plog.error("process request exception", e);
-                        plog.error(cmd.toString());
-                    }
+                    plog.error("process request exception", e);
+                    plog.error(cmd.toString());
 
                     if (!cmd.isOnewayRPC()) {
-                        final RemotingCommand response = RemotingCommand.createResponseCommand(RemotingSysResponseCode.SYSTEM_ERROR, //
+                        final RemotingCommand response = RemotingCommand.createResponseCommand(RemotingSysResponseCode.SYSTEM_ERROR,
                                 RemotingHelper.exceptionSimpleDesc(e));
                         response.setOpaque(opaque);
                         ctx.writeAndFlush(response);
@@ -192,9 +189,9 @@ public class NettyRemotingAbstract {
                 pair.getObject2().submit(requestTask);
             } catch (RejectedExecutionException e) {
                 if ((System.currentTimeMillis() % 10000) == 0) {
-                    plog.warn(RemotingHelper.parseChannelRemoteAddr(ctx.channel()) //
-                            + ", too many requests and system thread pool busy, RejectedExecutionException " //
-                            + pair.getObject2().toString() //
+                    plog.warn(RemotingHelper.parseChannelRemoteAddr(ctx.channel())
+                            + ", too many requests and system thread pool busy, RejectedExecutionException "
+                            + pair.getObject2().toString()
                             + " request code: " + cmd.getCode());
                 }
 
@@ -216,12 +213,20 @@ public class NettyRemotingAbstract {
     }
 
 
-    //* 处理返回结果
+    /**
+     * 处理返回结果
+     *
+     * @param ctx
+     * @param cmd
+     */
     public void processResponseCommand(ChannelHandlerContext ctx, RemotingCommand cmd) {
-        final int opaque = cmd.getOpaque();//* 获取request带过去的唯一码
-        final ResponseFuture responseFuture = this.responseTable.get(opaque);//* 查询responseFuture
+        //获取request带过去的唯一码
+        final int opaque = cmd.getOpaque();
+        //查询responseFuture
+        final ResponseFuture responseFuture = this.responseTable.get(opaque);
         if (responseFuture != null) {
-            responseFuture.setResponseCommand(cmd);//这里并不解除阻塞
+            //这里并不解除阻塞
+            responseFuture.setResponseCommand(cmd);
             responseFuture.release();
             this.responseTable.remove(opaque);
             if (responseFuture.getInvokeCallback() != null) {
@@ -252,7 +257,8 @@ public class NettyRemotingAbstract {
                     }
                 }
             } else {
-                responseFuture.putResponse(cmd);//* 解除阻塞
+                //解除阻塞
+                responseFuture.putResponse(cmd);
             }
         } else {
             plog.warn("receive response, but not matched any request, " + RemotingHelper.parseChannelRemoteAddr(ctx.channel()));

@@ -1,7 +1,7 @@
 package com.colobu.rpcx.netty;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public enum DecoderState {
     /**

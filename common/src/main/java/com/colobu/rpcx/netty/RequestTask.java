@@ -5,7 +5,7 @@ import com.colobu.rpcx.protocol.RemotingCommand;
 import io.netty.channel.Channel;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class RequestTask implements Runnable {
     private final Runnable runnable;

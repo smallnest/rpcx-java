@@ -3,7 +3,7 @@ package com.colobu.rpcx.netty;
 import io.netty.channel.Channel;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public interface ChannelEventListener {
 

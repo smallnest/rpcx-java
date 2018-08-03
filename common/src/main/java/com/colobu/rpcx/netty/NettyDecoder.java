@@ -1,5 +1,4 @@
 package com.colobu.rpcx.netty;
-
 import com.colobu.rpcx.protocol.Message;
 import com.colobu.rpcx.protocol.MessageType;
 import com.colobu.rpcx.protocol.RemotingCommand;
@@ -13,7 +12,7 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class NettyDecoder extends ReplayingDecoder<DecoderState> {
 

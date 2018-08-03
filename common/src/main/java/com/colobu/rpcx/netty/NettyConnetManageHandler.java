@@ -14,7 +14,7 @@ import java.net.SocketAddress;
 import static com.colobu.rpcx.common.RemotingUtil.closeChannel;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class NettyConnetManageHandler extends ChannelDuplexHandler {
 

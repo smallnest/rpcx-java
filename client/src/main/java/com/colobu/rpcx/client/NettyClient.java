@@ -151,16 +151,6 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
         return response.getMessage();
     }
 
-    @Override
-    public String host() {
-        return null;
-    }
-
-    @Override
-    public int port() {
-        return 0;
-    }
-
 
     @Override
     public Message call(Message req, long timeoutMillis) throws Exception {

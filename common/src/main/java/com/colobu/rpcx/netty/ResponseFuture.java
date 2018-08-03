@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class ResponseFuture<T> {
     private final int opaque;
@@ -21,7 +21,10 @@ public class ResponseFuture<T> {
     private final long beginTimestamp = System.currentTimeMillis();
     private final CountDownLatch countDownLatch = new CountDownLatch(1);
 
-    private final SemaphoreReleaseOnlyOnce once;//* 保证只会被释放一次
+    /**
+     * 保证只会被释放一次
+     */
+    private final SemaphoreReleaseOnlyOnce once;
 
     private final AtomicBoolean executeCallbackOnlyOnce = new AtomicBoolean(false);
     private volatile RemotingCommand responseCommand;
@@ -65,7 +68,10 @@ public class ResponseFuture<T> {
         return this.responseCommand;
     }
 
-    //* 放入结果就是coutDownLatch 执行countDown  waitResponse就不会再阻塞
+    /**
+     *  放入结果就是coutDownLatch 执行countDown  waitResponse就不会再阻塞
+     * @param responseCommand
+     */
     public void putResponse(final RemotingCommand responseCommand) {
         this.responseCommand = responseCommand;
         this.countDownLatch.countDown();
