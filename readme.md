@@ -122,7 +122,7 @@ Then you can write the java client:
 - 支持qps限流
 - 支持accesslog记录
 - 支持泛化调用
-- 支持同步 异步 onway调用
+- 支持同步 异步 oneway调用
 - 支持token调用
 - 支持client端重试
 - 支持调用数据采集
