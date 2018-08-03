@@ -15,7 +15,7 @@ import java.util.Arrays;
 
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 @RpcFilter(order = -1000, group = {Constants.PROVIDER})
 public class TimeoutFilter implements Filter {
@@ -25,18 +25,23 @@ public class TimeoutFilter implements Filter {
     @Override
     public Result invoke(Invoker<?> invoker, RpcInvocation invocation) throws RpcException {
         logger.info("TimeoutFilter begin");
-        long start = System.currentTimeMillis();
-        Result result = invoker.invoke(invocation);
-        long elapsed = System.currentTimeMillis() - start;
 
-        int v = invoker.getUrl().getParameter(Constants.TIMEOUT_KEY, Integer.MAX_VALUE);
-        if (invoker.getUrl() != null && v != 0 && elapsed > v) {
-            logger.warn("invoke time out. method: " + invocation.getMethodName()
-                    + "arguments: " + Arrays.toString(invocation.getArguments()) + " , url is "
-                    + invoker.getUrl() + ", invoke elapsed " + elapsed + " ms.");
+        if (!"-1".equals(invoker.getUrl().getParameter(Constants.TIMEOUT_KEY))) {
+            long start = System.currentTimeMillis();
+            Result result = invoker.invoke(invocation);
+            long elapsed = System.currentTimeMillis() - start;
+
+            int v = invoker.getUrl().getParameter(Constants.TIMEOUT_KEY, Integer.MAX_VALUE);
+            if (invoker.getUrl() != null && v != 0 && elapsed > v) {
+                logger.warn("invoke time out. method: " + invocation.getMethodName()
+                        + "arguments: " + Arrays.toString(invocation.getArguments()) + " , url is "
+                        + invoker.getUrl() + ", invoke elapsed " + elapsed + " ms.");
+            }
+            return result;
         }
         logger.info("TimeoutFilter end");
-        return result;
+
+        return invoker.invoke(invocation);
     }
 
 }

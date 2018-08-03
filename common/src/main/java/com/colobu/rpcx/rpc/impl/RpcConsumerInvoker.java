@@ -61,11 +61,11 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
         byte[] data = HessianUtils.write(invocation);
         req.payload = data;
 
-        RetryPolicy retryPolicy = new RetryNTimes(invocation.getRetryNum());//重试策略
+        RetryPolicy retryPolicy = new RetryNTimes(invocation.getRetryNum());
         boolean retryResult = retryPolicy.retry((n) -> {
             try {
-                req.setSeq(seq.incrementAndGet());//每次重发需要加1
-                Message res = client.call(req, invocation.getTimeOut());//同步调用
+                req.setSeq(seq.incrementAndGet());
+                Message res = client.call(req, invocation.getTimeOut());
 
                 if (res.metadata.containsKey("_rpcx_error_code")) {
                     int code = Integer.parseInt(res.metadata.get("_rpcx_error_code"));

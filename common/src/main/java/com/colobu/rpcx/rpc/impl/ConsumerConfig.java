@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class ConsumerConfig {
 
@@ -89,7 +89,7 @@ public class ConsumerConfig {
             invocation.setAttachments(attachments);
 
             Class<?>[] types = method.getParameterTypes();
-            invocation.parameterTypeNames = Stream.of(types).map(it -> ReflectUtils.getDesc(it)).toArray(String[]::new);
+            invocation.parameterTypeNames = Stream.of(types).map(it -> ReflectUtils.getName(it)).toArray(String[]::new);
             invocation.setParameterTypes(types);
             invocation.setResultType(method.getReturnType());
 

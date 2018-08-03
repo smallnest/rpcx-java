@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 @RpcFilter(order = -998, group = {Constants.PROVIDER})
 public class CacheFilter implements Filter {
@@ -32,7 +32,6 @@ public class CacheFilter implements Filter {
             Cache cache = factory.getCache(invoker.getUrl());
             if (cache != null) {
                 String key = StringUtils.toArgumentString(invocation.getArguments());
-                System.out.println(123);
                 if (cache != null && key != null) {
                     Object value = cache.get(key);
                     if (value != null) {

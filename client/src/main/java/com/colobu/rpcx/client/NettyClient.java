@@ -1,10 +1,7 @@
 package com.colobu.rpcx.client;
 
 import com.colobu.rpcx.client.impl.RandomSelector;
-import com.colobu.rpcx.common.InvokeCallback;
-import com.colobu.rpcx.common.NamedThreadFactory;
-import com.colobu.rpcx.common.RemotingHelper;
-import com.colobu.rpcx.common.SemaphoreReleaseOnlyOnce;
+import com.colobu.rpcx.common.*;
 import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.config.NettyClientConfig;
 import com.colobu.rpcx.exception.RemotingSendRequestException;
@@ -109,13 +106,13 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
 
         ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("ClientHouseKeepingService"));
 
-        executor.scheduleAtFixedRate(()->{
+        executor.scheduleAtFixedRate(() -> {
             try {
                 NettyClient.this.scanResponseTable();//* 查询response表
             } catch (Exception e) {
                 logger.error("scanResponseTable exception", e);
             }
-        },3000,3000,TimeUnit.MILLISECONDS);
+        }, 3000, 3000, TimeUnit.MILLISECONDS);
 
 
         //* netty 事件的处理
@@ -185,14 +182,18 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
 
         Message res = null;
 
-        if (req.metadata.get("sendType").equals(Constants.ASYNC_KEY)) {//异步调用
+        if (StringUtils.isEmpty(req.metadata.get(Constants.SEND_TYPE))) {
+            req.metadata.put(Constants.SEND_TYPE, Constants.SYNC_KEY);
+        }
+
+        if (req.metadata.get(Constants.SEND_TYPE).equals(Constants.SYNC_KEY)) {
+            RemotingCommand response = this.invokeSyncImpl(channel, request, timeoutMillis);
+            res = response.getMessage();
+        } else if (req.metadata.get(Constants.SEND_TYPE).equals(Constants.ASYNC_KEY)) {
             ResponseFuture future = this.invokeAsyncImpl(channel, request, timeoutMillis, null);
             res = new Message();
             RpcContext.getContext().setFuture(future);
-        } else if (req.metadata.get("sendType").equals(Constants.SYNC_KEY)) {//同步调用
-            RemotingCommand response = this.invokeSyncImpl(channel, request, timeoutMillis);
-            res = response.getMessage();
-        } else if (req.metadata.get("sendType").equals(Constants.ONE_WAY_KEY)) {
+        } else if (req.metadata.get(Constants.SEND_TYPE).equals(Constants.ONE_WAY_KEY)) {
             this.invokeOnewayImpl(channel, request, timeoutMillis);
             res = new Message();
         }

@@ -74,4 +74,6 @@ public class Constants {
 
     public static final String $INVOKE = "$invoke";
 
+    public static final String SEND_TYPE = "sendType";
+
 }

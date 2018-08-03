@@ -15,7 +15,7 @@ public @interface Provider {
 
     String name() default "";
 
-    String version() default "0.0.1";
+    String version() default "";
 
     /**
      * 服务启动token验证,客户端需要提供相同的token
@@ -29,7 +29,7 @@ public @interface Provider {
      *
      * @return
      */
-    long timeout() default 0;
+    long timeout() default -1;
 
     /**
      * 调用缓存

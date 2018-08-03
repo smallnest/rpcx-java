@@ -11,13 +11,15 @@ import com.colobu.rpcx.rpc.annotation.RpcFilter;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
 import com.google.gson.Gson;
 
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
-@RpcFilter(group = {Constants.PROVIDER})
+@RpcFilter(group = {Constants.PROVIDER}, order = -999)
 public class GenericFilter implements Filter {
 
     @Override
@@ -29,30 +31,25 @@ public class GenericFilter implements Filter {
             Gson gson = new Gson();
             int len = types.length;
 
-            Class[]classTypes = new Class[types.length];
-            String[]typeNames = new String[types.length];
+            Class[] classTypes = new Class[types.length];
 
             Object[] params = IntStream.range(0, len).mapToObj(i -> {
                 String type = types[i];
-                Class clazz = null;
-                try {
-                    clazz = ReflectUtils.name2class(type);
-                } catch (Exception ex) {
-                    throw new RpcException(ex.getMessage());
-                }
+                Class<?> clazz = ReflectUtils.forName(type);
                 classTypes[i] = clazz;
-                typeNames[i] = ReflectUtils.getDesc(clazz);
                 int j = i + 1;
                 String arg = args[j];
                 Object obj = gson.fromJson(arg, clazz);
                 return obj;
             }).toArray(Object[]::new);
 
+            //从新组装Invocation
             inv.setMethodName(args[0]);
             inv.setParameterTypes(classTypes);
-            inv.setParameterTypeNames(typeNames);
             inv.setArguments(params);
 
+            String s = Stream.of(params).map(it -> gson.toJson(it)).collect(Collectors.joining(","));
+            invoker.getUrl().setPath(inv.getClassName() + "." + inv.getMethodName() + "(" + s + ")");
 
             Result res = invoker.invoke(inv);
 
