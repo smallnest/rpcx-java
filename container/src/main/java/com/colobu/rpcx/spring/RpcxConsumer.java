@@ -10,7 +10,7 @@ import com.colobu.rpcx.rpc.impl.RpcConsumerInvoker;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class RpcxConsumer {
 

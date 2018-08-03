@@ -9,6 +9,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import com.colobu.rpcx.rpc.impl.ConsumerConfig.ConsumerConfigBuilder;
 
+/**
+ * @author goodjava@qq.com
+ */
 @Configuration
 public class ConsumerConfig {
 

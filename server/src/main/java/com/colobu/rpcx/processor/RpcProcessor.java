@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import java.util.function.Function;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class RpcProcessor implements NettyRequestProcessor {
 
@@ -38,16 +38,18 @@ public class RpcProcessor implements NettyRequestProcessor {
         String language = req.metadata.get("language");
 
         RpcInvocation invocation = null;
-        //golang 调用
-        if (null == language || !"java".equals(language)) {//golang 自己组装invocation
+        //golang 调用(自己组装invocation)
+        if (null == language || !"java".equals(language)) {
             Message reqMsg = request.getMessage();
             invocation = new RpcInvocation();
             invocation.setClassName(reqMsg.servicePath);
             invocation.setMethodName(reqMsg.serviceMethod);
             invocation.servicePath = request.getMessage().servicePath;
             invocation.serviceMethod = request.getMessage().serviceMethod;
-            invocation.setParameterTypeNames(new String[]{"[B"});//golang 参数是byte[]
-            invocation.setArguments(new Object[]{request.getMessage().payload});// 参数就是payload数据
+            //golang 参数是byte[]
+            invocation.setParameterTypeNames(new String[]{"[B"});
+            //参数就是payload数据
+            invocation.setArguments(new Object[]{request.getMessage().payload});
             invocation.url = new URL("rpcx", "", 0);
             invocation.languageCode = LanguageCode.GO;
         } else {

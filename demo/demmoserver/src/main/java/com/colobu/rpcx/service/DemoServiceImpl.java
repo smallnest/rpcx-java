@@ -5,7 +5,7 @@ import com.colobu.rpcx.rpc.annotation.Provider;
 import org.springframework.stereotype.Service;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 @Service
 @Provider

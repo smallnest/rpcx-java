@@ -5,6 +5,9 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 
 
+/**
+ * @author goodjava@qq.com
+ */
 @EnableAutoConfiguration
 @ComponentScan(basePackages = {"com.colobu.rpcx"})
 public class Bootstrap {

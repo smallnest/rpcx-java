@@ -32,6 +32,7 @@ public class CacheFilter implements Filter {
             Cache cache = factory.getCache(invoker.getUrl());
             if (cache != null) {
                 String key = StringUtils.toArgumentString(invocation.getArguments());
+                System.out.println(123);
                 if (cache != null && key != null) {
                     Object value = cache.get(key);
                     if (value != null) {

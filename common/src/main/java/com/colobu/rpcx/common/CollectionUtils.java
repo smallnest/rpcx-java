@@ -69,9 +69,6 @@ public class CollectionUtils {
 	}
 
 	public static Map<String, String> split(List<String> list, String separator) {
-		if (list == null) {
-			return null;
-		}
 		Map<String, String> map = new HashMap<String, String>();
 		if (list == null || list.size() == 0) {
 			return map;
@@ -88,9 +85,6 @@ public class CollectionUtils {
 	}
 
 	public static List<String> join(Map<String, String> map, String separator) {
-		if (map == null) {
-			return null;
-		}
 		List<String> list = new ArrayList<String>();
 		if (map == null || map.size() == 0) {
 			return list;

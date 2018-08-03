@@ -12,6 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+/**
+ * @author goodjava@qq.com
+ */
 @RpcFilter(group = {Constants.CONSUMER})
 public class DemoClientFilter implements Filter {
 

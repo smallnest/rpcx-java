@@ -8,6 +8,9 @@ import com.colobu.rpcx.rpc.impl.ConsumerConfig;
 import com.colobu.rpcx.service.IArith;
 
 
+/**
+ * @author goodjava@qq.com
+ */
 public class Client {
 
     public static void main(String... args) {

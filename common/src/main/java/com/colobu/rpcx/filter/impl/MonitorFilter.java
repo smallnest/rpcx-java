@@ -61,7 +61,6 @@ public class MonitorFilter implements Filter {
             String application = invoker.getUrl().getParameter(Constants.APPLICATION_KEY);
             String service = invoker.getInterface().getName(); // 获取服务名称
             String method = invocation.getMethodName(); // 获取方法名
-            URL url = invoker.getUrl().getUrlParameter(Constants.MONITOR_KEY);
             int localPort;
             String remoteKey;
             String remoteValue;

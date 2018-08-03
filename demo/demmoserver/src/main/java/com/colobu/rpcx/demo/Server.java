@@ -6,7 +6,7 @@ import com.colobu.rpcx.server.ZkServiceRegister;
 
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class Server {
 

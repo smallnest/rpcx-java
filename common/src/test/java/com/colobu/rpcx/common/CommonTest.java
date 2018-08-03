@@ -26,7 +26,7 @@ public class CommonTest {
 
     @Test
     public void testCode() {
-        RemotingCommand c =  RemotingCommand.createResponseCommand();
+        RemotingCommand c = RemotingCommand.createResponseCommand();
         c.markOnewayRPC();
         System.out.println(c.isOnewayRPC());
     }
@@ -41,7 +41,6 @@ public class CommonTest {
         System.out.println(ReflectUtils.desc2name(desc));
 
 
-
         System.out.println(ReflectUtils.getName(int.class));
 
         System.out.println(ReflectUtils.name2class("int"));
@@ -52,15 +51,15 @@ public class CommonTest {
 
     @Test
     public void getDesc() {
-         String desc = ReflectUtils.getDesc(new byte[]{}.getClass());
-         System.out.println(desc);
+        String desc = ReflectUtils.getDesc(new byte[]{}.getClass());
+        System.out.println(desc);
     }
 
 
     @Test
     public void testRetry() {
         RetryPolicy retryPolicy = new RetryNTimes(10);
-        retryPolicy.retry((i)->{
+        retryPolicy.retry((i) -> {
             System.out.println(i);
             if (i == 3) {
                 return true;
@@ -77,7 +76,7 @@ public class CommonTest {
 
 
     @Test
-    public void testClassPathResource()  {
+    public void testClassPathResource() {
         System.out.println(new ClassPathResource("test").getString());
         System.out.println(new ClassPathResource("test").getProperties().getProperty("2"));
     }
@@ -85,14 +84,14 @@ public class CommonTest {
 
     class E {
         public E() {
-            Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(()->{
+            Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
                 System.out.println("schedule");
-            },10,1,TimeUnit.SECONDS);
+            }, 10, 1, TimeUnit.SECONDS);
 
             Executors.newSingleThreadScheduledExecutor()
-                .scheduleWithFixedDelay(() -> {
-                    System.out.println("schedule");
-        }, 0, 5, TimeUnit.SECONDS);
+                    .scheduleWithFixedDelay(() -> {
+                        System.out.println("schedule");
+                    }, 0, 5, TimeUnit.SECONDS);
         }
     }
 
@@ -111,8 +110,12 @@ public class CommonTest {
         switch (i) {
             case 12:
                 System.out.println(12);
+                break;
             case 13:
                 System.out.println(13);
+                break;
+            default:
+                System.out.println(14);
         }
     }
 
@@ -146,7 +149,7 @@ public class CommonTest {
         String str = new Gson().toJson(i);
         System.out.println(str);
 
-        int i2 = new Gson().fromJson(str,int.class);
+        int i2 = new Gson().fromJson(str, int.class);
         System.out.println(i2);
     }
 

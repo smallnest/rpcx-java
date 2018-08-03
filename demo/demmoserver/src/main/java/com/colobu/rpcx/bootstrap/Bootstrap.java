@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
+/**
+ * @author goodjava@qq.com
+ */
 @EnableAutoConfiguration
 @ComponentScan(basePackages = {"com.colobu.rpcx"})
 @RestController

@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+/**
+ * @author goodjava@qq.com
+ */
 @RestController
 public class TestController {
 
@@ -66,14 +69,9 @@ public class TestController {
     public String async() throws InterruptedException {
         testService.hi("abc");
         ResponseFuture<String> f1 = RpcContext.getContext().getFuture();
-
-//        String s = f1.get();
-//        System.out.println(s);
         System.out.println(111111111111L);
         testService.hi("def");
         ResponseFuture<String> f2 = RpcContext.getContext().getFuture();
-//        s = f2.get();
-//        System.out.println(s);
         System.out.println(2222222222L);
         String s1 = f1.get(6000);
         String s2 = f2.get(6000);
