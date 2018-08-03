@@ -22,9 +22,9 @@ import java.util.Set;
 import java.util.concurrent.*;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
-@RpcFilter(group = {Constants.PROVIDER})
+@RpcFilter(group = {Constants.PROVIDER},order = -999)
 public class AccessLogFilter implements Filter {
 
     private static final Logger logger = LoggerFactory.getLogger(AccessLogFilter.class);

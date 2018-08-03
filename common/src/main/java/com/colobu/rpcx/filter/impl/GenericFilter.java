@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 /**
  * @author goodjava@qq.com
  */
-@RpcFilter(group = {Constants.PROVIDER}, order = -999)
+@RpcFilter(group = {Constants.PROVIDER}, order = -1000)
 public class GenericFilter implements Filter {
 
     @Override
