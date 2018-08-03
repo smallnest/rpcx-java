@@ -8,6 +8,7 @@ import com.colobu.rpcx.protocol.Message;
 import com.colobu.rpcx.protocol.MessageType;
 import com.colobu.rpcx.protocol.SerializeType;
 import com.colobu.rpcx.rpc.*;
+import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,10 +31,11 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
     private URL url;
 
     public RpcConsumerInvoker(IClient client, RpcInvocation invocation) {
+        Gson gson = new Gson();
         this.client = client;
         this.url = new URL("rpcx", "", 0);
         url.setServiceInterface(invocation.getClassName() + "" + invocation.getMethodName());
-        String params = Stream.of(invocation.getParameterTypeNames()).collect(Collectors.joining(","));
+        String params = Stream.of(invocation.getArguments()).map(it -> gson.toJson(it)).collect(Collectors.joining(","));
         this.url.setPath(invocation.getClassName() + "." + invocation.getMethodName() + "(" + params + ")");
     }
 
