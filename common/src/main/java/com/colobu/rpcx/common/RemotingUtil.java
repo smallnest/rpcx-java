@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class RemotingUtil {
     public static final String OS_NAME = System.getProperty("os.name");

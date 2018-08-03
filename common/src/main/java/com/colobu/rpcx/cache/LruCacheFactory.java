@@ -5,7 +5,7 @@ import com.colobu.rpcx.cache.impl.LruCache;
 import com.colobu.rpcx.rpc.URL;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class LruCacheFactory extends AbstractCacheFactory {
 

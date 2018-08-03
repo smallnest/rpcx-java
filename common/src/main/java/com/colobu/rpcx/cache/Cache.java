@@ -1,7 +1,7 @@
 package com.colobu.rpcx.cache;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public interface Cache {
 

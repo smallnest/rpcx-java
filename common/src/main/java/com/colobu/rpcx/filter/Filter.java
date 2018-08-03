@@ -1,14 +1,12 @@
 package com.colobu.rpcx.filter;
 
-
 import com.colobu.rpcx.rpc.Invoker;
 import com.colobu.rpcx.rpc.Result;
 import com.colobu.rpcx.rpc.RpcException;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
 
-
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public interface Filter {
 

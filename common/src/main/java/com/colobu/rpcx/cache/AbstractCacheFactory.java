@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public abstract class AbstractCacheFactory implements CacheFactory {
     

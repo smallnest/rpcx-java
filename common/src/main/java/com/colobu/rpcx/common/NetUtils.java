@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class NetUtils {
     
@@ -95,7 +95,7 @@ public class NetUtils {
     public static boolean isLocalHost(String host) {
         return host != null 
                 && (LOCAL_IP_PATTERN.matcher(host).matches() 
-                        || host.equalsIgnoreCase("localhost"));
+                        || "localhost".equalsIgnoreCase(host));
     }
 
     public static boolean isAnyHost(String host) {
@@ -105,8 +105,8 @@ public class NetUtils {
     public static boolean isInvalidLocalHost(String host) {
         return host == null 
         			|| host.length() == 0
-                    || host.equalsIgnoreCase("localhost")
-                    || host.equals("0.0.0.0")
+                    || "localhost".equalsIgnoreCase(host)
+                    || "0.0.0.0".equals(host)
                     || (LOCAL_IP_PATTERN.matcher(host).matches());
     }
     

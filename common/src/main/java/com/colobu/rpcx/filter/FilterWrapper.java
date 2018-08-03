@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class FilterWrapper {
 

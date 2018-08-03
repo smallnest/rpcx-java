@@ -1,7 +1,7 @@
 package com.colobu.rpcx.exception;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class RemotingTimeoutException extends RemotingException {
 

@@ -5,7 +5,7 @@ import io.netty.channel.Channel;
 import java.net.SocketAddress;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class RemotingHelper {
 

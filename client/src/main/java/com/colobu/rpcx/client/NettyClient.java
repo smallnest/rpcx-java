@@ -2,6 +2,7 @@ package com.colobu.rpcx.client;
 
 import com.colobu.rpcx.client.impl.RandomSelector;
 import com.colobu.rpcx.common.InvokeCallback;
+import com.colobu.rpcx.common.NamedThreadFactory;
 import com.colobu.rpcx.common.RemotingHelper;
 import com.colobu.rpcx.common.SemaphoreReleaseOnlyOnce;
 import com.colobu.rpcx.config.Constants;
@@ -29,13 +30,11 @@ import java.net.SocketAddress;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class NettyClient extends NettyRemotingAbstract implements IClient {
 
@@ -73,8 +72,8 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
             }
         });
 
-        this.defaultEventExecutorGroup = new DefaultEventExecutorGroup(//
-                nettyClientConfig.getClientWorkerThreads(), //
+        this.defaultEventExecutorGroup = new DefaultEventExecutorGroup(
+                nettyClientConfig.getClientWorkerThreads(),
                 new ThreadFactory() {
                     private AtomicInteger threadIndex = new AtomicInteger(0);
 
@@ -85,7 +84,7 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
                 });
 
 
-        this.bootstrap = new Bootstrap().group(this.eventLoopGroupWorker).channel(NioSocketChannel.class)//
+        this.bootstrap = new Bootstrap().group(this.eventLoopGroupWorker).channel(NioSocketChannel.class)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.SO_KEEPALIVE, false)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, nettyClientConfig.getConnectTimeoutMillis())
@@ -98,25 +97,29 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
                                 defaultEventExecutorGroup,
                                 new NettyEncoder(),
                                 new NettyDecoder(),
-                                new IdleStateHandler(0, 0, nettyClientConfig.getClientChannelMaxIdleTimeSeconds()), //*空闲状态的handler
-                                new NettyConnetManageHandler(NettyClient.this), //管理连接的
-                                new NettyClientHandler(NettyClient.this));//* 处理具体业务逻辑的handler
+                                //*空闲状态的handler
+                                new IdleStateHandler(0, 0, nettyClientConfig.getClientChannelMaxIdleTimeSeconds()),
+                                //管理连接的
+                                new NettyConnetManageHandler(NettyClient.this),
+                                //处理具体业务逻辑的handler
+                                new NettyClientHandler(NettyClient.this));
                     }
                 });
 
-        Timer timer = new Timer("ClientHouseKeepingService", true);
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                try {
-                    NettyClient.this.scanResponseTable();//* 查询response表
-                } catch (Exception e) {
-                    logger.error("scanResponseTable exception", e);
-                }
-            }
-        }, 1000 * 3, 1000);
 
-        if (this.channelEventListener != null) {//* netty 事件的处理
+        ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("ClientHouseKeepingService"));
+
+        executor.scheduleAtFixedRate(()->{
+            try {
+                NettyClient.this.scanResponseTable();//* 查询response表
+            } catch (Exception e) {
+                logger.error("scanResponseTable exception", e);
+            }
+        },3000,3000,TimeUnit.MILLISECONDS);
+
+
+        //* netty 事件的处理
+        if (this.channelEventListener != null) {
             this.nettyEventExecuter.run();
         }
     }
@@ -141,8 +144,10 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
         final RemotingCommand request = RemotingCommand.createRequestCommand(1);
         request.setMessage(req);
         long timeoutMillis = timeOut;
-        final Channel channel = this.getAndCreateChannel(addr);//* 获取或者创建channel
-        RemotingCommand response = this.invokeSyncImpl(channel, request, timeoutMillis);//* 同步执行
+        //获取或者创建channel
+        final Channel channel = this.getAndCreateChannel(addr);
+        //同步执行
+        RemotingCommand response = this.invokeSyncImpl(channel, request, timeoutMillis);
         return response.getMessage();
     }
 
@@ -157,6 +162,7 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
     }
 
 
+    @Override
     public Message call(Message req, long timeoutMillis) throws Exception {
         logger.info("remote call:{} begin", req.getServiceMethod());
         long begin = System.currentTimeMillis();
@@ -174,7 +180,8 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
         if (null == addr) {
             throw new RuntimeException("addr error");
         }
-        final Channel channel = this.getAndCreateChannel(addr);//* 获取或者创建channel
+        //获取或者创建channel
+        final Channel channel = this.getAndCreateChannel(addr);
 
         String host = "";
         int port = 0;
@@ -356,10 +363,10 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
             return responseFuture;
         } else {
             String info =
-                    String.format("invokeAsyncImpl tryAcquire semaphore timeout, %dms, waiting thread nums: %d semaphoreAsyncValue: %d", //
-                            timeoutMillis, //
-                            this.semaphoreAsync.getQueueLength(), //
-                            this.semaphoreAsync.availablePermits()//
+                    String.format("invokeAsyncImpl tryAcquire semaphore timeout, %dms, waiting thread nums: %d semaphoreAsyncValue: %d",
+                            timeoutMillis,
+                            this.semaphoreAsync.getQueueLength(),
+                            this.semaphoreAsync.availablePermits()
                     );
             logger.warn(info);
             throw new RemotingTooMuchRequestException(info);
@@ -375,8 +382,8 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
             final ResponseFuture responseFuture = new ResponseFuture(opaque, timeoutMillis, null, null);
             this.responseTable.put(opaque, responseFuture);
             final SocketAddress addr = channel.remoteAddress();
-
-            channel.writeAndFlush(request).addListener(new ChannelFutureListener() {//* 通过网络发送信息
+            //通过网络发送信息
+            channel.writeAndFlush(request).addListener(new ChannelFutureListener() {
                 @Override
                 public void operationComplete(ChannelFuture f) throws Exception {
                     if (f.isSuccess()) {
@@ -385,15 +392,15 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
                     } else {
                         responseFuture.setSendRequestOK(false);
                     }
-
-                    responseTable.remove(opaque);//* 发送失败responseTable中直接删除
+                    //发送失败responseTable中直接删除
+                    responseTable.remove(opaque);
                     responseFuture.setCause(f.cause());
                     responseFuture.putResponse(null);
                     logger.warn("send a request command to channel <" + addr + "> failed.");
                 }
             });
-
-            RemotingCommand responseCommand = responseFuture.waitResponse(timeoutMillis);//* 这里会直接阻塞住(CountDownLatch)
+            //这里会直接阻塞住(CountDownLatch)
+            RemotingCommand responseCommand = responseFuture.waitResponse(timeoutMillis);
             if (null == responseCommand) {
                 if (responseFuture.isSendRequestOK()) {
                     throw new RemotingTimeoutException(addr.toString(), timeoutMillis,
@@ -409,6 +416,7 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
     }
 
 
+    @Override
     public void putNettyEvent(final NettyEvent event) {
         this.nettyEventExecuter.putNettyEvent(event);
     }

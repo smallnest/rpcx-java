@@ -1,7 +1,7 @@
 package com.colobu.rpcx.common;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class Pair<T1, T2> {
     private T1 object1;

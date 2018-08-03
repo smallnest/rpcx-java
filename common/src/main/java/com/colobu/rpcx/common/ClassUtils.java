@@ -1,8 +1,7 @@
 package com.colobu.rpcx.common;
 
-
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class ClassUtils {
 

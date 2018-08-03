@@ -69,12 +69,12 @@ public class TestController {
 
 //        String s = f1.get();
 //        System.out.println(s);
-        System.out.println(111111111111l);
+        System.out.println(111111111111L);
         testService.hi("def");
         ResponseFuture<String> f2 = RpcContext.getContext().getFuture();
 //        s = f2.get();
 //        System.out.println(s);
-        System.out.println(2222222222l);
+        System.out.println(2222222222L);
         String s1 = f1.get(6000);
         String s2 = f2.get(6000);
         String result = s1 + s2;

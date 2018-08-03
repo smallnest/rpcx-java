@@ -13,7 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public final class StringUtils {
 
@@ -21,7 +21,8 @@ public final class StringUtils {
 
     public static final String[] EMPTY_STRING_ARRAY = new String[0];
 
-    private static final Pattern KVP_PATTERN = Pattern.compile("([_.a-zA-Z0-9][-_.a-zA-Z0-9]*)[=](.*)"); //key value pair pattern.
+    //key value pair pattern.
+    private static final Pattern KVP_PATTERN = Pattern.compile("([_.a-zA-Z0-9][-_.a-zA-Z0-9]*)[=](.*)");
 
     private static final Pattern INT_PATTERN = Pattern.compile("^\\d+$");
 

@@ -1,7 +1,7 @@
 package com.colobu.rpcx.exception;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class RemotingTooMuchRequestException extends RemotingException {
     private static final long serialVersionUID = 4326919581254519654L;

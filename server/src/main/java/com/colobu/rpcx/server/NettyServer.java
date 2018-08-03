@@ -20,15 +20,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.function.Function;
 
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class NettyServer extends NettyRemotingAbstract {
 
@@ -42,13 +39,15 @@ public class NettyServer extends NettyRemotingAbstract {
 
     private final CountDownLatch latch = new CountDownLatch(1);
 
-    private final Timer timer = new Timer("ServerHouseKeepingService", true);
+    private final ScheduledThreadPoolExecutor timer = new ScheduledThreadPoolExecutor(1,new NamedThreadFactory("timer"));
 
     private final EventLoopGroup eventLoopGroupBoss;
     private final EventLoopGroup eventLoopGroupSelector;
     private final NettyServerConfig nettyServerConfig;
 
-    //如果使用ioc容器,这里需要注入获取bean的 function
+    /**
+     * 如果使用ioc容器,这里需要注入获取bean的 function
+     */
     private Function<Class, Object> getBeanFunc;
 
     public NettyServer() {
@@ -61,12 +60,14 @@ public class NettyServer extends NettyRemotingAbstract {
 
     public void start() {
         //默认的处理器
-        this.defaultRequestProcessor = new Pair<>(new RpcProcessor(this.getBeanFunc), Executors.newFixedThreadPool(50));
-        DefaultEventExecutorGroup defaultEventExecutorGroup = new DefaultEventExecutorGroup(//
-                nettyServerConfig.getServerWorkerThreads(), new NamedThreadFactory("NettyServerCodecThread_",false));
+        this.defaultRequestProcessor = new Pair<>(new RpcProcessor(this.getBeanFunc), new ThreadPoolExecutor(50, 50,
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(),new NamedThreadFactory("defaultRequestProcessor")));
+        DefaultEventExecutorGroup defaultEventExecutorGroup = new DefaultEventExecutorGroup(
+                nettyServerConfig.getServerWorkerThreads(), new NamedThreadFactory("NettyServerCodecThread_", false));
 
 
-        ServerBootstrap childHandler = //
+        ServerBootstrap childHandler =
                 this.serverBootstrap.group(this.eventLoopGroupBoss, this.eventLoopGroupSelector).channel(NioServerSocketChannel.class)
                         .option(ChannelOption.SO_BACKLOG, 1024)
                         .option(ChannelOption.SO_REUSEADDR, true)
@@ -79,11 +80,11 @@ public class NettyServer extends NettyRemotingAbstract {
                             @Override
                             public void initChannel(SocketChannel ch) throws Exception {
                                 ch.pipeline().addLast(
-                                        defaultEventExecutorGroup, //
-                                        new NettyEncoder(), //
-                                        new NettyDecoder(), //
-                                        new IdleStateHandler(0, 0, nettyServerConfig.getServerChannelMaxIdleTimeSeconds()), //
-                                        new NettyConnetManageHandler(NettyServer.this), //
+                                        defaultEventExecutorGroup,
+                                        new NettyEncoder(),
+                                        new NettyDecoder(),
+                                        new IdleStateHandler(0, 0, nettyServerConfig.getServerChannelMaxIdleTimeSeconds()),
+                                        new NettyConnetManageHandler(NettyServer.this),
                                         new NettyServerHandler(NettyServer.this));
                             }
                         });
@@ -107,24 +108,23 @@ public class NettyServer extends NettyRemotingAbstract {
             this.nettyEventExecuter.run();
         }
 
-        this.timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                try {
-                } catch (Exception e) {
-                    NettyServer.this.scanResponseTable();
-                    logger.error("scanResponseTable exception", e);
-                }
+        this.timer.scheduleAtFixedRate(() -> {
+            try {
+            } catch (Exception e) {
+                NettyServer.this.scanResponseTable();
+                logger.error("scanResponseTable exception", e);
             }
-        }, 1000 * 3, 1000);
+        }, 1000, 3000, TimeUnit.MILLISECONDS);
 
+        addShutdownHook();
+    }
 
+    private void addShutdownHook() {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             logger.info("shutdown begin");
             latch.countDown();
             logger.info("shutdown end");
         }));
-
     }
 
     public void await() {

@@ -17,6 +17,7 @@ import java.util.Map;
 
 /**
  * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 @RpcFilter(order = -2000, group = {Constants.PROVIDER})
 public class ContextFilter implements Filter {
@@ -40,12 +41,10 @@ public class ContextFilter implements Filter {
                 .setInvoker(invoker)
                 .setInvocation(invocation)
                 .setAttachments(attachments)
-                .setRemoteAddress(invocation.getUrl().getAddress(),invocation.getUrl().getPort())
+                .setRemoteAddress(invocation.getUrl().getAddress(), invocation.getUrl().getPort())
                 .setLocalAddress(invoker.getUrl().getHost(),
                         invoker.getUrl().getPort());
-        if (invocation instanceof RpcInvocation) {
-            invocation.setInvoker(invoker);
-        }
+        invocation.setInvoker(invoker);
         try {
             return invoker.invoke(invocation);
         } finally {

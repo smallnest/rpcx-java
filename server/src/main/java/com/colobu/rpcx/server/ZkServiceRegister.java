@@ -7,10 +7,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class ZkServiceRegister implements IServiceRegister {
 
@@ -25,10 +26,13 @@ public class ZkServiceRegister implements IServiceRegister {
         this.addr = addr;
 
         logger.info("export service names:{}", this.serviceNameSet);
-        this.serviceNameSet = new Exporter().export(providerPackage);//导出所有有注解的service
+        //导出所有有注解的service
+        this.serviceNameSet = new Exporter().export(providerPackage);
     }
 
-    //服务注册
+    /**
+     * 服务注册
+     */
     @Override
     public void register() {
         try {
@@ -38,10 +42,12 @@ public class ZkServiceRegister implements IServiceRegister {
         }
     }
 
-    //周期性的注册
+    /**
+     * 周期性的注册
+     */
     @Override
     public void start() {
-        Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(() -> {
+        new ScheduledThreadPoolExecutor(1).scheduleWithFixedDelay(() -> {
             register();
         }, 0, 5, TimeUnit.SECONDS);
     }

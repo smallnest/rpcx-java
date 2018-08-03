@@ -28,7 +28,7 @@ public class CacheFilter implements Filter {
     @Override
     public Result invoke(Invoker<?> invoker, RpcInvocation invocation) throws RpcException {
         logger.debug("CacheFilter begin");
-        if (invoker.getUrl().getParameter(Constants.CACHE_KEY).equals("true")) {
+        if ("true".equals(invoker.getUrl().getParameter(Constants.CACHE_KEY))) {
             Cache cache = factory.getCache(invoker.getUrl());
             if (cache != null) {
                 String key = StringUtils.toArgumentString(invocation.getArguments());

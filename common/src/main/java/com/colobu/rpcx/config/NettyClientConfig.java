@@ -1,7 +1,7 @@
 package com.colobu.rpcx.config;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class NettyClientConfig {
     private int clientWorkerThreads = 4;

@@ -1,5 +1,6 @@
 package com.colobu.rpcx.client;
 
+import com.colobu.rpcx.common.NamedThreadFactory;
 import com.colobu.rpcx.rpc.impl.ConsumerFinder;
 import com.colobu.rpcx.utils.PathStatus;
 import com.colobu.rpcx.utils.ZkClient;
@@ -9,10 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -75,7 +73,7 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
         });
 
 
-        Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(() -> {
+        new ScheduledThreadPoolExecutor(1,new NamedThreadFactory("provider_info")).scheduleWithFixedDelay(() -> {
             logger.info("provider info:{}", this.map);
         }, 0, 5, TimeUnit.SECONDS);
         try {
@@ -105,12 +103,12 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
                     String service = ps.getPath().replace(this.basePath, "");
 
                     if (this.map.containsKey(service)) {
-                        if (ps.getType().equals("CHILD_ADDED")) {
+                        if ("CHILD_ADDED".equals(ps.getType())) {
                             this.map.compute(service, (k, v) -> {
                                 v.add(ps.getValue());
                                 return v;
                             });
-                        } else if (ps.getType().equals("CHILD_REMOVED")) {
+                        } else if ("CHILD_REMOVED".equals(ps.getType())) {
                             this.map.compute(service, (k, v) -> {
                                 v.remove(ps.getValue());
                                 return v;

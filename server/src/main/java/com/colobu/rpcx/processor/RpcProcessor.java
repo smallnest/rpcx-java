@@ -39,7 +39,7 @@ public class RpcProcessor implements NettyRequestProcessor {
 
         RpcInvocation invocation = null;
         //golang 调用
-        if (null == language || !language.equals("java")) {//golang 自己组装invocation
+        if (null == language || !"java".equals(language)) {//golang 自己组装invocation
             Message reqMsg = request.getMessage();
             invocation = new RpcInvocation();
             invocation.setClassName(reqMsg.servicePath);

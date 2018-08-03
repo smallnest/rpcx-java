@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class ConcurrentHashSet<E> extends AbstractSet<E> implements Set<E>, java.io.Serializable {
 

@@ -3,7 +3,7 @@ package com.colobu.rpcx.common;
 import java.util.Properties;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class Config {
 
