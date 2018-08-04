@@ -11,9 +11,9 @@ import com.colobu.rpcx.rpc.impl.RpcInvocation;
 import com.colobu.rpcx.rpc.impl.RpcResult;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
-@RpcFilter(order = -997, group = {Constants.PROVIDER})
+@RpcFilter(order = -2001, group = {Constants.PROVIDER})
 public class EchoFilter implements Filter {
 
     @Override

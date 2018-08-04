@@ -76,8 +76,9 @@ public class RpcxConsumer {
      *
      * @return
      */
-    public String echo(String str) {
+    public String echo(String className, String str) {
         RpcInvocation invocation = new RpcInvocation();
+        invocation.setClassName(className);
         invocation.setMethodName(Constants.$ECHO);
         invocation.setParameterTypeNames(new String[]{ReflectUtils.getName(String.class)});
         invocation.setTimeOut(1000);

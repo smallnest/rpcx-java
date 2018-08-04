@@ -10,6 +10,9 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+/**
+ * @author goodjava@qq.com
+ */
 public class DefaultTPSLimiter implements TPSLimiter {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultTPSLimiter.class);

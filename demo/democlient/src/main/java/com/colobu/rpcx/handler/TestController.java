@@ -49,7 +49,7 @@ public class TestController {
      */
     @GetMapping("/echo")
     public String echo(String word) {
-        String s = consumer.echo(word);
+        String s = consumer.echo("com.colobu.rpcx.service.TestService", word);
         return s;
     }
 
