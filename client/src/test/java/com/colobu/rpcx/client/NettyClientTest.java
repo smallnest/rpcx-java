@@ -31,7 +31,7 @@ public class NettyClientTest {
         req.payload = "world".getBytes("UTF-8");
 
         NettyClient client = new NettyClient(null);
-        Message res = client.call("10.231.72.75:8976", req);
+        Message res = client.call("192.168.31.82:8997", req);
         System.out.println(new String(res.payload));
     }
 

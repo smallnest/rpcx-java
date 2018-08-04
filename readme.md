@@ -45,7 +45,7 @@ import (
 )
 
 var (
-	addr = flag.String("addr", "localhost:8972", "server address")
+	addr = flag.String("addr", "192.168.31.82:8997", "server address")
 )
 
 type Echo int
@@ -73,33 +73,23 @@ go run main.go
 Then you can write the java client:
 
 ```java
-    public void call() throws Exception {
-        //prepare req
-        Message req = new Message("echo", "Echo");
-        req.setVersion((byte)0);
-        req.setMessageType(MessageType.Request);
-        req.setHeartbeat(false);
-        req.setOneway(false);
-        req.setCompressType(CompressType.None);
-        req.setSerializeType(SerializeType.SerializeNone);
-        req.setSeq(12345678);
-
-        req.metadata.put("test", "1234");
-
-        try {
+    @Test
+        public void testSendMsg() throws Exception {
+            Message req = new Message("Echo", "Echo");
+            req.setVersion((byte) 0);
+            req.setMessageType(MessageType.Request);
+            req.setHeartbeat(false);
+            req.setOneway(false);
+            req.setCompressType(CompressType.None);
+            req.setSerializeType(SerializeType.SerializeNone);
+            req.setSeq(123);
+            req.metadata.put("test", "1234");
             req.payload = "world".getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            fail("failed to get UTF-8 bytes");
+
+            NettyClient client = new NettyClient(null);
+            Message res = client.call("192.168.31.82:8997", req);
+            System.out.println(new String(res.payload));
         }
-
-
-        // create the client
-        Client client = new Client();
-        client.connect("127.0.0.1", 8972);
-        Message res = client.call(req);
-        
-        // handle response
-    }
 ```
 
 
@@ -127,3 +117,4 @@ Then you can write the java client:
 - 支持client端重试
 - 支持调用数据采集
 - 支持结果缓存
+- 支持热更新
