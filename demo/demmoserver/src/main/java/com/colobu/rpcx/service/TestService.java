@@ -26,7 +26,7 @@ public class TestService implements ITestService {
 //        } catch (InterruptedException e) {
 //            e.printStackTrace();
 //        }
-        return "hi " + str;
+        return "hi ####" + str;
     }
 
     //不会调过来(echo 的会呗echo filter 拦截下来)

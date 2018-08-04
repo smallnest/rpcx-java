@@ -16,14 +16,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.UUID;
 
 /**
  * @author goodjava@qq.com
+ * 支持热更新
  */
-@RpcFilter(order = -997, group = {Constants.PROVIDER})
+@RpcFilter(order = -2002, group = {Constants.PROVIDER})
 public class HotDeployFilter implements Filter {
 
     private static final Logger logger = LoggerFactory.getLogger(HotDeployFilter.class);
@@ -42,11 +45,10 @@ public class HotDeployFilter implements Filter {
                 throw new RpcException("token error");
             }
 
-
             byte[] classData = (byte[]) arguments[2];
             String uuid = UUID.randomUUID().toString();
             String file = "/tmp/" + uuid;
-            String pid = "";
+            String pid = getPid();
             logger.info("className:{} file:{} pid:{} data len:{}", className, file, pid, classData.length);
             try {
                 Files.write(Paths.get(file), classData);
@@ -55,10 +57,23 @@ public class HotDeployFilter implements Filter {
             }
             new AgentLoader().loadAgent(pid, Config.ins().get("rpcx_agent_path"), file + "__" + className);
 
+            try {
+                Files.delete(Paths.get(file));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             return new RpcResult("Finish");
         }
 
         return invoker.invoke(inv);
+    }
+
+
+    public String getPid() {
+        RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
+        // format: "pid@hostname"
+        String name = runtime.getName();
+        return name.substring(0, name.indexOf('@'));
     }
 
 }

@@ -72,12 +72,12 @@ public class RpcxConsumer {
     }
 
 
-    public String deploy(String className, String classPath,String token) throws IOException {
+    public String deploy(String className, String classPath, String token) throws IOException {
         RpcInvocation invocation = new RpcInvocation();
         invocation.setMethodName(Constants.$HOT_DEPLOY);
         invocation.setClassName(className);
 
-        String[]paramNames = new String[3];
+        String[] paramNames = new String[3];
         paramNames[0] = ReflectUtils.getName(String.class);
         paramNames[1] = ReflectUtils.getName(String.class);
         paramNames[2] = ReflectUtils.getName(byte[].class);
@@ -86,7 +86,7 @@ public class RpcxConsumer {
         invocation.setTimeOut(2000);
         invocation.setRetryNum(1);
         byte[] classData = Files.readAllBytes(Paths.get(classPath));
-        Object[]params = new Object[]{className,token,classData};
+        Object[] params = new Object[]{className, token, classData};
         invocation.setArguments(params);
         RpcConsumerInvoker invoker = new RpcConsumerInvoker(client, invocation);
         Result result = invoker.invoke(invocation);

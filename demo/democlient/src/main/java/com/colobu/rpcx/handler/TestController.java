@@ -9,6 +9,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
+
 /**
  * @author goodjava@qq.com
  */
@@ -79,6 +81,18 @@ public class TestController {
         String result = s1 + s2;
         return result;
     }
+
+    /**
+     * 测试热更新
+     * @return
+     * @throws IOException
+     */
+    @GetMapping("/deploy")
+    public String deploy() throws IOException {
+        Object s = consumer.deploy("com.colobu.rpcx.service.TestService","/Users/zhangzhiyong/IdeaProjects/rpcx-java/demo/demmoserver/target/classes/com/colobu/rpcx/service/TestService.class","123abc");
+        return s.toString();
+    }
+
 
 
 }
