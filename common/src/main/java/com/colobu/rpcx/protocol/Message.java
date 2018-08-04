@@ -1,7 +1,6 @@
 package com.colobu.rpcx.protocol;
 
 import lombok.Data;
-import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -11,14 +10,14 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 @Data
 public class Message {
 
     public static byte magicNumber = 0x08;
 
-    byte[] header;
+    public byte[] header;
     public String servicePath;
     public String serviceMethod;
     public Map<String, String> metadata;
@@ -76,7 +75,7 @@ public class Message {
     }
 
     public void setMessageType(byte type) {
-            header[2] = type;
+        header[2] = type;
     }
 
 
@@ -123,7 +122,7 @@ public class Message {
 
     public void setMessageStatusType(MessageStatusType mst) {
         int v = mst.value();
-        header[2] &=  ~0x03;
+        header[2] &= ~0x03;
         header[2] |= v & 0x03;
     }
 
@@ -150,111 +149,52 @@ public class Message {
         buf.putLong(seq);
     }
 
-    /**
-     * decode from an inputstream and fill this message with it.
-     *
-     * @param in input data
-     * @throws Exception
-     */
-    public void decode(InputStream in) throws Exception {
-        int magic = in.read();
-        if (magic != magicNumber) {
-            throw new Exception("read wrong magic number: " + magic);
-        }
-        header[0] = magicNumber;
 
-        int n = IOUtils.read(in, header, 1, header.length - 1);
-        if (n != header.length - 1) {
-            throw new Exception("read wrong header length: " + n);
-        }
-
-        //byte [] bytes = ByteBuffer.allocate(4).putInt(17291729).array();
-        //byte [] bytes = { 1, 7, -39, -47 };
-        //System.out.println(ByteBuffer.wrap(bytes).getInt());
-
-        byte[] lenBytes = new byte[4];
-        n = IOUtils.read(in, lenBytes);
-        if (n != 4) {
-            throw new Exception("read wrong total length: " + n);
-        }
-        int totalLen = ByteBuffer.wrap(lenBytes).getInt();
-
-        byte[] data = new byte[totalLen];
-        n = IOUtils.read(in, data);
-        if (n != totalLen) {
-            throw new Exception("read wrong data length: " + n);
-        }
-
-        ByteBuffer buf = ByteBuffer.wrap(data);
-        int len = buf.getInt();
-        byte[] b = new byte[len];
-        buf.get(b);
-        servicePath = new String(b, "UTF-8");
-        len = buf.getInt();
-        b = new byte[len];
-        buf.get(b);
-        serviceMethod = new String(b, "UTF-8");
-
-        len = buf.getInt();
-        b = new byte[len];
-        buf.get(b);
-        decodeMetadata(b);
-
-        len = buf.getInt();
-        payload = new byte[len];
-        buf.get(payload);
-
-        //decompress
-        if (getCompressType() == CompressType.Gzip) {
-            GZIPInputStream zipStream = new GZIPInputStream(new ByteArrayInputStream(payload));
-
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            int ll;
-            while ((ll = zipStream.read(buffer)) != -1) {
-                bos.write(buffer, 0, len);
-            }
-            payload = bos.toByteArray();
-        }
+    private byte[] compress() throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        GZIPOutputStream zipStream = new GZIPOutputStream(bos);
+        zipStream.write(payload);
+        return bos.toByteArray();
     }
 
+
     /**
-     * encode this message to a byte array.
+     * 编码
      *
-     * @return encoded data for this message.
+     * @return
      * @throws Exception
      */
     public byte[] encode() throws Exception {
-        ByteArrayOutputStream os = new ByteArrayOutputStream(24);
-        os.write(header);
-
-        //compress
         if (getCompressType() == CompressType.Gzip) {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            GZIPOutputStream zipStream = new GZIPOutputStream(bos);
-            zipStream.write(payload);
-            payload = bos.toByteArray();
+            this.payload = compress();
         }
 
         byte[] spBytes = servicePath.getBytes("UTF-8");
         byte[] smBytes = serviceMethod.getBytes("UTF-8");
         byte[] metaBytes = encodeMetadata();
-        int totalLen = spBytes.length + 4 + smBytes.length + 4 + metaBytes.length + 4 + payload.length + 4;
 
-        os.write(ByteBuffer.allocate(4).putInt(totalLen).array());
+        int headLen = header.length;
+        int bodyLen = spBytes.length + 4 + smBytes.length + 4 + metaBytes.length + 4 + payload.length + 4;
 
-        os.write(ByteBuffer.allocate(4).putInt(spBytes.length).array());
-        os.write(spBytes);
-        os.write(ByteBuffer.allocate(4).putInt(smBytes.length).array());
-        os.write(smBytes);
+        int capacity = headLen + 4 + bodyLen;
+        ByteBuffer buffer = ByteBuffer.allocate(capacity);
+        buffer.put(header);
 
-        os.write(ByteBuffer.allocate(4).putInt(metaBytes.length).array());
-        os.write(metaBytes);
+        buffer.putInt(bodyLen);
 
-        os.write(ByteBuffer.allocate(4).putInt(payload.length).array());
-        os.write(payload);
+        buffer.putInt(spBytes.length);
+        buffer.put(spBytes);
 
-        return os.toByteArray();
+        buffer.putInt(smBytes.length);
+        buffer.put(smBytes);
+
+        buffer.putInt(metaBytes.length);
+        buffer.put(metaBytes);
+
+        buffer.putInt(payload.length);
+        buffer.put(payload);
+
+        return buffer.array();
     }
 
     private void decodeMetadata(byte[] b) throws UnsupportedEncodingException {
@@ -309,7 +249,7 @@ public class Message {
         buffer.get(this.header);
 
 
-        int totalLen  = buffer.getInt();
+        int totalLen = buffer.getInt();
         byte[] data = new byte[totalLen];
         buffer.get(data);
 
