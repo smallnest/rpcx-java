@@ -37,7 +37,7 @@ public class TestController {
 
     @GetMapping("/sum")
     public String sum() {
-        String s = String.valueOf(testService.sum(22,33));
+        String s = String.valueOf(testService.sum(22, 33));
         return s;
     }
 
@@ -49,10 +49,9 @@ public class TestController {
      */
     @GetMapping("/echo")
     public String echo(String word) {
-        String s = testService.$echo(word);
+        String s = consumer.echo(word);
         return s;
     }
-
 
     /**
      * 泛化调用
@@ -67,6 +66,7 @@ public class TestController {
 
     /**
      * 异步模式(必须consumer 开启 异步模式)
+     *
      * @return
      * @throws InterruptedException
      */
@@ -84,15 +84,15 @@ public class TestController {
 
     /**
      * 测试热更新
+     *
      * @return
      * @throws IOException
      */
     @GetMapping("/deploy")
     public String deploy() throws IOException {
-        Object s = consumer.deploy("com.colobu.rpcx.service.TestService","/Users/zhangzhiyong/IdeaProjects/rpcx-java/demo/demmoserver/target/classes/com/colobu/rpcx/service/TestService.class","123abc");
+        Object s = consumer.deploy("com.colobu.rpcx.service.TestService", "/Users/zhangzhiyong/IdeaProjects/rpcx-java/demo/demmoserver/target/classes/com/colobu/rpcx/service/TestService.class", "123abc");
         return s.toString();
     }
-
 
 
 }

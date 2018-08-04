@@ -10,7 +10,6 @@ public interface ITestService {
 
     String hi(String str);
 
-    String $echo(String str);
 
     byte[] golangHi(byte[] data);
 

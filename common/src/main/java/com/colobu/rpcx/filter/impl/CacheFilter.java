@@ -27,11 +27,12 @@ public class CacheFilter implements Filter {
 
     @Override
     public Result invoke(Invoker<?> invoker, RpcInvocation invocation) throws RpcException {
-        logger.debug("CacheFilter begin");
         if ("true".equals(invoker.getUrl().getParameter(Constants.CACHE_KEY))) {
+            logger.debug("CacheFilter begin");
             Cache cache = factory.getCache(invoker.getUrl());
             if (cache != null) {
                 String key = StringUtils.toArgumentString(invocation.getArguments());
+                logger.info("cache key:{}", key);
                 if (cache != null && key != null) {
                     Object value = cache.get(key);
                     if (value != null) {
@@ -47,7 +48,6 @@ public class CacheFilter implements Filter {
                 }
             }
         }
-        logger.debug("CacheFilter end");
         return invoker.invoke(invocation);
     }
 

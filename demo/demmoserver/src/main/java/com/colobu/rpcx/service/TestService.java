@@ -29,10 +29,6 @@ public class TestService implements ITestService {
         return "hi ####" + str;
     }
 
-    //不会调过来(echo 的会呗echo filter 拦截下来)
-    public String $echo(String str) {
-        return null;
-    }
 
     public byte[] golangHi(byte[] data) {
         return ("hi " + new String(data)).getBytes();

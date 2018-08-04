@@ -71,7 +71,37 @@ public class RpcxConsumer {
         return result.getValue().toString();
     }
 
+    /**
+     * echo 调用
+     *
+     * @return
+     */
+    public String echo(String str) {
+        RpcInvocation invocation = new RpcInvocation();
+        invocation.setMethodName(Constants.$ECHO);
+        invocation.setParameterTypeNames(new String[]{ReflectUtils.getName(String.class)});
+        invocation.setTimeOut(1000);
+        invocation.setRetryNum(1);
+        invocation.setArguments(new String[]{str});
+        RpcConsumerInvoker invoker = new RpcConsumerInvoker(client, invocation);
+        Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.CONSUMER);
+        Result result = wrapperInvoker.invoke(invocation);
+        if (result.hasException()) {
+            throw new RuntimeException(result.getException());
+        }
+        return result.getValue().toString();
+    }
 
+
+    /**
+     * 热部署
+     *
+     * @param className
+     * @param classPath
+     * @param token
+     * @return
+     * @throws IOException
+     */
     public String deploy(String className, String classPath, String token) throws IOException {
         RpcInvocation invocation = new RpcInvocation();
         invocation.setMethodName(Constants.$HOT_DEPLOY);

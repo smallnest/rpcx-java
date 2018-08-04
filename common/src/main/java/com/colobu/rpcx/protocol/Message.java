@@ -6,7 +6,6 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -197,33 +196,12 @@ public class Message {
         return buffer.array();
     }
 
-    private void decodeMetadata(byte[] b) throws UnsupportedEncodingException {
-
-        ByteBuffer buf = ByteBuffer.wrap(b);
-        int len;
-        for (; ; ) {
-            if (buf.remaining() < 4) {
-                break;
-            }
-            len = buf.getInt();
-            b = new byte[len];
-            buf.get(b);
-            String k = new String(b, "UTF-8");
-
-            len = buf.getInt();
-            b = new byte[len];
-            buf.get(b);
-            String v = new String(b, "UTF-8");
-            metadata.put(k, v);
-        }
-
-    }
 
     private byte[] encodeMetadata() throws IOException {
         if (metadata.size() == 0) {
             return new byte[]{};
         }
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        ByteArrayOutputStream os = new ByteArrayOutputStream(20);
 
         for (Map.Entry<String, String> entry : metadata.entrySet()) {
             String key = entry.getKey();
@@ -240,50 +218,5 @@ public class Message {
         return os.toByteArray();
     }
 
-    public void decode(ByteBuffer buffer) throws Exception {
-        int magic = buffer.get();
-        if (magic != magicNumber) {
-            throw new Exception("read wrong magic number: " + magic);
-        }
-        buffer.rewind();
-        buffer.get(this.header);
 
-
-        int totalLen = buffer.getInt();
-        byte[] data = new byte[totalLen];
-        buffer.get(data);
-
-        ByteBuffer buf = ByteBuffer.wrap(data);
-        int len = buf.getInt();
-        byte[] b = new byte[len];
-        buf.get(b);
-        servicePath = new String(b, "UTF-8");
-
-        len = buf.getInt();
-        b = new byte[len];
-        buf.get(b);
-        serviceMethod = new String(b, "UTF-8");
-
-        len = buf.getInt();
-        b = new byte[len];
-        buf.get(b);
-        decodeMetadata(b);
-
-        len = buf.getInt();
-        payload = new byte[len];
-        buf.get(payload);
-
-        //decompress
-        if (getCompressType() == CompressType.Gzip) {
-            GZIPInputStream zipStream = new GZIPInputStream(new ByteArrayInputStream(payload));
-
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            byte[] buffer2 = new byte[1024];
-            int ll;
-            while ((ll = zipStream.read(buffer2)) != -1) {
-                bos.write(buffer2, 0, len);
-            }
-            payload = bos.toByteArray();
-        }
-    }
 }
