@@ -12,13 +12,14 @@ import com.google.gson.Gson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class RpcConsumerInvoker<T> implements Invoker<T> {
 
@@ -96,8 +97,23 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
     }
 
     @Override
+    public void setMethod(Method method) {
+
+    }
+
+    @Override
+    public void setInterface(Class clazz) {
+
+    }
+
+    @Override
     public URL getUrl() {
         return url;
+    }
+
+    @Override
+    public void setUrl(URL url) {
+
     }
 
     @Override

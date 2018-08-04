@@ -170,6 +170,11 @@ public class RpcxMonitor implements Monitor {
     }
 
     @Override
+    public void setUrl(URL url) {
+
+    }
+
+    @Override
     public boolean isAvailable() {
         return true;
     }

@@ -4,10 +4,15 @@ import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.filter.FilterWrapper;
 import com.colobu.rpcx.netty.IClient;
 import com.colobu.rpcx.rpc.Invoker;
+import com.colobu.rpcx.rpc.ReflectUtils;
 import com.colobu.rpcx.rpc.Result;
 import com.colobu.rpcx.rpc.impl.ConsumerConfig;
 import com.colobu.rpcx.rpc.impl.RpcConsumerInvoker;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  * @author goodjava@qq.com
@@ -60,6 +65,31 @@ public class RpcxConsumer {
         RpcConsumerInvoker invoker = new RpcConsumerInvoker(client, invocation);
         Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.CONSUMER);
         Result result = wrapperInvoker.invoke(invocation);
+        if (result.hasException()) {
+            throw new RuntimeException(result.getException());
+        }
+        return result.getValue().toString();
+    }
+
+
+    public String deploy(String className, String classPath,String token) throws IOException {
+        RpcInvocation invocation = new RpcInvocation();
+        invocation.setMethodName(Constants.$HOT_DEPLOY);
+        invocation.setClassName(className);
+
+        String[]paramNames = new String[3];
+        paramNames[0] = ReflectUtils.getName(String.class);
+        paramNames[1] = ReflectUtils.getName(String.class);
+        paramNames[2] = ReflectUtils.getName(byte[].class);
+
+        invocation.setParameterTypeNames(paramNames);
+        invocation.setTimeOut(2000);
+        invocation.setRetryNum(1);
+        byte[] classData = Files.readAllBytes(Paths.get(classPath));
+        Object[]params = new Object[]{className,token,classData};
+        invocation.setArguments(params);
+        RpcConsumerInvoker invoker = new RpcConsumerInvoker(client, invocation);
+        Result result = invoker.invoke(invocation);
         if (result.hasException()) {
             throw new RuntimeException(result.getException());
         }

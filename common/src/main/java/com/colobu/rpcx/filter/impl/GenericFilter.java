@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 /**
  * @author goodjava@qq.com
  */
-@RpcFilter(group = {Constants.PROVIDER}, order = -1000)
+@RpcFilter(group = {Constants.PROVIDER}, order = -2001)
 public class GenericFilter implements Filter {
 
     @Override
@@ -47,9 +47,6 @@ public class GenericFilter implements Filter {
             inv.setMethodName(args[0]);
             inv.setParameterTypes(classTypes);
             inv.setArguments(params);
-
-            String s = Stream.of(params).map(it -> gson.toJson(it)).collect(Collectors.joining(","));
-            invoker.getUrl().setPath(inv.getClassName() + "." + inv.getMethodName() + "(" + s + ")");
 
             Result res = invoker.invoke(inv);
 

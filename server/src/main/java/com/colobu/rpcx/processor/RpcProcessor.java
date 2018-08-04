@@ -36,7 +36,6 @@ public class RpcProcessor implements NettyRequestProcessor {
     public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request) throws Exception {
         Message req = request.getMessage();
         String language = req.metadata.get("language");
-
         RpcInvocation invocation = null;
         //golang 调用(自己组装invocation)
         if (null == language || !"java".equals(language)) {
@@ -62,7 +61,7 @@ public class RpcProcessor implements NettyRequestProcessor {
             invocation.languageCode = LanguageCode.JAVA;
         }
 
-        Invoker<Object> invoker = new RpcProviderInvoker<>(getBeanFunc, invocation);
+        Invoker<Object> invoker = new RpcProviderInvoker<>(getBeanFunc);
         Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.PROVIDER);
 
         RemotingCommand res = RemotingCommand.createResponseCommand();

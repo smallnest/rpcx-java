@@ -38,6 +38,10 @@ public @interface Provider {
      */
     boolean cache() default false;
 
+    /**
+     * 是否开启监控
+     * @return
+     */
     boolean monitor() default false;
 
     /**

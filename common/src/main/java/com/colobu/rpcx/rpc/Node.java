@@ -7,6 +7,8 @@ public interface Node {
 
     URL getUrl();
 
+    void setUrl(URL url);
+
     boolean isAvailable();
 
     void destroy();

@@ -11,6 +11,7 @@ import com.colobu.rpcx.rpc.impl.RpcInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -87,6 +88,11 @@ public class FilterWrapper {
                     }
 
                     @Override
+                    public void setUrl(URL url) {
+                        invoker.setUrl(url);
+                    }
+
+                    @Override
                     public boolean isAvailable() {
                         return invoker.isAvailable();
                     }
@@ -94,6 +100,16 @@ public class FilterWrapper {
                     @Override
                     public Result invoke(RpcInvocation invocation) throws RpcException {
                         return filter.invoke(next, invocation);
+                    }
+
+                    @Override
+                    public void setMethod(Method method) {
+                        invoker.setMethod(method);
+                    }
+
+                    @Override
+                    public void setInterface(Class clazz) {
+                        invoker.setInterface(clazz);
                     }
 
                     @Override

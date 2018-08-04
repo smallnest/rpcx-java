@@ -36,6 +36,8 @@ public class Constants {
 
     public static final String $ECHO = "$echo";
 
+    public static final String $HOT_DEPLOY = "$hot_deploy";
+
     public static final String TOKEN_KEY = "token";
 
     public static final String TIMEOUT_KEY = "timeout";
