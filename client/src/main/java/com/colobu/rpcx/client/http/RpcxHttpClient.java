@@ -9,11 +9,12 @@ import com.colobu.rpcx.rpc.impl.RpcInvocation;
 import com.google.gson.Gson;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,13 +27,18 @@ public class RpcxHttpClient {
 
     private static final Logger logger = LoggerFactory.getLogger(RpcxHttpClient.class);
 
-
     public static String execute(String url, String service, String method, Pair<String, Object>... params) {
-        try {
-            HttpClient client = new DefaultHttpClient();
+        RequestConfig defaultRequestConfig = RequestConfig.custom()
+                .setSocketTimeout(1000)
+                .setConnectTimeout(1000)
+                .setConnectionRequestTimeout(1000)
+                .build();
+
+        try (CloseableHttpClient client = HttpClients.custom().setDefaultRequestConfig(defaultRequestConfig).build()) {
             HttpPost post = new HttpPost(url);
             post.setHeader("X-RPCX-ServicePath", service);
             post.setHeader("X-RPCX-ServiceMethod", method);
+            post.setHeader("connection", "close");
 
             Invocation invocation = new RpcInvocation();
             String[] parameterTypeNames = new String[params.length];
@@ -57,7 +63,6 @@ public class RpcxHttpClient {
             u.setPath(invocation.getClassName() + "." + invocation.getMethodName() + "(" + _params + ")");
             ((RpcInvocation) invocation).setUrl(u);
 
-
             byte[] payload = HessianUtils.write(invocation);
 
             ByteArrayEntity entriy = new ByteArrayEntity(payload, ContentType.DEFAULT_BINARY);
@@ -66,12 +71,10 @@ public class RpcxHttpClient {
             HttpEntity resEntity = res.getEntity();
             byte[] data = EntityUtils.toByteArray(resEntity);
             logger.info("res:" + new String(data));
-
             Message message = gson.fromJson(new String(data), Message.class);
-            ((DefaultHttpClient) client).close();
             return new String(message.payload);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            logger.info("execute error:{}", ex.getMessage());
         }
         return "";
     }

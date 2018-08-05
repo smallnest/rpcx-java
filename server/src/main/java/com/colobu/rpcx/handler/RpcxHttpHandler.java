@@ -10,17 +10,12 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 
-import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_LENGTH;
-import static io.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
@@ -51,6 +46,10 @@ public class RpcxHttpHandler extends SimpleChannelInboundHandler<FullHttpRequest
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception {
         logger.info(msg.getUri());
 
+        msg.headers().forEach(it -> {
+            logger.info("--------->{}:{}", it.getKey(), it.getValue());
+        });
+
         String servicePath = msg.headers().get("X-RPCX-ServicePath");
         String serviceMethod = msg.headers().get("X-RPCX-ServiceMethod");
 
@@ -63,7 +62,7 @@ public class RpcxHttpHandler extends SimpleChannelInboundHandler<FullHttpRequest
         RemotingCommand command = RemotingCommand.createRequestCommand(-1);
         Message message = new Message();
         message.metadata.put("language", LanguageCode.HTTP.name());
-        message.metadata.put("_host", getClientIp(ctx,msg));
+        message.metadata.put("_host", getClientIp(ctx, msg));
         message.metadata.put("_port", "0");
         message.servicePath = servicePath;
         message.serviceMethod = serviceMethod;
@@ -78,14 +77,15 @@ public class RpcxHttpHandler extends SimpleChannelInboundHandler<FullHttpRequest
         logger.info("message:{}", res.getMessage());
 
 
-        byte[]data = new Gson().toJson(res.getMessage()).getBytes();
+        byte[] data = new Gson().toJson(res.getMessage()).getBytes();
 
 
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
                 OK, Unpooled.wrappedBuffer(data));
-        response.headers().set(CONTENT_TYPE, "text/plain");
-        response.headers().set(CONTENT_LENGTH,
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain");
+        response.headers().set(HttpHeaderNames.CONTENT_LENGTH,
                 response.content().readableBytes());
+        response.headers().set(HttpHeaderNames.CONNECTION, "close");
 
         ctx.write(response);
         ctx.flush();
