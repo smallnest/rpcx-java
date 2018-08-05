@@ -4,10 +4,7 @@ import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.fail.FailType;
 import com.colobu.rpcx.filter.FilterWrapper;
 import com.colobu.rpcx.netty.IClient;
-import com.colobu.rpcx.rpc.CglibProxy;
-import com.colobu.rpcx.rpc.Invoker;
-import com.colobu.rpcx.rpc.ReflectUtils;
-import com.colobu.rpcx.rpc.Result;
+import com.colobu.rpcx.rpc.*;
 import com.colobu.rpcx.rpc.annotation.Consumer;
 
 import java.util.HashMap;
@@ -108,7 +105,11 @@ public class ConsumerConfig {
             Result result = wrapperInvoker.invoke(invocation);
 
             if (result.hasException()) {
-                throw new RuntimeException(result.getException());
+                if (result.getException() instanceof RpcException) {
+                    throw (RpcException)result.getException();
+                } else {
+                    throw new RpcException(result.getException());
+                }
             }
 
             return result.getValue();

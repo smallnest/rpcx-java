@@ -1,6 +1,7 @@
 package com.colobu.rpcx.config;
 
 
+import com.colobu.rpcx.fail.FailType;
 import com.colobu.rpcx.service.IArith;
 import com.colobu.rpcx.service.ITestService;
 import com.colobu.rpcx.spring.RpcxConsumer;
@@ -29,7 +30,8 @@ public class ConsumerConfig {
         return rpcxConsumer.wrap(ITestService.class, new ConsumerConfigBuilder()
                 .setToken("zzy123")
                 .setSendType(Constants.SYNC_KEY)
-                .setTimeout(6000)
-                .setRetryNum(1));
+                .setTimeout(600000)
+                .setFailType(FailType.FailOver.name())
+                .setRetryNum(3));
     }
 }

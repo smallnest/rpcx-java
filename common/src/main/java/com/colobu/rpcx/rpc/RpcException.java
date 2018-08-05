@@ -8,16 +8,13 @@ public class RpcException extends RuntimeException {
 
     private int code;
 
-    private String message;
-
     public RpcException(String message, int code) {
         super(message);
         this.code = code;
     }
 
     public RpcException(String message, Throwable cause, int code) {
-        super(cause);
-        this.message = message;
+        super(message, cause);
         this.code = code;
     }
 
@@ -38,8 +35,4 @@ public class RpcException extends RuntimeException {
         return code;
     }
 
-    @Override
-    public String getMessage() {
-        return this.message;
-    }
 }

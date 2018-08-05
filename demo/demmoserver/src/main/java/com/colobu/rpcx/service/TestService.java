@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 
@@ -19,12 +20,16 @@ public class TestService implements ITestService {
 
     private static final Logger logger = LoggerFactory.getLogger(TestService.class);
 
+    private Random random = new Random();
+
     public String hi(String str) {
         logger.info("-------------->call hi:{}", str);
-
-        if (1 == 1) {
-            throw new RuntimeException("1 == 1");
+        int i = random.nextInt(6);
+        if (i != 5) {
+            logger.info("-------------->|||call error " + i);
+            throw new RuntimeException("random error!!!!");
         }
+        logger.info("-------------->call success " + i);
 
 //        try {
 //            TimeUnit.SECONDS.sleep(5);
