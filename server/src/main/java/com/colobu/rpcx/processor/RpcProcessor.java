@@ -13,6 +13,7 @@ import com.colobu.rpcx.rpc.Result;
 import com.colobu.rpcx.rpc.URL;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
 import com.colobu.rpcx.rpc.impl.RpcProviderInvoker;
+import com.google.gson.Gson;
 import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +39,7 @@ public class RpcProcessor implements NettyRequestProcessor {
         String language = req.metadata.get("language");
         RpcInvocation invocation = null;
         //golang 调用(自己组装invocation)
-        if (null == language || !"java".equals(language)) {
+        if (null == language) {
             Message reqMsg = request.getMessage();
             invocation = new RpcInvocation();
             invocation.setClassName(reqMsg.servicePath);
@@ -52,13 +53,13 @@ public class RpcProcessor implements NettyRequestProcessor {
             invocation.url = new URL("rpcx", "", 0);
             invocation.languageCode = LanguageCode.GO;
         } else {
-            //java 调用
+            //java http 调用
             invocation = (RpcInvocation) HessianUtils.read(request.getMessage().payload);
             invocation.servicePath = request.getMessage().servicePath;
             invocation.serviceMethod = request.getMessage().serviceMethod;
             invocation.url.setHost(req.metadata.get("_host"));
             invocation.url.setPort(Integer.parseInt(req.metadata.get("_port")));
-            invocation.languageCode = LanguageCode.JAVA;
+            invocation.languageCode = LanguageCode.valueOf(language);
         }
 
         Invoker<Object> invoker = new RpcProviderInvoker<>(getBeanFunc);
@@ -73,8 +74,9 @@ public class RpcProcessor implements NettyRequestProcessor {
         resMessage.setSeq(request.getOpaque());
 
         Result rpcResult = wrapperInvoker.invoke(invocation);
-
-        if (invocation.languageCode.equals(LanguageCode.JAVA)) {
+        if (invocation.languageCode.equals(LanguageCode.HTTP)) {
+            resMessage.payload = new Gson().toJson(rpcResult.getValue()).getBytes();
+        } else if (invocation.languageCode.equals(LanguageCode.JAVA)) {
             resMessage.payload = HessianUtils.write(rpcResult.getValue());
         } else {
             resMessage.payload = (byte[]) rpcResult.getValue();

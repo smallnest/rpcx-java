@@ -12,4 +12,8 @@ public enum LanguageCode {
      * go
      */
     GO,
+    /**
+     * http
+     */
+    HTTP,
 }

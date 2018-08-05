@@ -77,6 +77,7 @@ public class RpcInvocation implements Invocation, Serializable {
         return arguments;
     }
 
+    @Override
     public void setArguments(Object[] arguments) {
         this.arguments = arguments;
     }
@@ -127,6 +128,7 @@ public class RpcInvocation implements Invocation, Serializable {
         this.resultType = resultType;
     }
 
+    @Override
     public void setParameterTypeNames(String[] parameterTypeNames) {
         this.parameterTypeNames = parameterTypeNames;
     }

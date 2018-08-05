@@ -1,8 +1,7 @@
 package com.colobu.rpcx.server;
 
-import com.colobu.rpcx.common.NamedThreadFactory;
-import com.colobu.rpcx.common.Pair;
-import com.colobu.rpcx.common.RemotingUtil;
+import com.colobu.rpcx.common.*;
+import com.colobu.rpcx.handler.RpcxProcessHandler;
 import com.colobu.rpcx.netty.*;
 import com.colobu.rpcx.processor.RpcProcessor;
 import io.netty.bootstrap.ServerBootstrap;
@@ -39,7 +38,7 @@ public class NettyServer extends NettyRemotingAbstract {
 
     private final CountDownLatch latch = new CountDownLatch(1);
 
-    private final ScheduledThreadPoolExecutor timer = new ScheduledThreadPoolExecutor(1,new NamedThreadFactory("timer"));
+    private final ScheduledThreadPoolExecutor timer = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("timer"));
 
     private final EventLoopGroup eventLoopGroupBoss;
     private final EventLoopGroup eventLoopGroupSelector;
@@ -62,7 +61,7 @@ public class NettyServer extends NettyRemotingAbstract {
         //默认的处理器
         this.defaultRequestProcessor = new Pair<>(new RpcProcessor(this.getBeanFunc), new ThreadPoolExecutor(50, 50,
                 0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(),new NamedThreadFactory("defaultRequestProcessor")));
+                new LinkedBlockingQueue<>(), new NamedThreadFactory("defaultRequestProcessor")));
         DefaultEventExecutorGroup defaultEventExecutorGroup = new DefaultEventExecutorGroup(
                 nettyServerConfig.getServerWorkerThreads(), new NamedThreadFactory("NettyServerCodecThread_", false));
 
@@ -81,11 +80,8 @@ public class NettyServer extends NettyRemotingAbstract {
                             public void initChannel(SocketChannel ch) throws Exception {
                                 ch.pipeline().addLast(
                                         defaultEventExecutorGroup,
-                                        new NettyEncoder(),
-                                        new NettyDecoder(),
-                                        new IdleStateHandler(0, 0, nettyServerConfig.getServerChannelMaxIdleTimeSeconds()),
-                                        new NettyConnetManageHandler(NettyServer.this),
-                                        new NettyServerHandler(NettyServer.this));
+                                        new RpcxProcessHandler(nettyServerConfig.getServerChannelMaxIdleTimeSeconds(), NettyServer.this)
+                                );
                             }
                         });
 
@@ -95,11 +91,14 @@ public class NettyServer extends NettyRemotingAbstract {
 
         try {
             String inetHost = RemotingUtil.getLocalAddress();
-            ChannelFuture sync = this.serverBootstrap.bind(inetHost, 0).sync();
+
+            String port = getServerPort();
+
+            ChannelFuture sync = this.serverBootstrap.bind(inetHost, Integer.parseInt(port)).sync();
             InetSocketAddress addr = (InetSocketAddress) sync.channel().localAddress();
             this.port = addr.getPort();
             this.addr = addr.getHostString();
-            logger.info("rpc server addr:{} port:{}", this.addr, this.port);
+            logger.info("###########rpc server addr:{} port:{}", this.addr, this.port);
         } catch (InterruptedException e1) {
             throw new RuntimeException("this.serverBootstrap.bind().sync() InterruptedException", e1);
         }
@@ -117,6 +116,14 @@ public class NettyServer extends NettyRemotingAbstract {
         }, 1000, 3000, TimeUnit.MILLISECONDS);
 
         addShutdownHook();
+    }
+
+    private String getServerPort() {
+        String port = Config.ins().get("rpcx_port");
+        if (StringUtils.isEmpty(port)) {
+            port = "0";
+        }
+        return port;
     }
 
     private void addShutdownHook() {
@@ -137,6 +144,11 @@ public class NettyServer extends NettyRemotingAbstract {
 
     public void setGetBeanFunc(Function<Class, Object> getBeanFunc) {
         this.getBeanFunc = getBeanFunc;
+    }
+
+
+    public Function<Class, Object> getGetBeanFunc() {
+        return getBeanFunc;
     }
 
     public String getAddr() {

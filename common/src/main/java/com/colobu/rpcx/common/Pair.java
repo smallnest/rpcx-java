@@ -14,6 +14,11 @@ public class Pair<T1, T2> {
     }
 
 
+    public static <T1, T2> Pair<T1, T2> of(T1 object, T2 object2) {
+        return new Pair<>(object, object2);
+    }
+
+
     public T1 getObject1() {
         return object1;
     }

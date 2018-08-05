@@ -28,5 +28,9 @@ public interface Invocation {
 
     Class<?> getResultType();
 
+    void setArguments(Object[] arguments);
+
+    void setParameterTypeNames(String[] parameterTypeNames);
+
 
 }
