@@ -74,11 +74,12 @@ public class RpcxAutoConfigure {
 
     /**
      * 所有provider 的执行,这里都会被拦截到
+     *
      * @param joinPoint
      * @return
      */
     @Around("execution(public * *(..)) && within(@com.colobu.rpcx.rpc.annotation.Provider *)")
-    public Object aroundProvider(ProceedingJoinPoint joinPoint) {
+    public Object aroundProvider(ProceedingJoinPoint joinPoint) throws Throwable {
         Provider provider = joinPoint.getTarget().getClass().getAnnotation(Provider.class);
         String uuid = UUID.randomUUID().toString();
         Object[] o = joinPoint.getArgs();
@@ -91,7 +92,7 @@ public class RpcxAutoConfigure {
             return result;
         } catch (Throwable throwable) {
             logger.warn("provider execute finish name:{} version:{} id:{} error:{}", provider.name(), provider.version(), uuid, throwable.getMessage());
-            return new RpcException(throwable);//包装成自己的异常
+            throw throwable;
         }
     }
 

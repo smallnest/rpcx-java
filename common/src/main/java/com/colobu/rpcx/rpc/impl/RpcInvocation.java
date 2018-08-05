@@ -1,15 +1,18 @@
 package com.colobu.rpcx.rpc.impl;
 
+import com.colobu.rpcx.fail.FailType;
 import com.colobu.rpcx.protocol.LanguageCode;
 import com.colobu.rpcx.rpc.Invocation;
 import com.colobu.rpcx.rpc.Invoker;
 import com.colobu.rpcx.rpc.URL;
+import io.netty.channel.Channel;
+
 import java.io.Serializable;
 import java.util.Map;
 
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class RpcInvocation implements Invocation, Serializable {
 
@@ -44,6 +47,8 @@ public class RpcInvocation implements Invocation, Serializable {
     private String sendType;
 
     public LanguageCode languageCode;
+
+    private FailType failType;
 
     public RpcInvocation() {
     }
@@ -163,5 +168,13 @@ public class RpcInvocation implements Invocation, Serializable {
 
     public void setSendType(String sendType) {
         this.sendType = sendType;
+    }
+
+    public FailType getFailType() {
+        return failType;
+    }
+
+    public void setFailType(FailType failType) {
+        this.failType = failType;
     }
 }

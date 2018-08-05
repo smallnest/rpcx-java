@@ -1,6 +1,7 @@
 package com.colobu.rpcx.rpc.impl;
 
 import com.colobu.rpcx.config.Constants;
+import com.colobu.rpcx.fail.FailType;
 import com.colobu.rpcx.filter.FilterWrapper;
 import com.colobu.rpcx.netty.IClient;
 import com.colobu.rpcx.rpc.CglibProxy;
@@ -29,6 +30,8 @@ public class ConsumerConfig {
     private String token = "";
 
     private String sendType = Constants.SYNC_KEY;
+
+    private FailType failType = FailType.FailFast;
 
     public ConsumerConfig() {
     }
@@ -66,6 +69,11 @@ public class ConsumerConfig {
             return this;
         }
 
+        public ConsumerConfigBuilder setFailType(String failType) {
+            this.config.failType = FailType.valueOf(failType);
+            return this;
+        }
+
 
         public ConsumerConfig build() {
             return this.config;
@@ -83,6 +91,7 @@ public class ConsumerConfig {
             invocation.setTimeOut(timeOut);
             invocation.setRetryNum(retryNum);
             invocation.setSendType(sendType);
+            invocation.setFailType(failType);
 
             Map<String, String> attachments = new HashMap<>();
             attachments.put(Constants.TOKEN_KEY, token);

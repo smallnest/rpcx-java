@@ -11,7 +11,7 @@ import java.util.concurrent.*;
 
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class RpcContext {
 	
@@ -57,16 +57,9 @@ public class RpcContext {
     private final Map<String, String> attachments = new HashMap<String, String>();
 
     private final Map<String, Object> values = new HashMap<String, Object>();
-    
-	@Deprecated
-    private List<Invoker<?>> invokers;
-    
-	@Deprecated
-    private Invoker<?> invoker;
 
-	@Deprecated
-    private Invocation invocation;
-    
+    private String serviceAddr;
+
 	protected RpcContext() {
 	}
 
@@ -449,35 +442,6 @@ public class RpcContext {
         return values.get(key);
     }
 
-    public RpcContext setInvokers(List<Invoker<?>> invokers) {
-        this.invokers = invokers;
-        if (invokers != null && invokers.size() > 0) {
-            List<URL> urls = new ArrayList<URL>(invokers.size());
-            for (Invoker<?> invoker : invokers) {
-                urls.add(invoker.getUrl());
-            }
-            setUrls(urls);
-        }
-        return this;
-    }
-
-    public RpcContext setInvoker(Invoker<?> invoker) {
-        this.invoker = invoker;
-        if (invoker != null) {
-            setUrl(invoker.getUrl());
-        }
-        return this;
-    }
-
-    public RpcContext setInvocation(Invocation invocation) {
-        this.invocation = invocation;
-        if (invocation != null) {
-            setMethodName(invocation.getMethodName());
-            setParameterTypes(invocation.getParameterTypes());
-            setArguments(invocation.getArguments());
-        }
-        return this;
-    }
 
     /**
      * @deprecated Replace to isProviderSide()
@@ -493,31 +457,6 @@ public class RpcContext {
     @Deprecated
     public boolean isClientSide() {
         return isConsumerSide();
-    }
-    
-    /**
-     * @deprecated Replace to getUrls()
-     */
-    @Deprecated
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public List<Invoker<?>> getInvokers() {
-        return invokers == null && invoker != null ? (List)Arrays.asList(invoker) : invokers;
-    }
-
-    /**
-     * @deprecated Replace to getUrl()
-     */
-    @Deprecated
-    public Invoker<?> getInvoker() {
-        return invoker;
-    }
-
-    /**
-     * @deprecated Replace to getMethodName(), getParameterTypes(), getArguments()
-     */
-    @Deprecated
-    public Invocation getInvocation() {
-        return invocation;
     }
     
     /**
@@ -590,5 +529,13 @@ public class RpcContext {
 		} finally {
 			removeAttachment(Constants.RETURN_KEY);
 		}
+    }
+
+    public String getServiceAddr() {
+        return serviceAddr;
+    }
+
+    public void setServiceAddr(String serviceAddr) {
+        this.serviceAddr = serviceAddr;
     }
 }

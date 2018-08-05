@@ -78,4 +78,6 @@ public class Constants {
 
     public static final String SEND_TYPE = "sendType";
 
+    public static final String FAIL_TYPE = "fail.type";
+
 }

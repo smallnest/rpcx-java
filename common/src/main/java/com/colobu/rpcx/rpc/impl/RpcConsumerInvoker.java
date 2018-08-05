@@ -61,35 +61,28 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
         byte[] data = HessianUtils.write(invocation);
         req.payload = data;
 
-        RetryPolicy retryPolicy = new RetryNTimes(invocation.getRetryNum());
-        boolean retryResult = retryPolicy.retry((n) -> {
-            try {
-                req.setSeq(seq.incrementAndGet());
-                Message res = client.call(req, invocation.getTimeOut());
-
-                if (res.metadata.containsKey("_rpcx_error_code")) {
-                    int code = Integer.parseInt(res.metadata.get("_rpcx_error_code"));
-                    String message = res.metadata.get("_rpcx_error_message");
-                    logger.warn("client call error:{}:{}", code, message);
-                    RpcException error = new RpcException(message, code);
-                    result.setThrowable(error);
-                    return false;
-                } else {
-                    byte[] d = res.payload;
-                    if (d.length > 0) {
-                        Object r = HessianUtils.read(d);
-                        result.setValue(r);
-                    }
-                    return true;
+        try {
+            req.setSeq(seq.incrementAndGet());
+            Message res = client.call(req, invocation.getTimeOut());
+            if (res.metadata.containsKey("_rpcx_error_code")) {
+                int code = Integer.parseInt(res.metadata.get("_rpcx_error_code"));
+                String message = res.metadata.get("_rpcx_error_message");
+                logger.warn("client call error:{}:{}", code, message);
+                RpcException error = new RpcException(message, code);
+                result.setThrowable(error);
+            } else {
+                byte[] d = res.payload;
+                if (d.length > 0) {
+                    Object r = HessianUtils.read(d);
+                    result.setValue(r);
                 }
-            } catch (Throwable e) {
-                result.setThrowable(e);
-                logger.info("client call error need retry n:{}", n);
-                return false;
             }
-        });
+        } catch (Throwable e) {
+            result.setThrowable(e);
+            logger.info("client call error:{} ", e.getMessage());
+        }
 
-        logger.info("class:{} method:{} retryResult:{}", className, method, retryResult);
+        logger.info("class:{} method:{} result:{} finish", className, method, new Gson().toJson(result));
         return result;
     }
 

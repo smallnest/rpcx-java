@@ -62,9 +62,8 @@ public class CommonTest {
         retryPolicy.retry((i) -> {
             System.out.println(i);
             if (i == 3) {
-                return true;
             }
-            return false;
+            return null;
         });
     }
 

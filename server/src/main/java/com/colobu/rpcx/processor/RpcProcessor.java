@@ -82,6 +82,7 @@ public class RpcProcessor implements NettyRequestProcessor {
             resMessage.payload = (byte[]) rpcResult.getValue();
         }
         if (rpcResult.hasException()) {
+            logger.error(rpcResult.getException().getMessage(),rpcResult.getException());
             resMessage.metadata.put("_rpcx_error_code", "-2");
             resMessage.metadata.put("_rpcx_error_message", rpcResult.getException().getMessage());
         }

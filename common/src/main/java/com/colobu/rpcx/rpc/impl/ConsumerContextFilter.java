@@ -20,8 +20,6 @@ public class ConsumerContextFilter implements Filter {
     @Override
     public Result invoke(Invoker<?> invoker, RpcInvocation invocation) throws RpcException {
         RpcContext.getContext()
-                .setInvoker(invoker)
-                .setInvocation(invocation)
                 .setLocalAddress(NetUtils.getLocalHost(), 0)
                 .setRemoteAddress(invoker.getUrl().getHost(),
                         invoker.getUrl().getPort());

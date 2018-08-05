@@ -1,10 +1,12 @@
 package com.colobu.rpcx.common.retry;
 
+import com.colobu.rpcx.rpc.Result;
+
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class RetryNTimes implements RetryPolicy {
 
@@ -16,7 +18,14 @@ public class RetryNTimes implements RetryPolicy {
     }
 
     @Override
-    public boolean retry(Function<Integer, Boolean> func) {
-        return IntStream.range(1, n + 1).filter(it -> func.apply(it)).findFirst().isPresent();
+    public Result retry(Function<Integer, Result> func) {
+        Result res = null;
+        for (int i = 1; i < n + 1; i++) {
+            res = func.apply(i);
+            if (!res.getAttachment("needRetry").equals("true")) {
+                return res;
+            }
+        }
+        return res;
     }
 }

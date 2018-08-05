@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.List;
+import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.*;
@@ -156,19 +157,32 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
         final RemotingCommand request = RemotingCommand.createRequestCommand(1);
         request.setMessage(req);
 
-        List<String> serviceList = this.serviceDiscovery.getServices(req.getServicePath());
+        Channel channel = null;
+        String serviceAddr = RpcContext.getContext().getServiceAddr();
+        if (StringUtils.isEmpty(serviceAddr)) {
+            List<String> serviceList = this.serviceDiscovery.getServices(req.getServicePath());
+            if (0 == serviceList.size()) {
+                logger.warn("call service list=0 service:{} method:{}", req.servicePath, req.serviceMethod);
+                throw new RpcException("service list = 0");
+            }
 
-        if (0 == serviceList.size()) {
-            logger.warn("call service list=0 service:{} method:{}", req.servicePath, req.serviceMethod);
-            throw new RpcException("service list = 0");
+            serviceAddr = new RandomSelector().select(req.servicePath, req.serviceMethod, serviceList);
+            if (null == serviceAddr) {
+                throw new RpcException("serviceAddr error");
+            }
+            //获取或者创建channel
+            channel = this.getAndCreateChannel(serviceAddr);
+
+            if (!Optional.ofNullable(channel).isPresent()) {
+                throw new RpcException("getAndCreateChannel error");
+            }
+            logger.info("---------->use new channel");
+            RpcContext.getContext().setServiceAddr(serviceAddr);
+        } else {
+            logger.info("---------->use old channel");
+            channel = this.getAndCreateChannel(serviceAddr);
         }
 
-        String addr = new RandomSelector().select(req.servicePath, req.serviceMethod, serviceList);
-        if (null == addr) {
-            throw new RuntimeException("addr error");
-        }
-        //获取或者创建channel
-        final Channel channel = this.getAndCreateChannel(addr);
 
         String host = "";
         int port = 0;

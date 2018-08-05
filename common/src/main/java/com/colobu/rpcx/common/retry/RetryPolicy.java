@@ -1,12 +1,19 @@
 package com.colobu.rpcx.common.retry;
 
 
+import com.colobu.rpcx.rpc.Result;
+
 import java.util.function.Function;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public interface RetryPolicy {
 
-    boolean retry(Function<Integer, Boolean> func);
+    /**
+     * 判断的条件是result中没有异常
+     * @param func
+     * @return
+     */
+    Result retry(Function<Integer, Result> func);
 }

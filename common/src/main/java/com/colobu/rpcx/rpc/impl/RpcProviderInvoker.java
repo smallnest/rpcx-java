@@ -7,6 +7,7 @@ import com.colobu.rpcx.rpc.URL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.function.Function;
 
@@ -39,10 +40,10 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
 
 
     @Override
-    public Result invoke(RpcInvocation invocation) throws RpcException {
-        Object obj = null;
-        Result rpcResult = new RpcResult();
+    public Result invoke(RpcInvocation invocation) {
         try {
+            Object obj = null;
+            Result rpcResult = new RpcResult();
             //使用容器
             if (null != this.getBeanFunc) {
                 Object b = getBeanFunc.apply(clazz);
@@ -53,9 +54,11 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
             rpcResult.setValue(obj);
             return rpcResult;
         } catch (Throwable throwable) {
-            logger.error(throwable.getMessage(), throwable);
-            rpcResult.setThrowable(throwable);
-            return rpcResult;
+            String message = "";
+            if (throwable.getCause() != null) {
+                message = throwable.getCause().getMessage();
+            }
+            throw new RpcException(message, throwable, -2);
         }
     }
 

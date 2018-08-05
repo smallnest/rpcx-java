@@ -210,6 +210,9 @@ public class Message {
             os.write(keyBytes);
 
             String v = entry.getValue();
+            if (null == v) {
+                v = "null";
+            }
             byte[] vBytes = v.getBytes("UTF-8");
             os.write(ByteBuffer.allocate(4).putInt(vBytes.length).array());
             os.write(vBytes);

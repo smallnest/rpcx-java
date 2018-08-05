@@ -67,8 +67,6 @@ public class ContextFilter implements Filter {
             attachments.remove(Constants.TIMEOUT_KEY);
         }
         RpcContext.getContext()
-                .setInvoker(invoker)
-                .setInvocation(invocation)
                 .setAttachments(attachments)
                 .setRemoteAddress(invocation.getUrl().getAddress(), invocation.getUrl().getPort())
                 .setLocalAddress(invoker.getUrl().getHost(),

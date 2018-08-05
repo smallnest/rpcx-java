@@ -21,6 +21,11 @@ public class TestService implements ITestService {
 
     public String hi(String str) {
         logger.info("-------------->call hi:{}", str);
+
+        if (1 == 1) {
+            throw new RuntimeException("1 == 1");
+        }
+
 //        try {
 //            TimeUnit.SECONDS.sleep(5);
 //        } catch (InterruptedException e) {

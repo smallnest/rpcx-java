@@ -2,15 +2,22 @@ package com.colobu.rpcx.rpc;
 
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class RpcException extends RuntimeException {
 
-
     private int code;
+
+    private String message;
 
     public RpcException(String message, int code) {
         super(message);
+        this.code = code;
+    }
+
+    public RpcException(String message, Throwable cause, int code) {
+        super(cause);
+        this.message = message;
         this.code = code;
     }
 
@@ -29,5 +36,10 @@ public class RpcException extends RuntimeException {
 
     public int getCode() {
         return code;
+    }
+
+    @Override
+    public String getMessage() {
+        return this.message;
     }
 }
