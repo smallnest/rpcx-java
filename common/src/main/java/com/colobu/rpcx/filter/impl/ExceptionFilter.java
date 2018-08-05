@@ -58,7 +58,7 @@ public class ExceptionFilter implements Filter {
                 if (className.startsWith("java.") || className.startsWith("javax.")) {
                     return result;
                 }
-                // 是Dubbo本身的异常，直接抛出
+                // 是Rpcx本身的异常，直接抛出
                 if (exception instanceof RpcException) {
                     return result;
                 }

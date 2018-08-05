@@ -23,6 +23,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+/**
+ * @author goodjava@qq.com
+ */
 public class RpcxHttpClient {
 
     private static final Logger logger = LoggerFactory.getLogger(RpcxHttpClient.class);
