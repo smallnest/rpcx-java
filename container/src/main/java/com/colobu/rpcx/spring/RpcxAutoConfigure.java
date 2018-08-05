@@ -90,6 +90,9 @@ public class RpcxAutoConfigure {
             long useTime = System.currentTimeMillis() - startTime;
             logger.info("provider execute finish name:{} version:{} id:{} result:{} useTime:{}", provider.name(), provider.version(), uuid, result, useTime);
             return result;
+        } catch (RpcException ex) {
+            logger.warn("provider execute finish name:{} version:{} id:{} error:{}", provider.name(), provider.version(), uuid, ex.getMessage());
+            throw ex;
         } catch (Throwable throwable) {
             logger.warn("provider execute finish name:{} version:{} id:{} error:{}", provider.name(), provider.version(), uuid, throwable.getMessage());
             throw throwable;
