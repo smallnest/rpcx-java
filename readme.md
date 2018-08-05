@@ -119,3 +119,4 @@ Then you can write the java client:
 - 支持结果缓存
 - 支持热更新
 - 支持http gateway访问模式
+- 调用失败支持(FailFast Failover Failtry)

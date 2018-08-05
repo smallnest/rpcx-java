@@ -31,7 +31,7 @@ public class ConsumerConfig {
                 .setToken("zzy123")
                 .setSendType(Constants.SYNC_KEY)
                 .setTimeout(600000)
-                .setFailType(FailType.FailOver.name())
+                .setFailType(FailType.FailTry.name())
                 .setRetryNum(3));
     }
 }
