@@ -5,6 +5,7 @@ import com.colobu.rpcx.protocol.LanguageCode;
 import com.colobu.rpcx.rpc.Invocation;
 import com.colobu.rpcx.rpc.Invoker;
 import com.colobu.rpcx.rpc.URL;
+import com.colobu.rpcx.selector.SelectMode;
 import io.netty.channel.Channel;
 
 import java.io.Serializable;
@@ -49,6 +50,8 @@ public class RpcInvocation implements Invocation, Serializable {
     public LanguageCode languageCode;
 
     private FailType failType;
+
+    private SelectMode selectMode;
 
     public RpcInvocation() {
     }
@@ -176,5 +179,14 @@ public class RpcInvocation implements Invocation, Serializable {
 
     public void setFailType(FailType failType) {
         this.failType = failType;
+    }
+
+
+    public SelectMode getSelectMode() {
+        return selectMode;
+    }
+
+    public void setSelectMode(SelectMode selectMode) {
+        this.selectMode = selectMode;
     }
 }

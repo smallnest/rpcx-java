@@ -1,4 +1,4 @@
-package com.colobu.rpcx.client;
+package com.colobu.rpcx.discovery;
 
 import java.util.List;
 

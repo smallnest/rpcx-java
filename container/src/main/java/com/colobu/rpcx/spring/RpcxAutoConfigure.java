@@ -1,6 +1,6 @@
 package com.colobu.rpcx.spring;
 
-import com.colobu.rpcx.client.IServiceDiscovery;
+import com.colobu.rpcx.discovery.IServiceDiscovery;
 import com.colobu.rpcx.client.NettyClient;
 import com.colobu.rpcx.client.ZkServiceDiscovery;
 import com.colobu.rpcx.netty.IClient;

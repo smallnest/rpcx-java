@@ -4,6 +4,7 @@ import com.colobu.rpcx.client.impl.RandomSelector;
 import com.colobu.rpcx.common.*;
 import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.config.NettyClientConfig;
+import com.colobu.rpcx.discovery.IServiceDiscovery;
 import com.colobu.rpcx.exception.RemotingSendRequestException;
 import com.colobu.rpcx.exception.RemotingTimeoutException;
 import com.colobu.rpcx.exception.RemotingTooMuchRequestException;
@@ -26,8 +27,6 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.List;
 import java.util.Optional;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 

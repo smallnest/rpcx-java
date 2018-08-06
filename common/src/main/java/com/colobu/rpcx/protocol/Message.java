@@ -17,7 +17,13 @@ public class Message {
     public static byte magicNumber = 0x08;
 
     public byte[] header;
+    /**
+     * java-->className
+     */
     public String servicePath;
+    /**
+     * java-->methodName
+     */
     public String serviceMethod;
     public Map<String, String> metadata;
     public byte[] payload;

@@ -1,6 +1,7 @@
 package com.colobu.rpcx.client;
 
 import com.colobu.rpcx.common.NamedThreadFactory;
+import com.colobu.rpcx.discovery.IServiceDiscovery;
 import com.colobu.rpcx.rpc.impl.ConsumerFinder;
 import com.colobu.rpcx.utils.PathStatus;
 import com.colobu.rpcx.utils.ZkClient;
