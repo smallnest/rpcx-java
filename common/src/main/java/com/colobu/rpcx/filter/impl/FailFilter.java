@@ -6,7 +6,6 @@ import com.colobu.rpcx.fail.FailType;
 import com.colobu.rpcx.filter.Filter;
 import com.colobu.rpcx.rpc.Invoker;
 import com.colobu.rpcx.rpc.Result;
-import com.colobu.rpcx.rpc.RpcContext;
 import com.colobu.rpcx.rpc.RpcException;
 import com.colobu.rpcx.rpc.annotation.RpcFilter;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
@@ -43,7 +42,6 @@ public class FailFilter implements Filter {
                 if (failType.equals(FailType.FailOver)) {
                     logger.info("------>failOver");
                     res.getAttachments().put("needRetry", "true");
-                    RpcContext.getContext().setServiceAddr("");
                     return res;
                 }
                 //当前节点重试
