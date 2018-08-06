@@ -1,7 +1,6 @@
 package com.colobu.rpcx.filter.impl;
 
 import com.colobu.rpcx.common.retry.RetryNTimes;
-import com.colobu.rpcx.common.retry.RetryPolicy;
 import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.fail.FailType;
 import com.colobu.rpcx.filter.Filter;

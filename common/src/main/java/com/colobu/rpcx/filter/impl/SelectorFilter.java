@@ -39,7 +39,7 @@ public class SelectorFilter implements Filter {
 
 
         if (serviceList.size() <= 0) {
-            throw new RpcException("serviceList size <=0 ", -3);
+            throw new RpcException("service list size <=0 ", -3);
         }
 
         SelectMode selectMode = invocation.getSelectMode();
@@ -50,12 +50,12 @@ public class SelectorFilter implements Filter {
                 break;
             }
             case RoundRobin: {
-                String service = roundRobin(serviceList,serviceName);
+                String service = roundRobin(serviceList, serviceName);
                 RpcContext.getContext().setServiceAddr(service);
                 break;
             }
-            case WeightedRoundRobin:{
-                String service = weightedRountRobin(serviceList,serviceName);
+            case WeightedRoundRobin: {
+                String service = weightedRountRobin(serviceList, serviceName);
                 RpcContext.getContext().setServiceAddr(service);
                 break;
             }
@@ -86,7 +86,7 @@ public class SelectorFilter implements Filter {
     private String weightedRountRobin(List<String> serviceList, String serviceName) {
         WeightedRountRobin weightedRountRobin = weightRoundRobinMap.get(serviceName);
         if (null == weightedRountRobin) {
-            weightRoundRobinMap.putIfAbsent(serviceName,new WeightedRountRobin(serviceList));
+            weightRoundRobinMap.putIfAbsent(serviceName, new WeightedRountRobin(serviceList));
         }
         weightedRountRobin = weightRoundRobinMap.get(serviceName);
         Weighted wei = weightedRountRobin.nextWeighted();

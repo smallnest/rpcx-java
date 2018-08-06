@@ -2,6 +2,7 @@ package com.colobu.rpcx.config;
 
 
 import com.colobu.rpcx.fail.FailType;
+import com.colobu.rpcx.selector.SelectMode;
 import com.colobu.rpcx.service.IArith;
 import com.colobu.rpcx.service.ITestService;
 import com.colobu.rpcx.spring.RpcxConsumer;
@@ -31,7 +32,8 @@ public class ConsumerConfig {
                 .setToken("zzy123")
                 .setSendType(Constants.SYNC_KEY)
                 .setTimeout(600000)
-                .setFailType(FailType.FailTry.name())
+                .setFailType(FailType.FailTry)
+                .setSelectMode(SelectMode.RandomSelect)
                 .setRetryNum(3));
     }
 }

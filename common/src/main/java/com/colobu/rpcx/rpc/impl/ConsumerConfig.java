@@ -6,6 +6,7 @@ import com.colobu.rpcx.filter.FilterWrapper;
 import com.colobu.rpcx.netty.IClient;
 import com.colobu.rpcx.rpc.*;
 import com.colobu.rpcx.rpc.annotation.Consumer;
+import com.colobu.rpcx.selector.SelectMode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,6 +30,8 @@ public class ConsumerConfig {
     private String sendType = Constants.SYNC_KEY;
 
     private FailType failType = FailType.FailFast;
+
+    private SelectMode selectMode = SelectMode.RandomSelect;
 
     public ConsumerConfig() {
     }
@@ -66,8 +69,13 @@ public class ConsumerConfig {
             return this;
         }
 
-        public ConsumerConfigBuilder setFailType(String failType) {
-            this.config.failType = FailType.valueOf(failType);
+        public ConsumerConfigBuilder setFailType(FailType failType) {
+            this.config.failType = failType;
+            return this;
+        }
+
+        public ConsumerConfigBuilder setSelectMode(SelectMode selectMode) {
+            this.config.selectMode = selectMode;
             return this;
         }
 
@@ -89,6 +97,7 @@ public class ConsumerConfig {
             invocation.setRetryNum(retryNum);
             invocation.setSendType(sendType);
             invocation.setFailType(failType);
+            invocation.setSelectMode(selectMode);
 
             Map<String, String> attachments = new HashMap<>();
             attachments.put(Constants.TOKEN_KEY, token);
@@ -106,7 +115,7 @@ public class ConsumerConfig {
 
             if (result.hasException()) {
                 if (result.getException() instanceof RpcException) {
-                    throw (RpcException)result.getException();
+                    throw (RpcException) result.getException();
                 } else {
                     throw new RpcException(result.getException());
                 }
