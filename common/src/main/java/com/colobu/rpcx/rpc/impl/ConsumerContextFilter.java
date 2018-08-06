@@ -12,7 +12,7 @@ import com.colobu.rpcx.rpc.annotation.RpcFilter;
 
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 @RpcFilter(group = {Constants.CONSUMER}, order = -3000)
 public class ConsumerContextFilter implements Filter {
@@ -29,6 +29,7 @@ public class ConsumerContextFilter implements Filter {
         } finally {
             RpcContext.getContext().clearAttachments();
             RpcContext.getContext().setServiceAddr("");
+            RpcContext.removeContext();
         }
     }
 

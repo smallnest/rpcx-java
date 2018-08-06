@@ -23,13 +23,13 @@ public class TestService implements ITestService {
 
     public String hi(String str) {
 
-        logger.info("-------------->call hi:{}", str);
-        int i = random.nextInt(6);
-        if (i != 5) {
-            logger.info("-------------->|||call error " + i);
-            throw new RuntimeException("call hi error!!!!");
-        }
-        logger.info("-------------->call success " + i);
+//        logger.info("-------------->call hi:{}", str);
+//        int i = random.nextInt(6);
+//        if (i != 5) {
+//            logger.info("-------------->|||call error " + i);
+//            throw new RuntimeException("call hi error!!!!");
+//        }
+//        logger.info("-------------->call success " + i);
 
 //        try {
 //            TimeUnit.SECONDS.sleep(5);

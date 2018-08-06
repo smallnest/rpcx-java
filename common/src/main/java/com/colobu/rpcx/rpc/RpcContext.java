@@ -397,13 +397,6 @@ public class RpcContext {
         return values;
     }
 
-    /**
-     * set value.
-     * 
-     * @param key
-     * @param value
-     * @return context
-     */
     public RpcContext set(String key, Object value) {
         if (value == null) {
             values.remove(key);
@@ -413,23 +406,11 @@ public class RpcContext {
         return this;
     }
 
-    /**
-     * remove value.
-     * 
-     * @param key
-     * @return value
-     */
     public RpcContext remove(String key) {
         values.remove(key);
         return this;
     }
 
-    /**
-     * get value.
-     * 
-     * @param key
-     * @return value
-     */
     public Object get(String key) {
         return values.get(key);
     }
@@ -451,77 +432,6 @@ public class RpcContext {
         return isConsumerSide();
     }
     
-    /**
-     * 异步调用 ，需要返回值，即使步调用Future.get方法，也会处理调用超时问题.
-     * @param callable
-     * @return 通过future.get()获取返回结果.
-     */
-    @SuppressWarnings("unchecked")
-	public <T> Future<T> asyncCall(Callable<T> callable) {
-    	try {
-	    	try {
-	    		setAttachment(Constants.ASYNC_KEY, Boolean.TRUE.toString());
-				final T o = callable.call();
-				//local调用会直接返回结果.
-				if (o != null) {
-					FutureTask<T> f = new FutureTask<T>(new Callable<T>() {
-						@Override
-                        public T call() throws Exception {
-							return o;
-						}
-					});
-					f.run();
-					return f;
-				} else {
-					
-				}
-			} catch (Exception e) {
-				throw new RpcException(e);
-			} finally {
-				removeAttachment(Constants.ASYNC_KEY);
-			}
-    	} catch (final RpcException e) {
-			return new Future<T>() {
-				@Override
-                public boolean cancel(boolean mayInterruptIfRunning) {
-					return false;
-				}
-				@Override
-                public boolean isCancelled() {
-					return false;
-				}
-				@Override
-                public boolean isDone() {
-					return true;
-				}
-				@Override
-                public T get() throws InterruptedException, ExecutionException {
-					throw new ExecutionException(e.getCause());
-				}
-				@Override
-                public T get(long timeout, TimeUnit unit)
-						throws InterruptedException, ExecutionException,
-						TimeoutException {
-					return get();
-				}
-			};
-		}
-    	return ((Future<T>)getContext().getFuture());
-    }
-    
-	/**
-	 * oneway调用，只发送请求，不接收返回结果.
-	 */
-	public void asyncCall(Runnable runable) {
-    	try {
-    		setAttachment(Constants.RETURN_KEY, Boolean.FALSE.toString());
-    		runable.run();
-		} catch (Throwable e) {
-			throw new RpcException("oneway call error ." + e.getMessage());
-		} finally {
-			removeAttachment(Constants.RETURN_KEY);
-		}
-    }
 
     public String getServiceAddr() {
         return serviceAddr;

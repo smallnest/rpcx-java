@@ -50,6 +50,7 @@ public class FailFilter implements Filter {
                 if (failType.equals(FailType.FailTry)) {
                     logger.info("------>failTry");
                     res.getAttachments().put("needRetry", "true");
+                    //这样走到下游的SelectFilter就不会再选出来一个新的Service了
                     invocation.setSelectMode(SelectMode.SelectByUser);
                     return res;
                 }
