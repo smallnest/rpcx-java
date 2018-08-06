@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * <p>
  * 负责管理失败的重试
  */
-@RpcFilter(group = {Constants.CONSUMER})
+@RpcFilter(group = {Constants.CONSUMER}, order = -1000)
 public class FailFilter implements Filter {
 
 

@@ -1,4 +1,4 @@
-package com.colobu.rpcx.server;
+package com.colobu.rpcx.register;
 
 /**
  * @author goodjava@qq.com

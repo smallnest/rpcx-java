@@ -1,6 +1,6 @@
 package com.colobu.rpcx.demo;
 
-import com.colobu.rpcx.server.IServiceRegister;
+import com.colobu.rpcx.register.IServiceRegister;
 import com.colobu.rpcx.server.NettyServer;
 import com.colobu.rpcx.server.ZkServiceRegister;
 

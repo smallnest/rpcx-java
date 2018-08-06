@@ -1,5 +1,9 @@
 package com.colobu.rpcx.selector;
 
+import com.colobu.rpcx.rpc.URL;
+
+import java.util.List;
+
 /**
  * @author goodjava@qq.com
  */
@@ -8,6 +12,15 @@ public class WeightedRountRobin {
     private Weighted[] weighteds;
 
     public WeightedRountRobin(Weighted[] weighteds) {
+        this.weighteds = weighteds;
+    }
+
+    public WeightedRountRobin(List<String> serviceList) {
+        Weighted[] weighteds = serviceList.stream().map(it -> {
+            URL url = URL.valueOf(it);
+            Weighted weighted = new Weighted(url.getHost(), Integer.parseInt(url.getParameter("weight")));
+            return weighted;
+        }).toArray(Weighted[]::new);
         this.weighteds = weighteds;
     }
 

@@ -40,6 +40,7 @@ public @interface Provider {
 
     /**
      * 是否开启监控
+     *
      * @return
      */
     boolean monitor() default false;
@@ -50,5 +51,8 @@ public @interface Provider {
      * @return
      */
     int tps() default -1;
+
+
+    String weight() default "";
 
 }

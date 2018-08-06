@@ -99,7 +99,7 @@ public class ConsumerConfig {
             invocation.setParameterTypes(types);
             invocation.setResultType(method.getReturnType());
 
-            RpcConsumerInvoker invoker = new RpcConsumerInvoker(client, invocation);
+            Invoker invoker = new RpcConsumerInvoker(client, invocation);
             Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.CONSUMER);
 
             Result result = wrapperInvoker.invoke(invocation);

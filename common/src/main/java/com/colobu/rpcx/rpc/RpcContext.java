@@ -22,18 +22,10 @@ public class RpcContext {
 		}
 	};
 
-	/**
-	 * get context.
-	 * 
-	 * @return context
-	 */
 	public static RpcContext getContext() {
 	    return LOCAL.get();
 	}
 	
-	/**
-	 * remove context.
-	 */
 	public static void removeContext() {
 	    LOCAL.remove();
 	}

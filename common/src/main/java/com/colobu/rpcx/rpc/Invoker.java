@@ -1,12 +1,13 @@
 package com.colobu.rpcx.rpc;
 
+import com.colobu.rpcx.discovery.IServiceDiscovery;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
 
 import java.lang.reflect.Method;
 
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public interface Invoker<T> extends Node {
 
@@ -17,5 +18,13 @@ public interface Invoker<T> extends Node {
     void setMethod(Method method);
 
     void setInterface(Class clazz);
+
+    /**
+     * 服务发现
+     * @return
+     */
+    default IServiceDiscovery serviceDiscovery() {
+        return null;
+    }
 
 }

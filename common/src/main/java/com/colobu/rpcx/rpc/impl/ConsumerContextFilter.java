@@ -14,7 +14,7 @@ import com.colobu.rpcx.rpc.annotation.RpcFilter;
 /**
  * Created by goodjava@qq.com.
  */
-@RpcFilter(group = {Constants.CONSUMER})
+@RpcFilter(group = {Constants.CONSUMER}, order = -3000)
 public class ConsumerContextFilter implements Filter {
 
     @Override
@@ -28,6 +28,7 @@ public class ConsumerContextFilter implements Filter {
             return invoker.invoke(invocation);
         } finally {
             RpcContext.getContext().clearAttachments();
+            RpcContext.getContext().setServiceAddr("");
         }
     }
 

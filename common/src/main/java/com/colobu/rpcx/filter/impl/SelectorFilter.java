@@ -1,14 +1,13 @@
 package com.colobu.rpcx.filter.impl;
 
 import com.colobu.rpcx.config.Constants;
-import com.colobu.rpcx.discovery.IServiceDiscovery;
 import com.colobu.rpcx.filter.Filter;
-import com.colobu.rpcx.rpc.Invoker;
-import com.colobu.rpcx.rpc.Result;
-import com.colobu.rpcx.rpc.RpcException;
+import com.colobu.rpcx.rpc.*;
 import com.colobu.rpcx.rpc.annotation.RpcFilter;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
 import com.colobu.rpcx.selector.SelectMode;
+import com.colobu.rpcx.selector.Weighted;
+import com.colobu.rpcx.selector.WeightedRountRobin;
 
 import java.security.SecureRandom;
 import java.util.List;
@@ -21,18 +20,24 @@ import java.util.concurrent.ConcurrentHashMap;
 @RpcFilter(group = {Constants.CONSUMER})
 public class SelectorFilter implements Filter {
 
-    private IServiceDiscovery discovery;
-
     private static SecureRandom secureRandom = new SecureRandom();
 
     private static ConcurrentHashMap<String, Integer> selectIndexMap = new ConcurrentHashMap<>();
+
+    /**
+     * 基于权重
+     */
+    private static ConcurrentHashMap<String, WeightedRountRobin> weightRoundRobinMap = new ConcurrentHashMap<>();
 
     @Override
     public Result invoke(Invoker<?> invoker, RpcInvocation invocation) throws RpcException {
         //目前使用类名当服务名称
         String serviceName = invocation.getClassName();
 
-        List<String> serviceList = this.discovery.getServices(serviceName);
+        //获取服务列表(ip?param)
+        List<String> serviceList = invoker.serviceDiscovery().getServices(serviceName);
+
+
         if (serviceList.size() <= 0) {
             throw new RpcException("serviceList size <=0 ", -3);
         }
@@ -40,14 +45,18 @@ public class SelectorFilter implements Filter {
         SelectMode selectMode = invocation.getSelectMode();
         switch (selectMode) {
             case RandomSelect: {
-
+                String service = randomSelect(serviceList);
+                RpcContext.getContext().setServiceAddr(service);
                 break;
             }
             case RoundRobin: {
+                String service = roundRobin(serviceList,serviceName);
+                RpcContext.getContext().setServiceAddr(service);
                 break;
             }
-
             case WeightedRoundRobin:{
+                String service = weightedRountRobin(serviceList,serviceName);
+                RpcContext.getContext().setServiceAddr(service);
                 break;
             }
         }
@@ -70,19 +79,26 @@ public class SelectorFilter implements Filter {
             v = v + 1;
             return v;
         });
-        return serviceAddr;
+        return URL.valueOf(serviceAddr).getAddress();
     }
 
 
-    private String weightedRountRobin(List<String> serviceList) {
-        return "";
+    private String weightedRountRobin(List<String> serviceList, String serviceName) {
+        WeightedRountRobin weightedRountRobin = weightRoundRobinMap.get(serviceName);
+        if (null == weightedRountRobin) {
+            weightRoundRobinMap.putIfAbsent(serviceName,new WeightedRountRobin(serviceList));
+        }
+        weightedRountRobin = weightRoundRobinMap.get(serviceName);
+        Weighted wei = weightedRountRobin.nextWeighted();
+        if (null == wei) {
+            return null;
+        }
+        return URL.valueOf(wei.getServer()).getAddress();
     }
-
-
 
 
     private String randomSelect(List<String> serviceList) {
         int index = secureRandom.nextInt(serviceList.size());
-        return serviceList.get(index);
+        return URL.valueOf(serviceList.get(index)).getAddress();
     }
 }

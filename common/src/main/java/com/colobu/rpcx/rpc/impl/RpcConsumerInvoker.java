@@ -1,7 +1,6 @@
 package com.colobu.rpcx.rpc.impl;
 
-import com.colobu.rpcx.common.retry.RetryNTimes;
-import com.colobu.rpcx.common.retry.RetryPolicy;
+import com.colobu.rpcx.discovery.IServiceDiscovery;
 import com.colobu.rpcx.netty.IClient;
 import com.colobu.rpcx.protocol.*;
 import com.colobu.rpcx.rpc.*;
@@ -114,5 +113,10 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
     @Override
     public void destroy() {
 
+    }
+
+    @Override
+    public IServiceDiscovery serviceDiscovery() {
+        return this.client.getServiceDiscovery();
     }
 }

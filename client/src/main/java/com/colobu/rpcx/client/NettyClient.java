@@ -424,4 +424,9 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
     public void putNettyEvent(final NettyEvent event) {
         this.nettyEventExecuter.putNettyEvent(event);
     }
+
+    @Override
+    public IServiceDiscovery getServiceDiscovery() {
+        return serviceDiscovery;
+    }
 }

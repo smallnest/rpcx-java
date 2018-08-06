@@ -3,7 +3,7 @@ package com.colobu.rpcx.discovery;
 import java.util.List;
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public interface IServiceDiscovery {
 

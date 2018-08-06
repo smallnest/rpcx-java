@@ -1,5 +1,6 @@
 package com.colobu.rpcx.netty;
 
+import com.colobu.rpcx.discovery.IServiceDiscovery;
 import com.colobu.rpcx.protocol.Message;
 
 /**
@@ -29,6 +30,9 @@ public interface IClient {
      *指定超时时间
      */
     Message call(String addr, Message req, long timeOut) throws Exception;
+
+
+    IServiceDiscovery getServiceDiscovery();
 
 }
 

@@ -1,6 +1,7 @@
 package com.colobu.rpcx.utils;
 
 import com.colobu.rpcx.common.Config;
+import com.colobu.rpcx.rpc.URL;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -71,8 +72,9 @@ public class ZkClient {
 
     ///youpin/services/Arith/tcp@0.0.0.0:8976"
     public void create(String basePath, Set<String> serviceNames, String addr) {
-        serviceNames.forEach(name -> {
-            String path = basePath + name + "/tcp@" + addr;
+        serviceNames.forEach(u -> {
+            URL url = URL.valueOf(u);
+            String path = basePath + url.getPath() + "/tcp@" + addr + "?" + url.toParameterString();
             try {
                 if (client.checkExists().forPath(path) == null) {
                     client.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL).forPath(path);

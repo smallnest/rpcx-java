@@ -1,12 +1,12 @@
 package com.colobu.rpcx.server;
 
+import com.colobu.rpcx.register.IServiceRegister;
 import com.colobu.rpcx.rpc.impl.Exporter;
 import com.colobu.rpcx.utils.ZkClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Set;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -24,10 +24,9 @@ public class ZkServiceRegister implements IServiceRegister {
     public ZkServiceRegister(String basePath, String addr, String providerPackage) {
         this.basePath = basePath;
         this.addr = addr;
-
-        logger.info("export service names:{}", this.serviceNameSet);
         //导出所有有注解的service
         this.serviceNameSet = new Exporter().export(providerPackage);
+        logger.info("export service names:{}", this.serviceNameSet);
     }
 
     /**

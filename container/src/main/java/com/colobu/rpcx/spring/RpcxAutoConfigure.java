@@ -6,7 +6,7 @@ import com.colobu.rpcx.client.ZkServiceDiscovery;
 import com.colobu.rpcx.netty.IClient;
 import com.colobu.rpcx.rpc.RpcException;
 import com.colobu.rpcx.rpc.annotation.Provider;
-import com.colobu.rpcx.server.IServiceRegister;
+import com.colobu.rpcx.register.IServiceRegister;
 import com.colobu.rpcx.server.NettyServer;
 import com.colobu.rpcx.server.ZkServiceRegister;
 import org.aspectj.lang.ProceedingJoinPoint;
