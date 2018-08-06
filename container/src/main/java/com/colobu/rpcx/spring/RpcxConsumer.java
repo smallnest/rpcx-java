@@ -1,6 +1,7 @@
 package com.colobu.rpcx.spring;
 
 import com.colobu.rpcx.config.Constants;
+import com.colobu.rpcx.fail.FailType;
 import com.colobu.rpcx.filter.FilterWrapper;
 import com.colobu.rpcx.netty.IClient;
 import com.colobu.rpcx.rpc.Invoker;
@@ -9,6 +10,7 @@ import com.colobu.rpcx.rpc.Result;
 import com.colobu.rpcx.rpc.impl.ConsumerConfig;
 import com.colobu.rpcx.rpc.impl.RpcConsumerInvoker;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
+import com.colobu.rpcx.selector.SelectMode;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -54,6 +56,8 @@ public class RpcxConsumer {
     public String invoke(String className, String methodName, String[] types, String[] params) {
         RpcInvocation invocation = new RpcInvocation();
         invocation.setMethodName(Constants.$INVOKE);
+        invocation.setFailType(FailType.FailFast);
+        invocation.setSelectMode(SelectMode.RandomSelect);
         invocation.setClassName(className);
         invocation.setParameterTypeNames(types);
         invocation.setTimeOut(2000);
