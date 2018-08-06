@@ -10,6 +10,7 @@ import com.colobu.rpcx.rpc.RpcContext;
 import com.colobu.rpcx.rpc.RpcException;
 import com.colobu.rpcx.rpc.annotation.RpcFilter;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
+import com.colobu.rpcx.selector.SelectMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +50,7 @@ public class FailFilter implements Filter {
                 if (failType.equals(FailType.FailTry)) {
                     logger.info("------>failTry");
                     res.getAttachments().put("needRetry", "true");
+                    invocation.setSelectMode(SelectMode.SelectByUser);
                     return res;
                 }
             }

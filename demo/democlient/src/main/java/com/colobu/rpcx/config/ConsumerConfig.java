@@ -27,13 +27,12 @@ public class ConsumerConfig {
 
     @Bean
     public ITestService testService() {
-        //设置超时时间1000 重试次数3
         return rpcxConsumer.wrap(ITestService.class, new ConsumerConfigBuilder()
                 .setToken("zzy123")
                 .setSendType(Constants.SYNC_KEY)
                 .setTimeout(600000)
                 .setFailType(FailType.FailTry)
-                .setSelectMode(SelectMode.RandomSelect)
+                .setSelectMode(SelectMode.WeightedRoundRobin)
                 .setRetryNum(3));
     }
 }

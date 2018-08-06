@@ -59,6 +59,9 @@ public class SelectorFilter implements Filter {
                 RpcContext.getContext().setServiceAddr(service);
                 break;
             }
+            case SelectByUser: {
+                break;
+            }
         }
 
 
@@ -70,8 +73,8 @@ public class SelectorFilter implements Filter {
         Integer index = selectIndexMap.get(serviceName);
         if (null == index) {
             selectIndexMap.putIfAbsent(serviceName, 0);
+            index = selectIndexMap.get(serviceName);
         }
-        index = selectIndexMap.get(serviceName);
 
         int i = index % serviceList.size();
         String serviceAddr = serviceList.get(i);
@@ -87,8 +90,11 @@ public class SelectorFilter implements Filter {
         WeightedRountRobin weightedRountRobin = weightRoundRobinMap.get(serviceName);
         if (null == weightedRountRobin) {
             weightRoundRobinMap.putIfAbsent(serviceName, new WeightedRountRobin(serviceList));
+            weightedRountRobin = weightRoundRobinMap.get(serviceName);
         }
-        weightedRountRobin = weightRoundRobinMap.get(serviceName);
+        //需要更新权重列表,有可能服务器上下线
+        weightedRountRobin.updateWeighteds(serviceList);
+
         Weighted wei = weightedRountRobin.nextWeighted();
         if (null == wei) {
             return null;

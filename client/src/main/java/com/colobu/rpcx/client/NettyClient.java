@@ -162,7 +162,6 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
         if (StringUtils.isEmpty(serviceAddr)) {
             throw new RpcException("serviceAdd is null");
         } else {
-            logger.info("---------->use old channel");
             channel = this.getAndCreateChannel(serviceAddr);
         }
 
