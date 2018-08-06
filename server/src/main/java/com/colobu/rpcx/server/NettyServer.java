@@ -3,6 +3,7 @@ package com.colobu.rpcx.server;
 import com.colobu.rpcx.common.*;
 import com.colobu.rpcx.handler.RpcxProcessHandler;
 import com.colobu.rpcx.netty.*;
+import com.colobu.rpcx.processor.RpcHttpProcessor;
 import com.colobu.rpcx.processor.RpcProcessor;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -62,6 +63,11 @@ public class NettyServer extends NettyRemotingAbstract {
         this.defaultRequestProcessor = new Pair<>(new RpcProcessor(this.getBeanFunc), new ThreadPoolExecutor(50, 50,
                 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(), new NamedThreadFactory("defaultRequestProcessor")));
+        //http网关请求处理器
+        this.registerProcessor(1984, new RpcHttpProcessor(this.getBeanFunc), new ThreadPoolExecutor(50, 50,
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(), new NamedThreadFactory("httpRequestProcessor")));
+
         DefaultEventExecutorGroup defaultEventExecutorGroup = new DefaultEventExecutorGroup(
                 nettyServerConfig.getServerWorkerThreads(), new NamedThreadFactory("NettyServerCodecThread_", false));
 

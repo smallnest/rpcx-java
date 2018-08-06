@@ -22,11 +22,9 @@ public class NettyRemotingAbstract {
 
     private static final Logger plog = LoggerFactory.getLogger(NettyRemotingAbstract.class);
 
-    protected final ConcurrentHashMap<Integer, ResponseFuture> responseTable =
-            new ConcurrentHashMap<>(256);
+    protected final ConcurrentHashMap<Integer, ResponseFuture> responseTable = new ConcurrentHashMap<>(256);
 
-    protected final HashMap<Integer, Pair<NettyRequestProcessor, ExecutorService>> processorTable =
-            new HashMap<>(64);
+    protected final HashMap<Integer, Pair<NettyRequestProcessor, ExecutorService>> processorTable = new HashMap<>(64);
 
     protected Pair<NettyRequestProcessor, ExecutorService> defaultRequestProcessor;
 
@@ -147,7 +145,7 @@ public class NettyRemotingAbstract {
                 try {
 
                     final RemotingCommand response = pair.getObject1().processRequest(ctx, cmd);
-
+                    //是否是oneway是根据来的request计算的
                     if (!cmd.isOnewayRPC()) {
                         if (response != null) {
                             response.setOpaque(opaque);
@@ -274,6 +272,11 @@ public class NettyRemotingAbstract {
 
     public boolean hasEventListener() {
         return this.channelEventListener != null;
+    }
+
+    public void registerProcessor(int requestCode, NettyRequestProcessor processor, ExecutorService executor) {
+        Pair<NettyRequestProcessor, ExecutorService> pair = new Pair<NettyRequestProcessor, ExecutorService>(processor, executor);
+        this.processorTable.put(requestCode, pair);
     }
 
 }
