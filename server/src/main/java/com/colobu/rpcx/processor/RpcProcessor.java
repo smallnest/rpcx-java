@@ -7,10 +7,7 @@ import com.colobu.rpcx.protocol.LanguageCode;
 import com.colobu.rpcx.protocol.Message;
 import com.colobu.rpcx.protocol.MessageType;
 import com.colobu.rpcx.protocol.RemotingCommand;
-import com.colobu.rpcx.rpc.HessianUtils;
-import com.colobu.rpcx.rpc.Invoker;
-import com.colobu.rpcx.rpc.Result;
-import com.colobu.rpcx.rpc.URL;
+import com.colobu.rpcx.rpc.*;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
 import com.colobu.rpcx.rpc.impl.RpcProviderInvoker;
 import com.google.gson.Gson;
@@ -19,6 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.function.Function;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * @author goodjava@qq.com
@@ -44,23 +43,32 @@ public class RpcProcessor implements NettyRequestProcessor {
             invocation = new RpcInvocation();
             invocation.setClassName(reqMsg.servicePath);
             invocation.setMethodName(reqMsg.serviceMethod);
-            invocation.servicePath = request.getMessage().servicePath;
-            invocation.serviceMethod = request.getMessage().serviceMethod;
             //golang 参数是byte[]
             invocation.setParameterTypeNames(new String[]{"[B"});
             //参数就是payload数据
             invocation.setArguments(new Object[]{request.getMessage().payload});
             invocation.url = new URL("rpcx", "", 0);
             invocation.languageCode = LanguageCode.GO;
-        } else {
-            //java http 调用
+        } else if (LanguageCode.JAVA.name().equals(language)) {
             invocation = (RpcInvocation) HessianUtils.read(request.getMessage().payload);
-            invocation.servicePath = request.getMessage().servicePath;
-            invocation.serviceMethod = request.getMessage().serviceMethod;
-            invocation.url.setHost(req.metadata.get("_host"));
-            invocation.url.setPort(Integer.parseInt(req.metadata.get("_port")));
+            invocation.languageCode = LanguageCode.valueOf(language);
+        } else if (LanguageCode.HTTP.name().equals(language)) {
+            Gson gson = new Gson();
+            invocation = gson.fromJson(new String(request.getMessage().payload), RpcInvocation.class);
+            String[] names = invocation.getParameterTypeNames();
+            Object[] args = invocation.getArguments();
+            invocation.setArguments(IntStream.range(0,names.length).mapToObj(i->{
+                String name = names[i];
+                Class<?> clazz = ReflectUtils.forName(name);
+                return gson.fromJson(args[i].toString(),clazz);
+            }).toArray());
             invocation.languageCode = LanguageCode.valueOf(language);
         }
+
+        invocation.servicePath = request.getMessage().servicePath;
+        invocation.serviceMethod = request.getMessage().serviceMethod;
+        invocation.url.setHost(req.metadata.get("_host"));
+        invocation.url.setPort(Integer.parseInt(req.metadata.get("_port")));
 
         Invoker<Object> invoker = new RpcProviderInvoker<>(getBeanFunc);
         Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.PROVIDER);
@@ -82,7 +90,7 @@ public class RpcProcessor implements NettyRequestProcessor {
             resMessage.payload = (byte[]) rpcResult.getValue();
         }
         if (rpcResult.hasException()) {
-            logger.error(rpcResult.getException().getMessage(),rpcResult.getException());
+            logger.error(rpcResult.getException().getMessage(), rpcResult.getException());
             resMessage.metadata.put("_rpcx_error_code", "-2");
             resMessage.metadata.put("_rpcx_error_message", rpcResult.getException().getMessage());
         }

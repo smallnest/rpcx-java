@@ -34,7 +34,7 @@ public class SelectorFilter implements Filter {
         //目前使用类名当服务名称
         String serviceName = invocation.getClassName();
 
-        //获取服务列表(ip?param)
+        //获取服务列表(ip:port?param)
         List<String> serviceList = invoker.serviceDiscovery().getServices(serviceName);
 
 

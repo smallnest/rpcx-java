@@ -4,6 +4,7 @@ import com.colobu.rpcx.common.Pair;
 import com.colobu.rpcx.protocol.Message;
 import com.colobu.rpcx.rpc.HessianUtils;
 import com.colobu.rpcx.rpc.Invocation;
+import com.colobu.rpcx.rpc.RpcException;
 import com.colobu.rpcx.rpc.URL;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
 import com.google.gson.Gson;
@@ -30,7 +31,16 @@ public class RpcxHttpClient {
 
     private static final Logger logger = LoggerFactory.getLogger(RpcxHttpClient.class);
 
-    public static String execute(String url, String service, String method, Pair<String, Object>... params) {
+    /**
+     * http 调用
+     *
+     * @param url
+     * @param service
+     * @param method
+     * @param params  key=类型  value=json后的值
+     * @return
+     */
+    public static String execute(String url, String service, String method, Pair<String, String>... params) {
         RequestConfig defaultRequestConfig = RequestConfig.custom()
                 .setSocketTimeout(1000)
                 .setConnectTimeout(1000)
@@ -43,11 +53,12 @@ public class RpcxHttpClient {
             post.setHeader("X-RPCX-ServiceMethod", method);
             post.setHeader("connection", "close");
 
+            Gson gson = new Gson();
             Invocation invocation = new RpcInvocation();
             String[] parameterTypeNames = new String[params.length];
             Object[] arguments = new Object[params.length];
             IntStream.range(0, params.length).forEach(index -> {
-                Pair<String, Object> p = params[index];
+                Pair<String, String> p = params[index];
                 parameterTypeNames[index] = p.getObject1();
                 arguments[index] = p.getObject2();
             });
@@ -56,17 +67,16 @@ public class RpcxHttpClient {
             invocation.setArguments(arguments);
 
             URL u = new URL("rpcx", "", 0);
-            Gson gson = new Gson();
 
             ((RpcInvocation) invocation).setClassName(service);
             ((RpcInvocation) invocation).setMethodName(method);
 
-            u.setServiceInterface(invocation.getClassName() + "" + invocation.getMethodName());
+            u.setServiceInterface(invocation.getClassName() + "." + invocation.getMethodName());
             String _params = Stream.of(invocation.getArguments()).map(it -> gson.toJson(it)).collect(Collectors.joining(","));
             u.setPath(invocation.getClassName() + "." + invocation.getMethodName() + "(" + _params + ")");
             ((RpcInvocation) invocation).setUrl(u);
 
-            byte[] payload = HessianUtils.write(invocation);
+            byte[] payload = new Gson().toJson(invocation).getBytes();
 
             ByteArrayEntity entriy = new ByteArrayEntity(payload, ContentType.DEFAULT_BINARY);
             post.setEntity(entriy);
@@ -78,7 +88,7 @@ public class RpcxHttpClient {
             return new String(message.payload);
         } catch (Exception ex) {
             logger.info("execute error:{}", ex.getMessage());
+            throw new RpcException(ex);
         }
-        return "";
     }
 }
