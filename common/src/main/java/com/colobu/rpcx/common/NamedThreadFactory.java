@@ -13,8 +13,6 @@ public class NamedThreadFactory implements ThreadFactory {
 
     private static final Logger logger = LoggerFactory.getLogger(NamedThreadFactory.class);
 
-    private static final AtomicInteger POOL_SEQ = new AtomicInteger(1);
-
     private final AtomicInteger mThreadNum = new AtomicInteger(1);
 
     private final String mPrefix;
@@ -22,10 +20,6 @@ public class NamedThreadFactory implements ThreadFactory {
     private final boolean mDaemo;
 
     private final ThreadGroup mGroup;
-
-    public NamedThreadFactory() {
-        this("pool-" + POOL_SEQ.getAndIncrement(), false);
-    }
 
     public NamedThreadFactory(String prefix) {
         this(prefix, false);

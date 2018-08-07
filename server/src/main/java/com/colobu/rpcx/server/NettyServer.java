@@ -60,11 +60,11 @@ public class NettyServer extends NettyRemotingAbstract {
 
     public void start() {
         //默认的处理器
-        this.defaultRequestProcessor = new Pair<>(new RpcProcessor(this.getBeanFunc), new ThreadPoolExecutor(5, 50,
+        this.defaultRequestProcessor = new Pair<>(new RpcProcessor(this.getBeanFunc), new ThreadPoolExecutor(50, 50,
                 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(), new NamedThreadFactory("defaultRequestProcessor")));
         //http网关请求处理器
-        this.registerProcessor(1984, new RpcHttpProcessor(this.getBeanFunc), new ThreadPoolExecutor(5, 50,
+        this.registerProcessor(1984, new RpcHttpProcessor(this.getBeanFunc), new ThreadPoolExecutor(50, 50,
                 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(), new NamedThreadFactory("httpRequestProcessor")));
 
@@ -104,7 +104,7 @@ public class NettyServer extends NettyRemotingAbstract {
             InetSocketAddress addr = (InetSocketAddress) sync.channel().localAddress();
             this.port = addr.getPort();
             this.addr = addr.getHostString();
-            logger.info("###########rpc server addr:{} port:{}", this.addr, this.port);
+            logger.info("###########rpc server start addr{} ", this.addr + ":" + this.port);
         } catch (InterruptedException e1) {
             throw new RuntimeException("this.serverBootstrap.bind().sync() InterruptedException", e1);
         }
