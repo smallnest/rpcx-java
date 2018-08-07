@@ -3,8 +3,15 @@ package com.colobu.rpcx.netty;
 import com.colobu.rpcx.common.Pair;
 import com.colobu.rpcx.common.RemotingHelper;
 import com.colobu.rpcx.common.RemotingUtil;
+import com.colobu.rpcx.config.Constants;
+import com.colobu.rpcx.protocol.Message;
+import com.colobu.rpcx.protocol.MessageType;
 import com.colobu.rpcx.protocol.RemotingCommand;
 import com.colobu.rpcx.protocol.RemotingSysResponseCode;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.JdkFutureAdapters;
+import com.google.common.util.concurrent.ListenableFuture;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;
@@ -12,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -20,7 +28,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class NettyRemotingAbstract {
 
-    private static final Logger plog = LoggerFactory.getLogger(NettyRemotingAbstract.class);
+    private static final Logger logger = LoggerFactory.getLogger(NettyRemotingAbstract.class);
 
     protected final ConcurrentHashMap<Integer, ResponseFuture> responseTable = new ConcurrentHashMap<>(256);
 
@@ -38,10 +46,18 @@ public class NettyRemotingAbstract {
 
     protected static final long LockTimeoutMillis = 3000;
 
+    private AtomicInteger processingRequest = new AtomicInteger();
+
+    private volatile boolean stop = false;
+
     public void putNettyEvent(final NettyEvent event) {
         this.nettyEventExecuter.putNettyEvent(event);
     }
 
+
+    public void scanProcessingRequest() {
+        logger.info("processing request num:{}", processingRequest.get());
+    }
 
     public void scanResponseTable() {
         final List<ResponseFuture> rfList = new LinkedList<>();
@@ -54,7 +70,7 @@ public class NettyRemotingAbstract {
                 rep.release();
                 it.remove();
                 rfList.add(rep);
-                plog.warn("remove timeout request:{} ", rep);
+                logger.warn("remove timeout request:{} ", rep);
             }
         }
 
@@ -62,7 +78,7 @@ public class NettyRemotingAbstract {
             try {
                 rf.executeInvokeCallback();
             } catch (Throwable e) {
-                plog.warn("scanResponseTable, operationComplete Exception", e);
+                logger.warn("scanResponseTable, operationComplete Exception", e);
             }
         }
     }
@@ -76,7 +92,6 @@ public class NettyRemotingAbstract {
         if (null == channel) {
             return;
         }
-
         try {
             if (this.lockChannelTables.tryLock(LockTimeoutMillis, TimeUnit.MILLISECONDS)) {
                 try {
@@ -96,25 +111,25 @@ public class NettyRemotingAbstract {
                     }
 
                     if (null == prevCW) {
-                        plog.info("eventCloseChannel: the channel[{}] has been removed from the channel table before", addrRemote);
+                        logger.info("eventCloseChannel: the channel[{}] has been removed from the channel table before", addrRemote);
                         removeItemFromTable = false;
                     }
 
                     if (removeItemFromTable) {
                         this.channelTables.remove(addrRemote);
-                        plog.info("closeChannel: the channel[{}] was removed from channel table", addrRemote);
+                        logger.info("closeChannel: the channel[{}] was removed from channel table", addrRemote);
                         RemotingUtil.closeChannel(channel);
                     }
                 } catch (Exception e) {
-                    plog.error("closeChannel: close the channel exception", e);
+                    logger.error("closeChannel: close the channel exception", e);
                 } finally {
                     this.lockChannelTables.unlock();
                 }
             } else {
-                plog.warn("closeChannel: try to lock channel table, but timeout, {}ms", LockTimeoutMillis);
+                logger.warn("closeChannel: try to lock channel table, but timeout, {}ms", LockTimeoutMillis);
             }
         } catch (InterruptedException e) {
-            plog.error("closeChannel exception", e);
+            logger.error("closeChannel exception", e);
         }
     }
 
@@ -136,13 +151,30 @@ public class NettyRemotingAbstract {
     }
 
     public void processRequestCommand(final ChannelHandlerContext ctx, final RemotingCommand cmd) {
+        final int opaque = cmd.getOpaque();
+        if (this.stop) {
+            if (!cmd.isOnewayRPC()) {
+                final RemotingCommand response = RemotingCommand.createResponseCommand();
+                Message message = new Message();
+                message.setMessageType(MessageType.Response);
+                message.setSeq(opaque);
+                message.metadata.put(Constants.RPCX_ERROR_CODE, "-9");
+                message.metadata.put(Constants.RPCX_ERROR_MESSAGE, "server begin shutdown");
+                response.setMessage(message);
+                response.setOpaque(opaque);
+                ctx.writeAndFlush(response);
+            }
+            return;
+        }
+
+
         final Pair<NettyRequestProcessor, ExecutorService> matched = this.processorTable.get(cmd.getCode());
         final Pair<NettyRequestProcessor, ExecutorService> pair = null == matched ? this.defaultRequestProcessor : matched;
-        final int opaque = cmd.getOpaque();
 
         if (pair != null) {
             Runnable run = () -> {
                 try {
+                    processingRequest.incrementAndGet();
                     final RemotingCommand response = pair.getObject1().processRequest(ctx, cmd);
                     //是否是oneway是根据来的request计算的
                     if (!cmd.isOnewayRPC()) {
@@ -152,24 +184,25 @@ public class NettyRemotingAbstract {
                             try {
                                 ctx.writeAndFlush(response);
                             } catch (Throwable e) {
-                                plog.error("process request over, but response failed", e);
-                                plog.error(cmd.toString());
-                                plog.error(response.toString());
+                                logger.error("process request over, but response failed", e);
+                                logger.error(cmd.toString());
+                                logger.error(response.toString());
                             }
                         } else {
 
                         }
                     }
                 } catch (Throwable e) {
-                    plog.error("process request exception", e);
-                    plog.error(cmd.toString());
-
+                    logger.error("process request exception", e);
+                    logger.error(cmd.toString());
                     if (!cmd.isOnewayRPC()) {
                         final RemotingCommand response = RemotingCommand.createResponseCommand(RemotingSysResponseCode.SYSTEM_ERROR,
                                 RemotingHelper.exceptionSimpleDesc(e));
                         response.setOpaque(opaque);
                         ctx.writeAndFlush(response);
                     }
+                } finally {
+                    processingRequest.decrementAndGet();
                 }
             };
 
@@ -183,10 +216,22 @@ public class NettyRemotingAbstract {
 
             try {
                 final RequestTask requestTask = new RequestTask(run, ctx.channel(), cmd);
-                pair.getObject2().submit(requestTask);
+                Future<?> future = pair.getObject2().submit(requestTask);
+                ListenableFuture<?> listenableFuture = JdkFutureAdapters.listenInPoolThread(future);
+                Futures.addCallback(listenableFuture, new FutureCallback<Object>() {
+                    @Override
+                    public void onSuccess(Object result) {
+                    }
+
+                    @Override
+                    public void onFailure(Throwable t) {
+                    }
+                });
+
+
             } catch (RejectedExecutionException e) {
                 if ((System.currentTimeMillis() % 10000) == 0) {
-                    plog.warn(RemotingHelper.parseChannelRemoteAddr(ctx.channel())
+                    logger.warn(RemotingHelper.parseChannelRemoteAddr(ctx.channel())
                             + ", too many requests and system thread pool busy, RejectedExecutionException "
                             + pair.getObject2().toString()
                             + " request code: " + cmd.getCode());
@@ -205,7 +250,7 @@ public class NettyRemotingAbstract {
                     RemotingCommand.createResponseCommand(RemotingSysResponseCode.REQUEST_CODE_NOT_SUPPORTED, error);
             response.setOpaque(opaque);
             ctx.writeAndFlush(response);
-            plog.error(RemotingHelper.parseChannelRemoteAddr(ctx.channel()) + error);
+            logger.error(RemotingHelper.parseChannelRemoteAddr(ctx.channel()) + error);
         }
     }
 
@@ -235,12 +280,12 @@ public class NettyRemotingAbstract {
                             try {
                                 responseFuture.executeInvokeCallback();
                             } catch (Throwable e) {
-                                plog.warn("execute callback in executor exception, and callback throw", e);
+                                logger.warn("execute callback in executor exception, and callback throw", e);
                             }
                         });
                     } catch (Exception e) {
                         runInThisThread = true;
-                        plog.warn("execute callback in executor exception, maybe executor busy", e);
+                        logger.warn("execute callback in executor exception, maybe executor busy", e);
                     }
                 } else {
                     runInThisThread = true;
@@ -250,7 +295,7 @@ public class NettyRemotingAbstract {
                     try {
                         responseFuture.executeInvokeCallback();
                     } catch (Throwable e) {
-                        plog.warn("executeInvokeCallback Exception", e);
+                        logger.warn("executeInvokeCallback Exception", e);
                     }
                 }
             } else {
@@ -258,8 +303,8 @@ public class NettyRemotingAbstract {
                 responseFuture.putResponse(cmd);
             }
         } else {
-            plog.warn("receive response, but not matched any request, " + RemotingHelper.parseChannelRemoteAddr(ctx.channel()));
-            plog.warn(cmd.toString());
+            logger.warn("receive response, but not matched any request, " + RemotingHelper.parseChannelRemoteAddr(ctx.channel()));
+            logger.warn(cmd.toString());
         }
     }
 
@@ -276,6 +321,28 @@ public class NettyRemotingAbstract {
     public void registerProcessor(int requestCode, NettyRequestProcessor processor, ExecutorService executor) {
         Pair<NettyRequestProcessor, ExecutorService> pair = new Pair<NettyRequestProcessor, ExecutorService>(processor, executor);
         this.processorTable.put(requestCode, pair);
+    }
+
+    public void serverShutdown() {
+        logger.info("server shutdown begin");
+        stop = true;
+        int i = 0;
+        while (true) {
+            if (i++ >= 30) {
+                break;
+            }
+            int num = this.processingRequest.get();
+            logger.info("shutdown processing request num:{}", num);
+            if (num == 0) {
+                break;
+            }
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        logger.info("server shutdown finish");
     }
 
 }

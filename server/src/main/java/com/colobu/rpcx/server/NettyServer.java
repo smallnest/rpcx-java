@@ -41,6 +41,8 @@ public class NettyServer extends NettyRemotingAbstract {
 
     private final ScheduledThreadPoolExecutor timer = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("timer"));
 
+    private final ScheduledThreadPoolExecutor processingRequestSchedule = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("processingRequestSchedule"));
+
     private final EventLoopGroup eventLoopGroupBoss;
     private final EventLoopGroup eventLoopGroupSelector;
     private final NettyServerConfig nettyServerConfig;
@@ -60,9 +62,7 @@ public class NettyServer extends NettyRemotingAbstract {
 
     public void start() {
         //默认的处理器
-        this.defaultRequestProcessor = new Pair<>(new RpcProcessor(this.getBeanFunc), new ThreadPoolExecutor(50, 50,
-                0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(), new NamedThreadFactory("defaultRequestProcessor")));
+        this.defaultRequestProcessor = createDefaultRequestProcessor();
         //http网关请求处理器
         this.registerProcessor(1984, new RpcHttpProcessor(this.getBeanFunc), new ThreadPoolExecutor(50, 50,
                 0L, TimeUnit.MILLISECONDS,
@@ -72,38 +72,19 @@ public class NettyServer extends NettyRemotingAbstract {
                 nettyServerConfig.getServerWorkerThreads(), new NamedThreadFactory("NettyServerCodecThread_", false));
 
 
-        ServerBootstrap childHandler =
-                this.serverBootstrap.group(this.eventLoopGroupBoss, this.eventLoopGroupSelector).channel(NioServerSocketChannel.class)
-                        .option(ChannelOption.SO_BACKLOG, 1024)
-                        .option(ChannelOption.SO_REUSEADDR, true)
-                        .option(ChannelOption.SO_KEEPALIVE, false)
-                        .childOption(ChannelOption.TCP_NODELAY, true)
-                        .option(ChannelOption.SO_SNDBUF, nettyServerConfig.getServerSocketSndBufSize())
-                        .option(ChannelOption.SO_RCVBUF, nettyServerConfig.getServerSocketRcvBufSize())
-                        .localAddress(new InetSocketAddress(this.nettyServerConfig.getListenPort()))
-                        .childHandler(new ChannelInitializer<SocketChannel>() {
-                            @Override
-                            public void initChannel(SocketChannel ch) throws Exception {
-                                ch.pipeline().addLast(
-                                        defaultEventExecutorGroup,
-                                        new RpcxProcessHandler(nettyServerConfig.getServerChannelMaxIdleTimeSeconds(), NettyServer.this)
-                                );
-                            }
-                        });
+        ServerBootstrap childHandler = createServerBootstrap(defaultEventExecutorGroup);
 
         if (nettyServerConfig.isServerPooledByteBufAllocatorEnable()) {
             childHandler.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
         }
 
         try {
-            String inetHost = RemotingUtil.getLocalAddress();
-
+            String host = RemotingUtil.getLocalAddress();
             String port = getServerPort();
-
-            ChannelFuture sync = this.serverBootstrap.bind(inetHost, Integer.parseInt(port)).sync();
+            ChannelFuture sync = this.serverBootstrap.bind(host, Integer.parseInt(port)).sync();
             InetSocketAddress addr = (InetSocketAddress) sync.channel().localAddress();
-            this.port = addr.getPort();
             this.addr = addr.getHostString();
+            this.port = addr.getPort();
             logger.info("###########rpc server start addr{} ", this.addr + ":" + this.port);
         } catch (InterruptedException e1) {
             throw new RuntimeException("this.serverBootstrap.bind().sync() InterruptedException", e1);
@@ -113,15 +94,56 @@ public class NettyServer extends NettyRemotingAbstract {
             this.nettyEventExecuter.run();
         }
 
+        runScanResponseTableSchedule();
+        runProcessingRequestSchedule();
+        addShutdownHook();
+    }
+
+    private Pair<NettyRequestProcessor, ExecutorService> createDefaultRequestProcessor() {
+        return new Pair<>(new RpcProcessor(this.getBeanFunc), new ThreadPoolExecutor(50, 50,
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(), new NamedThreadFactory("defaultRequestProcessor")));
+    }
+
+    private void runScanResponseTableSchedule() {
         this.timer.scheduleAtFixedRate(() -> {
             try {
-            } catch (Exception e) {
                 NettyServer.this.scanResponseTable();
+            } catch (Exception e) {
                 logger.error("scanResponseTable exception", e);
             }
         }, 1000, 3000, TimeUnit.MILLISECONDS);
+    }
 
-        addShutdownHook();
+    private void runProcessingRequestSchedule() {
+        this.processingRequestSchedule.scheduleAtFixedRate(() -> {
+            try {
+                scanProcessingRequest();
+            } catch (Exception ex) {
+                logger.error("runProcessingRequestSchedule error:{}", ex.getMessage());
+            }
+        }, 0, 10, TimeUnit.SECONDS);
+    }
+
+    private ServerBootstrap createServerBootstrap(DefaultEventExecutorGroup defaultEventExecutorGroup) {
+        return this.serverBootstrap.group(this.eventLoopGroupBoss, this.eventLoopGroupSelector).channel(NioServerSocketChannel.class)
+                .option(ChannelOption.SO_BACKLOG, 1024)
+                .option(ChannelOption.SO_REUSEADDR, true)
+                .option(ChannelOption.SO_KEEPALIVE, false)
+                .option(ChannelOption.SO_LINGER, 10)
+                .childOption(ChannelOption.TCP_NODELAY, true)
+                .option(ChannelOption.SO_SNDBUF, nettyServerConfig.getServerSocketSndBufSize())
+                .option(ChannelOption.SO_RCVBUF, nettyServerConfig.getServerSocketRcvBufSize())
+                .localAddress(new InetSocketAddress(this.nettyServerConfig.getListenPort()))
+                .childHandler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    public void initChannel(SocketChannel ch) throws Exception {
+                        ch.pipeline().addLast(
+                                defaultEventExecutorGroup,
+                                new RpcxProcessHandler(nettyServerConfig.getServerChannelMaxIdleTimeSeconds(), NettyServer.this)
+                        );
+                    }
+                });
     }
 
     private String getServerPort() {
@@ -135,9 +157,18 @@ public class NettyServer extends NettyRemotingAbstract {
     private void addShutdownHook() {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             logger.info("shutdown begin");
+
+            serverShutdown();
+            shutdown();
+
             latch.countDown();
             logger.info("shutdown end");
         }));
+    }
+
+    private void shutdown() {
+        this.eventLoopGroupSelector.shutdownGracefully();
+        this.eventLoopGroupBoss.shutdownGracefully();
     }
 
     public void await() {

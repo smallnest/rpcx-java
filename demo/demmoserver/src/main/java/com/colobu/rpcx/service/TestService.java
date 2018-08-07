@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -32,7 +33,7 @@ public class TestService implements ITestService {
 //        logger.info("-------------->call success " + i);
 
 //        try {
-//            TimeUnit.SECONDS.sleep(5);
+//            TimeUnit.SECONDS.sleep(15);
 //        } catch (InterruptedException e) {
 //            e.printStackTrace();
 //        }

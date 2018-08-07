@@ -121,3 +121,4 @@ Then you can write the java client:
 - 支持http gateway访问模式
 - 调用失败支持(FailFast Failover Failtry)
 - 支持select模式(RandomSelect RoundRobin WeightedRoundRobin SelectByUser)
+- 支持优雅关机

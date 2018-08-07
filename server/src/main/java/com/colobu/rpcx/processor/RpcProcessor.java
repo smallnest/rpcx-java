@@ -34,7 +34,7 @@ public class RpcProcessor implements NettyRequestProcessor {
     }
 
     @Override
-    public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request) throws Exception {
+    public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request) {
         Message req = request.getMessage();
         String language = req.metadata.get("language");
         RpcInvocation invocation = null;
