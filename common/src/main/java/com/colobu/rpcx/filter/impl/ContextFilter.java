@@ -29,7 +29,7 @@ public class ContextFilter implements Filter {
 
     @Override
     public Result invoke(Invoker<?> invoker, RpcInvocation invocation) throws RpcException {
-        logger.info("ContextFilter begin className:{} methodName:{}", invocation.getClassName(), invocation.getMethodName());
+        logger.debug("ContextFilter begin className:{} methodName:{}", invocation.getClassName(), invocation.getMethodName());
 
         Class clazz = ClassUtils.getClassByName(invocation.getClassName());
         invoker.setInterface(clazz);
@@ -76,7 +76,7 @@ public class ContextFilter implements Filter {
             return invoker.invoke(invocation);
         } finally {
             RpcContext.removeContext();
-            logger.info("ContextFilter end");
+            logger.debug("ContextFilter end");
         }
     }
 

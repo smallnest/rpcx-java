@@ -44,12 +44,11 @@ public class TestController {
     /**
      * 测试echo
      *
-     * @param word
      * @return
      */
     @GetMapping("/echo")
-    public String echo(String word) {
-        String s = consumer.echo("com.colobu.rpcx.service.TestService", word);
+    public String echo() {
+        String s = consumer.echo("com.colobu.rpcx.service.TestService", "echo");
         return s;
     }
 

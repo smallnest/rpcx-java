@@ -27,13 +27,14 @@ public class MonitorFilter implements Filter {
 
     private final static ConcurrentMap<String, AtomicInteger> concurrents = new ConcurrentHashMap<>();
 
-    private static Monitor monitor = new MonitorFactory().getMonitor(null);
+//    private static Monitor monitor = new MonitorFactory().getMonitor(null);
+    private static Monitor monitor = null;
 
 
     // 调用过程拦截
     @Override
     public Result invoke(Invoker<?> invoker, RpcInvocation invocation) throws RpcException {
-        if ("true".equals(invoker.getUrl().getParameter(Constants.MONITOR_KEY, "false"))) {
+        if ("true111".equals(invoker.getUrl().getParameter(Constants.MONITOR_KEY, "false"))) {
             RpcContext context = RpcContext.getContext(); // 提供方必须在invoke()之前获取context信息
             long start = System.currentTimeMillis(); // 记录起始时间戮
             getConcurrent(invoker, invocation).incrementAndGet(); // 并发计数

@@ -15,6 +15,9 @@ import io.netty.handler.timeout.IdleStateHandler;
 
 import java.util.List;
 
+/**
+ * @author goodjava@qq.com
+ */
 public class RpcxProcessHandler extends ByteToMessageDecoder {
 
     private int serverChannelMaxIdleTimeSeconds;

@@ -10,6 +10,7 @@ import io.netty.channel.Channel;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -39,19 +40,17 @@ public class RpcInvocation implements Invocation, Serializable {
 
     public URL url;
 
-    //超时时间
-    private long timeOut;
+    private long timeOut = TimeUnit.SECONDS.toMillis(1);
 
-    //重试次数
     private int retryNum = 1;
 
     private String sendType;
 
-    public LanguageCode languageCode;
+    public LanguageCode languageCode = LanguageCode.JAVA;
 
-    private FailType failType;
+    private FailType failType = FailType.FailFast;
 
-    private SelectMode selectMode;
+    private SelectMode selectMode = SelectMode.RandomSelect;
 
     public RpcInvocation() {
     }

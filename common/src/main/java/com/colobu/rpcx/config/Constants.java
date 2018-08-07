@@ -80,4 +80,6 @@ public class Constants {
 
     public static final String FAIL_TYPE = "fail.type";
 
+    public static final String LANGUAGE = "language";
+
 }

@@ -1,5 +1,6 @@
 package com.colobu.rpcx.rpc.impl;
 
+import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.discovery.IServiceDiscovery;
 import com.colobu.rpcx.netty.IClient;
 import com.colobu.rpcx.protocol.*;
@@ -10,8 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 /**
@@ -27,13 +26,8 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
 
     private URL url;
 
-    public RpcConsumerInvoker(IClient client, RpcInvocation invocation) {
-        Gson gson = new Gson();
+    public RpcConsumerInvoker(IClient client) {
         this.client = client;
-        this.url = new URL("rpcx", "", 0);
-        url.setServiceInterface(invocation.getClassName() + "" + invocation.getMethodName());
-        String params = Stream.of(invocation.getArguments()).map(it -> gson.toJson(it)).collect(Collectors.joining(","));
-        this.url.setPath(invocation.getClassName() + "." + invocation.getMethodName() + "(" + params + ")");
     }
 
     @Override
@@ -54,8 +48,8 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
         req.setOneway(false);
         req.setCompressType(CompressType.None);
         req.setSerializeType(SerializeType.SerializeNone);
-        req.metadata.put("language", LanguageCode.JAVA.name());
-        req.metadata.put("sendType", invocation.getSendType());
+        req.metadata.put(Constants.LANGUAGE, LanguageCode.JAVA.name());
+        req.metadata.put(Constants.SEND_TYPE, invocation.getSendType());
         invocation.setUrl(this.url);
         byte[] data = HessianUtils.write(invocation);
         req.payload = data;
@@ -102,7 +96,7 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
 
     @Override
     public void setUrl(URL url) {
-
+        this.url = url;
     }
 
     @Override

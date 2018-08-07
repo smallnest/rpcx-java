@@ -1,52 +1,53 @@
 package com.colobu.rpcx.common;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author goodjava@qq.com
  */
-public class NamedThreadFactory implements ThreadFactory
-{
-	private static final AtomicInteger POOL_SEQ = new AtomicInteger(1);
+public class NamedThreadFactory implements ThreadFactory {
 
-	private final AtomicInteger mThreadNum = new AtomicInteger(1);
+    private static final Logger logger = LoggerFactory.getLogger(NamedThreadFactory.class);
 
-	private final String mPrefix;
+    private static final AtomicInteger POOL_SEQ = new AtomicInteger(1);
 
-	private final boolean mDaemo;
+    private final AtomicInteger mThreadNum = new AtomicInteger(1);
 
-	private final ThreadGroup mGroup;
+    private final String mPrefix;
 
-	public NamedThreadFactory()
-	{
-		this("pool-" + POOL_SEQ.getAndIncrement(),false);
-	}
+    private final boolean mDaemo;
 
-	public NamedThreadFactory(String prefix)
-	{
-		this(prefix,false);
-	}
+    private final ThreadGroup mGroup;
 
-	public NamedThreadFactory(String prefix, boolean daemo)
-	{
-		mPrefix = prefix + "-thread-";
-		mDaemo = daemo;
+    public NamedThreadFactory() {
+        this("pool-" + POOL_SEQ.getAndIncrement(), false);
+    }
+
+    public NamedThreadFactory(String prefix) {
+        this(prefix, false);
+    }
+
+    public NamedThreadFactory(String prefix, boolean daemo) {
+        mPrefix = prefix + "-thread-";
+        mDaemo = daemo;
         SecurityManager s = System.getSecurityManager();
-        mGroup = ( s == null ) ? Thread.currentThread().getThreadGroup() : s.getThreadGroup();
-	}
+        mGroup = (s == null) ? Thread.currentThread().getThreadGroup() : s.getThreadGroup();
+    }
 
-	@Override
-    public Thread newThread(Runnable runnable)
-	{
-		String name = mPrefix + mThreadNum.getAndIncrement();
-        Thread ret = new Thread(mGroup,runnable,name,0);
+    @Override
+    public Thread newThread(Runnable runnable) {
+        String name = mPrefix + mThreadNum.getAndIncrement();
+        logger.info("-------------->create new thread:{}", name);
+        Thread ret = new Thread(mGroup, runnable, name, 0);
         ret.setDaemon(mDaemo);
         return ret;
-	}
+    }
 
-	public ThreadGroup getThreadGroup()
-	{
-		return mGroup;
-	}
+    public ThreadGroup getThreadGroup() {
+        return mGroup;
+    }
 }

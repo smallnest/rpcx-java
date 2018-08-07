@@ -1,7 +1,6 @@
 package com.colobu.rpcx.spring;
 
 import com.colobu.rpcx.config.Constants;
-import com.colobu.rpcx.fail.FailType;
 import com.colobu.rpcx.filter.FilterWrapper;
 import com.colobu.rpcx.netty.IClient;
 import com.colobu.rpcx.rpc.Invoker;
@@ -10,7 +9,6 @@ import com.colobu.rpcx.rpc.Result;
 import com.colobu.rpcx.rpc.impl.ConsumerConfig;
 import com.colobu.rpcx.rpc.impl.RpcConsumerInvoker;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
-import com.colobu.rpcx.selector.SelectMode;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -52,21 +50,19 @@ public class RpcxConsumer {
 
     /**
      * 泛化调用
+     * params 是参数的json字符串形式
+     * 在不依赖jar的情况下即可调用
      */
     public String invoke(String className, String methodName, String[] types, String[] params) {
         RpcInvocation invocation = new RpcInvocation();
         invocation.setMethodName(Constants.$INVOKE);
-        invocation.setFailType(FailType.FailFast);
-        invocation.setSelectMode(SelectMode.RandomSelect);
         invocation.setClassName(className);
         invocation.setParameterTypeNames(types);
-        invocation.setTimeOut(2000);
-        invocation.setRetryNum(1);
         String[] params1 = new String[params.length + 1];
         params1[0] = methodName;
         System.arraycopy(params, 0, params1, 1, params.length);
         invocation.setArguments(params1);
-        RpcConsumerInvoker invoker = new RpcConsumerInvoker(client, invocation);
+        Invoker invoker = new RpcConsumerInvoker(client);
         Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.CONSUMER);
         Result result = wrapperInvoker.invoke(invocation);
         if (result.hasException()) {
@@ -76,19 +72,16 @@ public class RpcxConsumer {
     }
 
     /**
-     * echo 调用
-     *
-     * @return
+     * echo调用
+     * 测试服务是否可连通
      */
     public String echo(String className, String str) {
         RpcInvocation invocation = new RpcInvocation();
-        invocation.setClassName(className);
         invocation.setMethodName(Constants.$ECHO);
+        invocation.setClassName(className);
         invocation.setParameterTypeNames(new String[]{ReflectUtils.getName(String.class)});
-        invocation.setTimeOut(1000);
-        invocation.setRetryNum(1);
         invocation.setArguments(new String[]{str});
-        RpcConsumerInvoker invoker = new RpcConsumerInvoker(client, invocation);
+        RpcConsumerInvoker invoker = new RpcConsumerInvoker(client);
         Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.CONSUMER);
         Result result = wrapperInvoker.invoke(invocation);
         if (result.hasException()) {
@@ -100,12 +93,7 @@ public class RpcxConsumer {
 
     /**
      * 热部署
-     *
-     * @param className
-     * @param classPath
-     * @param token
-     * @return
-     * @throws IOException
+     * 动态修改class bytecode
      */
     public String deploy(String className, String classPath, String token) throws IOException {
         RpcInvocation invocation = new RpcInvocation();
@@ -116,15 +104,13 @@ public class RpcxConsumer {
         paramNames[0] = ReflectUtils.getName(String.class);
         paramNames[1] = ReflectUtils.getName(String.class);
         paramNames[2] = ReflectUtils.getName(byte[].class);
-
         invocation.setParameterTypeNames(paramNames);
-        invocation.setTimeOut(2000);
-        invocation.setRetryNum(1);
         byte[] classData = Files.readAllBytes(Paths.get(classPath));
         Object[] params = new Object[]{className, token, classData};
         invocation.setArguments(params);
-        RpcConsumerInvoker invoker = new RpcConsumerInvoker(client, invocation);
-        Result result = invoker.invoke(invocation);
+        RpcConsumerInvoker invoker = new RpcConsumerInvoker(client);
+        Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.CONSUMER);
+        Result result = wrapperInvoker.invoke(invocation);
         if (result.hasException()) {
             throw new RuntimeException(result.getException());
         }

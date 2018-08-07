@@ -3,7 +3,6 @@ package com.colobu.rpcx.common.retry;
 import com.colobu.rpcx.rpc.Result;
 
 import java.util.function.Function;
-import java.util.stream.IntStream;
 
 /**
  * @author goodjava@qq.com

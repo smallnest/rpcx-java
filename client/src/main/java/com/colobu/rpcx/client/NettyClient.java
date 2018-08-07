@@ -1,6 +1,5 @@
 package com.colobu.rpcx.client;
 
-import com.colobu.rpcx.client.impl.RandomSelector;
 import com.colobu.rpcx.common.*;
 import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.config.NettyClientConfig;
@@ -25,10 +24,9 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author goodjava@qq.com
@@ -60,28 +58,23 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
         this.semaphoreOneway = new Semaphore(1000, true);
         this.semaphoreAsync = new Semaphore(1000, true);
         this.serviceDiscovery = serviceDiscovery;
-        this.eventLoopGroupWorker = new NioEventLoopGroup(1, new ThreadFactory() {
-            private AtomicInteger threadIndex = new AtomicInteger(0);
+        this.eventLoopGroupWorker = new NioEventLoopGroup(1, new NamedThreadFactory("NettyClientSelector_"));
+        this.defaultEventExecutorGroup = new DefaultEventExecutorGroup(nettyClientConfig.getClientWorkerThreads(), new NamedThreadFactory("NettyClientWorkerThread_"));
 
-            @Override
-            public Thread newThread(Runnable r) {
-                return new Thread(r, String.format("NettyClientSelector_%d", this.threadIndex.incrementAndGet()));
-            }
-        });
+        this.bootstrap = createBootstrap();
 
-        this.defaultEventExecutorGroup = new DefaultEventExecutorGroup(
-                nettyClientConfig.getClientWorkerThreads(),
-                new ThreadFactory() {
-                    private AtomicInteger threadIndex = new AtomicInteger(0);
+        startScanResponseTableSchedule();
+        runEventListener();
+    }
 
-                    @Override
-                    public Thread newThread(Runnable r) {
-                        return new Thread(r, "NettyClientWorkerThread_" + this.threadIndex.incrementAndGet());
-                    }
-                });
+    private void runEventListener() {
+        if (this.channelEventListener != null) {
+            this.nettyEventExecuter.run();
+        }
+    }
 
-
-        this.bootstrap = new Bootstrap().group(this.eventLoopGroupWorker).channel(NioSocketChannel.class)
+    private Bootstrap createBootstrap() {
+        return new Bootstrap().group(this.eventLoopGroupWorker).channel(NioSocketChannel.class)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.SO_KEEPALIVE, false)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, nettyClientConfig.getConnectTimeoutMillis())
@@ -89,7 +82,7 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
                 .option(ChannelOption.SO_RCVBUF, nettyClientConfig.getClientSocketRcvBufSize())
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
-                    public void initChannel(SocketChannel ch) throws Exception {
+                    public void initChannel(SocketChannel ch) {
                         ch.pipeline().addLast(
                                 defaultEventExecutorGroup,
                                 new NettyEncoder(),
@@ -102,10 +95,10 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
                                 new NettyClientHandler(NettyClient.this));
                     }
                 });
+    }
 
-
+    public void startScanResponseTableSchedule() {
         ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("ClientHouseKeepingService"));
-
         executor.scheduleAtFixedRate(() -> {
             try {
                 NettyClient.this.scanResponseTable();//* 查询response表
@@ -113,27 +106,8 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
                 logger.error("scanResponseTable exception", e);
             }
         }, 3000, 3000, TimeUnit.MILLISECONDS);
-
-
-        //* netty 事件的处理
-        if (this.channelEventListener != null) {
-            this.nettyEventExecuter.run();
-        }
     }
 
-
-    /**
-     * 同步的调用
-     *
-     * @param addr
-     * @param req
-     * @return
-     * @throws Exception
-     */
-    @Override
-    public Message call(String addr, Message req) throws Exception {
-        return call(addr, req, CallTimeOut);
-    }
 
 
     @Override
@@ -151,37 +125,22 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
 
     @Override
     public Message call(Message req, long timeoutMillis) throws Exception {
-        logger.info("remote call:{} begin", req.getServiceMethod());
-        long begin = System.currentTimeMillis();
         final RemotingCommand request = RemotingCommand.createRequestCommand(1);
         request.setMessage(req);
 
         Channel channel = null;
         String serviceAddr = RpcContext.getContext().getServiceAddr();
-        logger.info("---------||||---->serviceAdd:{}", serviceAddr);
+        logger.info("---------||||---->serviceAddr:{}", serviceAddr);
         if (StringUtils.isEmpty(serviceAddr)) {
-            throw new RpcException("serviceAdd is null");
+            throw new RpcException("service addr is null  call method:" + req.getServiceMethod());
         } else {
             channel = this.getAndCreateChannel(serviceAddr);
         }
-
-
-        String host = "";
-        int port = 0;
-        if (channel.localAddress() instanceof InetSocketAddress) {
-            host = ((InetSocketAddress) channel.localAddress()).getAddress().toString();
-            port = ((InetSocketAddress) channel.localAddress()).getPort();
-        }
-
-        req.metadata.put("_host", host);
-        req.metadata.put("_port", String.valueOf(port));
-
+        setHostAndPort(req, channel);
         Message res = null;
-
         if (StringUtils.isEmpty(req.metadata.get(Constants.SEND_TYPE))) {
             req.metadata.put(Constants.SEND_TYPE, Constants.SYNC_KEY);
         }
-
         if (req.metadata.get(Constants.SEND_TYPE).equals(Constants.SYNC_KEY)) {
             RemotingCommand response = this.invokeSyncImpl(channel, request, timeoutMillis);
             res = response.getMessage();
@@ -193,8 +152,19 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
             this.invokeOnewayImpl(channel, request, timeoutMillis);
             res = new Message();
         }
-        logger.info("remote call:{} use time:{}", req.getServiceMethod(), (System.currentTimeMillis() - begin));
         return res;
+    }
+
+    private void setHostAndPort(Message req, Channel channel) {
+        String host = "";
+        int port = 0;
+        if (channel.localAddress() instanceof InetSocketAddress) {
+            host = ((InetSocketAddress) channel.localAddress()).getAddress().toString();
+            port = ((InetSocketAddress) channel.localAddress()).getPort();
+        }
+
+        req.metadata.put("_host", host);
+        req.metadata.put("_port", String.valueOf(port));
     }
 
 
@@ -272,13 +242,13 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
     public void invokeOnewayImpl(final Channel channel, final RemotingCommand request, final long timeoutMillis)
             throws InterruptedException, RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException {
         request.markOnewayRPC();
-        boolean acquired = this.semaphoreOneway.tryAcquire(timeoutMillis, TimeUnit.MILLISECONDS);//* 限流
+        boolean acquired = this.semaphoreOneway.tryAcquire(timeoutMillis, TimeUnit.MILLISECONDS);
         if (acquired) {
             final SemaphoreReleaseOnlyOnce once = new SemaphoreReleaseOnlyOnce(this.semaphoreOneway);
             try {
                 channel.writeAndFlush(request).addListener(new ChannelFutureListener() {
                     @Override
-                    public void operationComplete(ChannelFuture f) throws Exception {
+                    public void operationComplete(ChannelFuture f) {
                         once.release();//* 释放一次限流次数
                         if (!f.isSuccess()) {
                             logger.warn("send a request command to channel <" + channel.remoteAddress() + "> failed.");
@@ -295,10 +265,10 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
                 throw new RemotingTooMuchRequestException("invokeOnewayImpl invoke too fast");
             } else {
                 String info = String.format(
-                        "invokeOnewayImpl tryAcquire semaphore timeout, %dms, waiting thread nums: %d semaphoreAsyncValue: %d", //
-                        timeoutMillis, //
-                        this.semaphoreAsync.getQueueLength(), //
-                        this.semaphoreAsync.availablePermits()//
+                        "invokeOnewayImpl tryAcquire semaphore timeout, %dms, waiting thread nums: %d semaphoreAsyncValue: %d",
+                        timeoutMillis,
+                        this.semaphoreAsync.getQueueLength(),
+                        this.semaphoreAsync.availablePermits()
                 );
                 logger.warn(info);
                 throw new RemotingTimeoutException(info);
@@ -307,29 +277,41 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
     }
 
 
-    //* 异步执行  可以放入回调 执行回调
+    /**
+     * 异步调用
+     * @param channel
+     * @param request
+     * @param timeoutMillis
+     * @param invokeCallback
+     * @return
+     * @throws InterruptedException
+     * @throws RemotingTooMuchRequestException
+     * @throws RemotingSendRequestException
+     */
     public ResponseFuture invokeAsyncImpl(final Channel channel, final RemotingCommand request, final long timeoutMillis,
                                           final InvokeCallback invokeCallback)
-            throws InterruptedException, RemotingTooMuchRequestException, RemotingTimeoutException, RemotingSendRequestException {
+            throws InterruptedException, RemotingTooMuchRequestException, RemotingSendRequestException {
         final int opaque = request.getOpaque();
-        boolean acquired = this.semaphoreAsync.tryAcquire(timeoutMillis, TimeUnit.MILLISECONDS);//* 达到限流作用
+        //达到限流作用
+        boolean acquired = this.semaphoreAsync.tryAcquire(timeoutMillis, TimeUnit.MILLISECONDS);
         if (acquired) {
-            final SemaphoreReleaseOnlyOnce once = new SemaphoreReleaseOnlyOnce(this.semaphoreAsync);//* 用来保证只释放1次的
+            //用来保证只释放1次的
+            final SemaphoreReleaseOnlyOnce once = new SemaphoreReleaseOnlyOnce(this.semaphoreAsync);
 
             final ResponseFuture responseFuture = new ResponseFuture(opaque, timeoutMillis, invokeCallback, once);
             this.responseTable.put(opaque, responseFuture);
             try {
                 channel.writeAndFlush(request).addListener(new ChannelFutureListener() {
                     @Override
-                    public void operationComplete(ChannelFuture f) throws Exception {
+                    public void operationComplete(ChannelFuture f) {
                         if (f.isSuccess()) {
                             responseFuture.setSendRequestOK(true);
                             return;
                         } else {
                             responseFuture.setSendRequestOK(false);
                         }
-
-                        responseFuture.putResponse(null);//* 发送失败会解除阻塞
+                        //发送失败会解除阻塞
+                        responseFuture.putResponse(null);
                         responseTable.remove(opaque);
                         try {
                             responseFuture.executeInvokeCallback();
@@ -372,7 +354,7 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
             //通过网络发送信息
             channel.writeAndFlush(request).addListener(new ChannelFutureListener() {
                 @Override
-                public void operationComplete(ChannelFuture f) throws Exception {
+                public void operationComplete(ChannelFuture f) {
                     if (f.isSuccess()) {
                         responseFuture.setSendRequestOK(true);
                         return;

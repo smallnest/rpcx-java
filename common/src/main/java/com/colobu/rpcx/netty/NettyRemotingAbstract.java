@@ -54,7 +54,7 @@ public class NettyRemotingAbstract {
                 rep.release();
                 it.remove();
                 rfList.add(rep);
-                plog.warn("remove timeout request, " + rep);
+                plog.warn("remove timeout request:{} ", rep);
             }
         }
 
@@ -143,7 +143,6 @@ public class NettyRemotingAbstract {
         if (pair != null) {
             Runnable run = () -> {
                 try {
-
                     final RemotingCommand response = pair.getObject1().processRequest(ctx, cmd);
                     //是否是oneway是根据来的request计算的
                     if (!cmd.isOnewayRPC()) {

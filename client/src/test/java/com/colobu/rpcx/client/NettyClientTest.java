@@ -31,7 +31,7 @@ public class NettyClientTest {
         req.payload = "world".getBytes("UTF-8");
 
         NettyClient client = new NettyClient(null);
-        Message res = client.call("192.168.31.82:8997", req);
+        Message res = client.call("192.168.31.82:8997", req,1000);
         System.out.println(new String(res.payload));
     }
 
@@ -74,7 +74,7 @@ public class NettyClientTest {
         IntStream.range(0,100).forEach(it->{
             Message res = null;
             try {
-                res = client.call("10.231.72.75:8976", req);
+                res = client.call("10.231.72.75:8976", req, 1000);
             } catch (Exception e) {
                 e.printStackTrace();
             }

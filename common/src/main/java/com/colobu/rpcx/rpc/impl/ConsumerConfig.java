@@ -89,6 +89,7 @@ public class ConsumerConfig {
     public <T> T refer(Class<T> clazz) {
         return new CglibProxy().getProxy(clazz, (method, args) -> {
             Consumer provider = clazz.getAnnotation(Consumer.class);
+
             RpcInvocation invocation = new RpcInvocation();
             invocation.setClassName(provider.impl());
             invocation.setArguments(args);
@@ -108,7 +109,7 @@ public class ConsumerConfig {
             invocation.setParameterTypes(types);
             invocation.setResultType(method.getReturnType());
 
-            Invoker invoker = new RpcConsumerInvoker(client, invocation);
+            Invoker invoker = new RpcConsumerInvoker(client);
             Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.CONSUMER);
 
             Result result = wrapperInvoker.invoke(invocation);

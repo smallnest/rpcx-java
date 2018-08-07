@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 
 /**
- * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 public class RpcxMonitor implements Monitor {
 
