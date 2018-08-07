@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by goodjava@qq.com.
+ * @author goodjava@qq.com
  */
 @RpcFilter(group = {Constants.PROVIDER})
 public class MonitorFilter implements Filter {
@@ -27,26 +28,28 @@ public class MonitorFilter implements Filter {
 
     private final static ConcurrentMap<String, AtomicInteger> concurrents = new ConcurrentHashMap<>();
 
-//    private static Monitor monitor = new MonitorFactory().getMonitor(null);
-    private static Monitor monitor = null;
+    private static Monitor monitor = new MonitorFactory().getMonitor(null);
 
-
-    // 调用过程拦截
     @Override
     public Result invoke(Invoker<?> invoker, RpcInvocation invocation) throws RpcException {
-        if ("true111".equals(invoker.getUrl().getParameter(Constants.MONITOR_KEY, "false"))) {
-            RpcContext context = RpcContext.getContext(); // 提供方必须在invoke()之前获取context信息
-            long start = System.currentTimeMillis(); // 记录起始时间戮
-            getConcurrent(invoker, invocation).incrementAndGet(); // 并发计数
+        if ("true".equals(invoker.getUrl().getParameter(Constants.MONITOR_KEY, "false"))) {
+            // 提供方必须在invoke()之前获取context信息
+            RpcContext context = RpcContext.getContext();
+            // 记录起始时间戮
+            long start = System.currentTimeMillis();
+            // 并发计数
+            getConcurrent(invoker, invocation).incrementAndGet();
             try {
-                Result result = invoker.invoke(invocation); // 让调用链往下执行
+                // 让调用链往下执行
+                Result result = invoker.invoke(invocation);
                 collect(invoker, invocation, result, context, start, false);
                 return result;
             } catch (RpcException e) {
                 collect(invoker, invocation, null, context, start, true);
                 throw e;
             } finally {
-                getConcurrent(invoker, invocation).decrementAndGet(); // 并发计数
+                // 并发计数
+                getConcurrent(invoker, invocation).decrementAndGet();
             }
         } else {
             return invoker.invoke(invocation);
@@ -56,12 +59,15 @@ public class MonitorFilter implements Filter {
     // 信息采集
     private void collect(Invoker<?> invoker, Invocation invocation, Result result, RpcContext context, long start, boolean error) {
         try {
-            // ---- 服务信息获取 ----
-            long elapsed = System.currentTimeMillis() - start; // 计算调用耗时
-            int concurrent = getConcurrent(invoker, invocation).get(); // 当前并发数
+            // 计算调用耗时
+            long elapsed = System.currentTimeMillis() - start;
+            // 当前并发数
+            int concurrent = getConcurrent(invoker, invocation).get();
             String application = invoker.getUrl().getParameter(Constants.APPLICATION_KEY);
-            String service = invoker.getInterface().getName(); // 获取服务名称
-            String method = invocation.getMethodName(); // 获取方法名
+            // 获取服务名称
+            String service = invoker.getInterface().getName();
+            // 获取方法名
+            String method = invocation.getMethodName();
             int localPort;
             String remoteKey;
             String remoteValue;
@@ -100,7 +106,13 @@ public class MonitorFilter implements Filter {
         }
     }
 
-    // 获取并发计数器
+
+    /**
+     * 获取并发计数器
+     * @param invoker
+     * @param invocation
+     * @return
+     */
     private AtomicInteger getConcurrent(Invoker<?> invoker, Invocation invocation) {
         String key = invoker.getInterface().getName() + "." + invocation.getMethodName();
         AtomicInteger concurrent = concurrents.get(key);
