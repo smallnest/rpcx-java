@@ -14,8 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 /**
@@ -26,6 +28,7 @@ public class ContextFilter implements Filter {
 
     private static final Logger logger = LoggerFactory.getLogger(ContextFilter.class);
 
+    private static ConcurrentHashMap<String,Method> methods = new ConcurrentHashMap<>();
 
     @Override
     public Result invoke(Invoker<?> invoker, RpcInvocation invocation) throws RpcException {
@@ -48,7 +51,12 @@ public class ContextFilter implements Filter {
 
         String methodName = invocation.getMethodName();
 
-        Method method = this.getMethod(invocation.getClassName(), methodName, invocation.getParameterTypeNames());
+        String key = invocation.getClassName()+"."+invocation.getMethodName()+"("+ Arrays.toString(invocation.getParameterTypes())+")";
+        Method method= methods.get(key);
+        if (null == method) {
+            method = this.getMethod(invocation.getClassName(), methodName, invocation.getParameterTypeNames());
+            methods.putIfAbsent(key,method);
+        }
         invoker.setMethod(method);
         Provider methodProvider = method.getAnnotation(Provider.class);
 

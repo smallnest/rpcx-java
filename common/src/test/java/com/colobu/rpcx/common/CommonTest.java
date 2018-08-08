@@ -7,11 +7,17 @@ import com.colobu.rpcx.rpc.A;
 import com.colobu.rpcx.rpc.HessianUtils;
 import com.colobu.rpcx.rpc.ReflectUtils;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
+import com.esotericsoftware.reflectasm.MethodAccess;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -22,6 +28,52 @@ import java.util.stream.Stream;
  * Created by goodjava@qq.com.
  */
 public class CommonTest {
+
+
+    class Bean {
+        public String str(String s) {
+            return "str:" + s;
+        }
+    }
+
+
+    @Test
+    public void testMethdHandle() throws Throwable {
+        MethodHandles.Lookup lookup = MethodHandles.lookup();
+        MethodType mt = MethodType.methodType(String.class, String.class);
+        MethodHandle mh = lookup.findVirtual(Bean.class, "str", mt);
+        long begin = System.currentTimeMillis();
+        for (int i = 0; i < 10000000; i++) {
+            String s = (String) mh.invokeExact(new Bean(), "zzy");
+//            System.out.println(s);
+        }
+        System.out.println(System.currentTimeMillis() - begin);
+    }
+
+    @Test
+    public void testReflect() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Bean bean = new Bean();
+        Method method = bean.getClass().getMethod("str", String.class);
+        long begin = System.currentTimeMillis();
+        for (int i = 0; i < 100000000; i++) {
+            String res = (String) method.invoke(bean, "zzy");
+//            System.out.println(res);
+        }
+        System.out.println(System.currentTimeMillis() - begin);
+    }
+
+
+//    @Test
+//    public void testReflectAsm() {
+//        Bean bean = new Bean();
+//        MethodAccess access = MethodAccess.get(Bean.class);
+//        long begin = System.currentTimeMillis();
+//        for (int i = 0; i < 100000000; i++) {
+//            String res = (String) access.invoke(bean, "str", "zzy");
+////            System.out.println(res);
+//        }
+//        System.out.println(System.currentTimeMillis() - begin);
+//    }
 
 
     @Test
