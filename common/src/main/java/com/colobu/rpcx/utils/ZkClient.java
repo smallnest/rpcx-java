@@ -1,6 +1,7 @@
 package com.colobu.rpcx.utils;
 
 import com.colobu.rpcx.common.Config;
+import com.colobu.rpcx.common.Pair;
 import com.colobu.rpcx.rpc.URL;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
@@ -59,19 +60,19 @@ public class ZkClient {
     }
 
 
-    public Set<String> get(String basePath, String serviceName) {
+    public Set<Pair<String,String>> get(String basePath, String serviceName) {
         try {
             Set<String> set = client.getChildren().forPath(basePath + serviceName).stream().collect(Collectors.toSet());
-            set = set.stream().map(it -> {
+            Set<Pair<String, String>> pairSet = set.stream().map(it -> {
                 String data = "";
                 try {
                     data = new String(client.getData().forPath(basePath + serviceName + "/" + it));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                return it + "?" + data;
+                return Pair.of(it, data);
             }).collect(Collectors.toSet());
-            return set;
+            return pairSet;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -111,18 +112,22 @@ public class ZkClient {
                 case CHILD_ADDED:
                     String path = event.getData().getPath();
                     String param = new String(event.getData().getData());
-                    String addr = path.split("@")[1] + "?" + param;
+                    String addr = path.split("@")[1];
                     logger.info("------->CHILD_ADDED :{}:{}", path, addr);
-                    queue.offer(new PathStatus("CHILD_ADDED", addr, p));
+                    queue.offer(new PathStatus("CHILD_ADDED", Pair.of(addr, param), p));
                     break;
                 case CHILD_UPDATED:
+                    String updatePath = event.getData().getPath();
                     logger.info("------>CHILD_UPDATED :" + event.getData().getPath());
+                    String updateParam = new String(event.getData().getData());
+                    String updateAddr = updatePath.split("@")[1];
+                    queue.offer(new PathStatus("CHILD_UPDATED", Pair.of(updateAddr, updateParam), p));
                     break;
                 case CHILD_REMOVED:
                     String path2 = event.getData().getPath();
                     String addr2 = path2.split("@")[1];
                     logger.info("------>CHILD_REMOVED :{}:{}" + path2, addr2);
-                    queue.offer(new PathStatus("CHILD_REMOVED", addr2, p));
+                    queue.offer(new PathStatus("CHILD_REMOVED", Pair.of(addr2, ""), p));
                     break;
                 default:
                     break;

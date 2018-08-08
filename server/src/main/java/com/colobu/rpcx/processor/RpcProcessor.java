@@ -63,27 +63,21 @@ public class RpcProcessor implements NettyRequestProcessor {
         Invoker<Object> invoker = new RpcProviderInvoker<>(getBeanFunc);
         Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.PROVIDER);
 
-        RemotingCommand res = RemotingCommand.createResponseCommand();
-        Message resMessage = new Message();
-        resMessage.servicePath = invocation.getClassName();
-        resMessage.serviceMethod = invocation.getMethodName();
-        resMessage.setMessageType(MessageType.Response);
-        resMessage.setSeq(request.getOpaque());
+        RemotingCommand res = RemotingCommand.createResponseCommand(new Message(invocation.getClassName(),invocation.getMethodName(),MessageType.Response, request.getOpaque()));
 
         Result rpcResult = wrapperInvoker.invoke(invocation);
         if (invocation.languageCode.equals(LanguageCode.HTTP)) {
-            resMessage.payload = new Gson().toJson(rpcResult.getValue()).getBytes();
+            res.getMessage().payload = new Gson().toJson(rpcResult.getValue()).getBytes();
         } else if (invocation.languageCode.equals(LanguageCode.JAVA)) {
-            resMessage.payload = HessianUtils.write(rpcResult.getValue());
+            res.getMessage().payload = HessianUtils.write(rpcResult.getValue());
         } else {
-            resMessage.payload = (byte[]) rpcResult.getValue();
+            res.getMessage().payload = (byte[]) rpcResult.getValue();
         }
         if (rpcResult.hasException()) {
             logger.error(rpcResult.getException().getMessage(), rpcResult.getException());
-            resMessage.metadata.put(Constants.RPCX_ERROR_CODE, "-2");
-            resMessage.metadata.put(Constants.RPCX_ERROR_MESSAGE, rpcResult.getException().getMessage());
+            res.getMessage().metadata.put(Constants.RPCX_ERROR_CODE, "-2");
+            res.getMessage().metadata.put(Constants.RPCX_ERROR_MESSAGE, rpcResult.getException().getMessage());
         }
-        res.setMessage(resMessage);
         return res;
     }
 

@@ -54,10 +54,11 @@ public class RemotingCommand {
         return cmd;
     }
 
+
     public static RemotingCommand createResponseCommand(Message message) {
         RemotingCommand cmd = new RemotingCommand();
         cmd.markResponseType();
-        message.setMessageType(MessageType.Response);
+        cmd.setMessage(message);
         return cmd;
     }
 

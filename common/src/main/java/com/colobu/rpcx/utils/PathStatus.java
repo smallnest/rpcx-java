@@ -1,17 +1,20 @@
 package com.colobu.rpcx.utils;
 
+import com.colobu.rpcx.common.Pair;
+
 /**
- * Created by zhangzhiyong on 2018/7/4.
+ * @author zhangzhiyong
+ * @date 2018/7/4
  */
 public class PathStatus {
 
     private String type;
-    private String value;
+    private Pair<String,String> value;
     private String path;
 
     private boolean stop;
 
-    public PathStatus(String type, String value, String path) {
+    public PathStatus(String type, Pair<String,String> value, String path) {
         this.type = type;
         this.value = value;
         this.path = path;
@@ -30,11 +33,11 @@ public class PathStatus {
         this.type = type;
     }
 
-    public String getValue() {
+    public Pair<String,String> getValue() {
         return value;
     }
 
-    public void setValue(String value) {
+    public void setValue(Pair<String,String> value) {
         this.value = value;
     }
 

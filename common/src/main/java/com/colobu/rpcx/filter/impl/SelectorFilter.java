@@ -12,6 +12,7 @@ import com.colobu.rpcx.selector.WeightedRountRobin;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 
 /**
@@ -36,6 +37,10 @@ public class SelectorFilter implements Filter {
 
         //获取服务列表(ip:port?param)
         List<String> serviceList = invoker.serviceDiscovery().getServices(serviceName);
+
+        System.out.println("------------>"+serviceList);
+
+        serviceList = serviceList.stream().filter(it->!it.contains("state=inactive")).collect(Collectors.toList());
 
 
         if (serviceList.size() <= 0) {

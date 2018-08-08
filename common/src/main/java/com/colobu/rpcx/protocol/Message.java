@@ -28,6 +28,7 @@ public class Message {
     public Map<String, String> metadata;
     public byte[] payload;
 
+
     public Message() {
         header = new byte[12];
         header[0] = magicNumber;
@@ -37,11 +38,19 @@ public class Message {
         payload = new byte[]{};
     }
 
-
     public Message(String servicePath, String serviceMethod) {
         this();
         this.servicePath = servicePath;
         this.serviceMethod = serviceMethod;
+    }
+
+
+    public Message(String servicePath, String serviceMethod, MessageType messageType, long seq) {
+        this();
+        this.servicePath = servicePath;
+        this.serviceMethod = serviceMethod;
+        this.setMessageType(messageType);
+        this.setSeq(seq);
     }
 
     public Message(String servicePath, String serviceMethod, Map<String, String> metadata) {
