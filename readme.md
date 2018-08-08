@@ -123,3 +123,4 @@ Then you can write the java client:
 - 支持select模式(RandomSelect RoundRobin WeightedRoundRobin SelectByUser)
 - 支持优雅关机
 - 支持服务治理(通过rpcx-ui)
+- 支持服务分组
