@@ -61,8 +61,17 @@ public class ZkClient {
 
     public Set<String> get(String basePath, String serviceName) {
         try {
-            Set<String> list = client.getChildren().forPath(basePath + serviceName).stream().collect(Collectors.toSet());
-            return list;
+            Set<String> set = client.getChildren().forPath(basePath + serviceName).stream().collect(Collectors.toSet());
+            set = set.stream().map(it -> {
+                String data = "";
+                try {
+                    data = new String(client.getData().forPath(basePath + serviceName + "/" + it));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                return it + "?" + data;
+            }).collect(Collectors.toSet());
+            return set;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -74,10 +83,12 @@ public class ZkClient {
     public void create(String basePath, Set<String> serviceNames, String addr) {
         serviceNames.forEach(u -> {
             URL url = URL.valueOf(u);
-            String path = basePath + url.getPath() + "/tcp@" + addr + "?" + url.toParameterString();
+            //& 为了兼容  rpcx(golang)
+//            String path = basePath + url.getPath() + "/tcp@" + addr + "&" + url.toParameterString();
+            String path = basePath + url.getPath() + "/tcp@" + addr;
             try {
                 if (client.checkExists().forPath(path) == null) {
-                    client.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL).forPath(path);
+                    client.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL).forPath(path, url.toParameterString().getBytes());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -99,7 +110,8 @@ public class ZkClient {
             switch (event.getType()) {
                 case CHILD_ADDED:
                     String path = event.getData().getPath();
-                    String addr = path.split("@")[1];
+                    String param = new String(event.getData().getData());
+                    String addr = path.split("@")[1] + "?" + param;
                     logger.info("------->CHILD_ADDED :{}:{}", path, addr);
                     queue.offer(new PathStatus("CHILD_ADDED", addr, p));
                     break;

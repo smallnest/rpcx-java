@@ -74,9 +74,6 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
         });
 
 
-        new ScheduledThreadPoolExecutor(1,new NamedThreadFactory("provider_info")).scheduleWithFixedDelay(() -> {
-            logger.info("provider info:{}", this.map);
-        }, 0, 5, TimeUnit.SECONDS);
         try {
             watch();
         } catch (Exception e) {

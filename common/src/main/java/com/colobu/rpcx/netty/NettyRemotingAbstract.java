@@ -319,7 +319,7 @@ public class NettyRemotingAbstract {
     }
 
     public void registerProcessor(int requestCode, NettyRequestProcessor processor, ExecutorService executor) {
-        Pair<NettyRequestProcessor, ExecutorService> pair = new Pair<NettyRequestProcessor, ExecutorService>(processor, executor);
+        Pair<NettyRequestProcessor, ExecutorService> pair = new Pair<>(processor, executor);
         this.processorTable.put(requestCode, pair);
     }
 

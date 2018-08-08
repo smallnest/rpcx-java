@@ -35,39 +35,38 @@ public class RpcProcessor implements NettyRequestProcessor {
 
     @Override
     public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request) {
-        Message req = request.getMessage();
-        String language = req.metadata.get("language");
+        String language = request.getMessage().metadata.get("language");
         RpcInvocation invocation = null;
-        //golang 调用(自己组装invocation)
+
+        String className = request.getMessage().servicePath;
+        String methodName = request.getMessage().serviceMethod;
+
+        //golang调用是没有language的
         if (null == language) {
-            Message reqMsg = request.getMessage();
             invocation = new RpcInvocation();
-            invocation.setClassName(reqMsg.servicePath);
-            invocation.setMethodName(reqMsg.serviceMethod);
+            invocation.setLanguageCode(LanguageCode.GO);
+            invocation.url = new URL("rpcx", "", 0);
+            invocation.url.setPath(className+"."+methodName);
             //golang 参数是byte[]
-            invocation.setParameterTypeNames(new String[]{"[B"});
+            invocation.setParameterTypeNames(new String[]{"byte[]"});
             //参数就是payload数据
             invocation.setArguments(new Object[]{request.getMessage().payload});
-            invocation.url = new URL("rpcx", "", 0);
-            invocation.languageCode = LanguageCode.GO;
         } else if (LanguageCode.JAVA.name().equals(language)) {
             invocation = (RpcInvocation) HessianUtils.read(request.getMessage().payload);
-            invocation.languageCode = LanguageCode.valueOf(language);
+            invocation.url.setHost(request.getMessage().metadata.get("_host"));
+            invocation.url.setPort(Integer.parseInt(request.getMessage().metadata.get("_port")));
         }
 
-        invocation.servicePath = request.getMessage().servicePath;
-        invocation.serviceMethod = request.getMessage().serviceMethod;
-        invocation.url.setHost(req.metadata.get("_host"));
-        invocation.url.setPort(Integer.parseInt(req.metadata.get("_port")));
+        invocation.setClassName(className);
+        invocation.setMethodName(methodName);
 
         Invoker<Object> invoker = new RpcProviderInvoker<>(getBeanFunc);
         Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.PROVIDER);
 
         RemotingCommand res = RemotingCommand.createResponseCommand();
-
         Message resMessage = new Message();
-        resMessage.servicePath = invocation.servicePath;
-        resMessage.serviceMethod = invocation.serviceMethod;
+        resMessage.servicePath = invocation.getClassName();
+        resMessage.serviceMethod = invocation.getMethodName();
         resMessage.setMessageType(MessageType.Response);
         resMessage.setSeq(request.getOpaque());
 
@@ -81,8 +80,8 @@ public class RpcProcessor implements NettyRequestProcessor {
         }
         if (rpcResult.hasException()) {
             logger.error(rpcResult.getException().getMessage(), rpcResult.getException());
-            resMessage.metadata.put("_rpcx_error_code", "-2");
-            resMessage.metadata.put("_rpcx_error_message", rpcResult.getException().getMessage());
+            resMessage.metadata.put(Constants.RPCX_ERROR_CODE, "-2");
+            resMessage.metadata.put(Constants.RPCX_ERROR_MESSAGE, rpcResult.getException().getMessage());
         }
         res.setMessage(resMessage);
         return res;

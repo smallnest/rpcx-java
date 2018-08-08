@@ -4,6 +4,7 @@ import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.fail.FailType;
 import com.colobu.rpcx.filter.FilterWrapper;
 import com.colobu.rpcx.netty.IClient;
+import com.colobu.rpcx.protocol.LanguageCode;
 import com.colobu.rpcx.rpc.*;
 import com.colobu.rpcx.rpc.annotation.Consumer;
 import com.colobu.rpcx.selector.SelectMode;
@@ -99,8 +100,9 @@ public class ConsumerConfig {
             invocation.setSendType(sendType);
             invocation.setFailType(failType);
             invocation.setSelectMode(selectMode);
+            invocation.setLanguageCode(LanguageCode.JAVA);
 
-            Map<String, String> attachments = new HashMap<>();
+            Map<String, String> attachments = new HashMap<>(1);
             attachments.put(Constants.TOKEN_KEY, token);
             invocation.setAttachments(attachments);
 

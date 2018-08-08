@@ -25,6 +25,12 @@ public class CommonTest {
 
 
     @Test
+    public void testClassName() {
+        System.out.println(ReflectUtils.getName(byte[].class));
+    }
+
+
+    @Test
     public void testCode() {
         RemotingCommand c = RemotingCommand.createResponseCommand();
         c.markOnewayRPC();

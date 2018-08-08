@@ -54,6 +54,13 @@ public class RemotingCommand {
         return cmd;
     }
 
+    public static RemotingCommand createResponseCommand(Message message) {
+        RemotingCommand cmd = new RemotingCommand();
+        cmd.markResponseType();
+        message.setMessageType(MessageType.Response);
+        return cmd;
+    }
+
     public void markResponseType() {
         int bits = 1 << RPC_TYPE;
         this.flag |= bits;

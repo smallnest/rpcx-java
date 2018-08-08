@@ -53,8 +53,8 @@ public class RpcHttpProcessor implements NettyRequestProcessor {
         }).toArray());
         invocation.languageCode = LanguageCode.HTTP;
 
-        invocation.servicePath = request.getMessage().servicePath;
-        invocation.serviceMethod = request.getMessage().serviceMethod;
+        invocation.setClassName(request.getMessage().servicePath);
+        invocation.setMethodName(request.getMessage().serviceMethod);
         invocation.url.setHost(req.metadata.get("_host"));
         invocation.url.setPort(Integer.parseInt(req.metadata.get("_port")));
 
@@ -63,8 +63,8 @@ public class RpcHttpProcessor implements NettyRequestProcessor {
 
         RemotingCommand res = RemotingCommand.createResponseCommand();
         Message resMessage = new Message();
-        resMessage.servicePath = invocation.servicePath;
-        resMessage.serviceMethod = invocation.serviceMethod;
+        resMessage.servicePath = invocation.getClassName();
+        resMessage.serviceMethod = invocation.getMethodName();
         resMessage.setMessageType(MessageType.Response);
         resMessage.setSeq(request.getOpaque());
 
@@ -72,8 +72,8 @@ public class RpcHttpProcessor implements NettyRequestProcessor {
         resMessage.payload = new Gson().toJson(rpcResult.getValue()).getBytes();
         if (rpcResult.hasException()) {
             logger.error(rpcResult.getException().getMessage(), rpcResult.getException());
-            resMessage.metadata.put("_rpcx_error_code", "-2");
-            resMessage.metadata.put("_rpcx_error_message", rpcResult.getException().getMessage());
+            resMessage.metadata.put(Constants.RPCX_ERROR_CODE, "-2");
+            resMessage.metadata.put(Constants.RPCX_ERROR_MESSAGE, rpcResult.getException().getMessage());
         }
         res.setMessage(resMessage);
 

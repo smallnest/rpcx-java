@@ -34,10 +34,6 @@ public class RpcInvocation implements Invocation, Serializable {
 
     private transient Invoker<?> invoker;
 
-    public String servicePath;
-
-    public String serviceMethod;
-
     public URL url;
 
     private long timeOut = TimeUnit.SECONDS.toMillis(1);
@@ -188,4 +184,13 @@ public class RpcInvocation implements Invocation, Serializable {
     public void setSelectMode(SelectMode selectMode) {
         this.selectMode = selectMode;
     }
+
+    public LanguageCode getLanguageCode() {
+        return languageCode;
+    }
+
+    public void setLanguageCode(LanguageCode languageCode) {
+        this.languageCode = languageCode;
+    }
+
 }

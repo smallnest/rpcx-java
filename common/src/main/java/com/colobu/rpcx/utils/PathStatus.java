@@ -7,7 +7,6 @@ public class PathStatus {
 
     private String type;
     private String value;
-
     private String path;
 
     private boolean stop;
@@ -17,6 +16,7 @@ public class PathStatus {
         this.value = value;
         this.path = path;
     }
+
 
     public PathStatus(boolean stop) {
         this.stop = stop;
@@ -61,4 +61,5 @@ public class PathStatus {
     public void setStop(boolean stop) {
         this.stop = stop;
     }
+
 }
