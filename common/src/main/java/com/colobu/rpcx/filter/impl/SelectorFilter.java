@@ -40,7 +40,13 @@ public class SelectorFilter implements Filter {
 
         System.out.println("------------>"+serviceList);
 
-        serviceList = serviceList.stream().filter(it->!it.contains("state=inactive")).collect(Collectors.toList());
+        serviceList = serviceList.stream().filter(it->{
+            URL url = URL.valueOf(it);
+            if (!it.contains("state=inactive") && invocation.getGroup().equals(url.getParameter(Constants.GROUP_KEY,""))) {
+                return true;
+            }
+            return false;
+        }).collect(Collectors.toList());
 
 
         if (serviceList.size() <= 0) {

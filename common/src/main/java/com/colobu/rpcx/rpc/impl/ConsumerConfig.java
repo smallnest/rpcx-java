@@ -34,6 +34,8 @@ public class ConsumerConfig {
 
     private SelectMode selectMode = SelectMode.RandomSelect;
 
+    private String group = "";
+
     public ConsumerConfig() {
     }
 
@@ -80,6 +82,11 @@ public class ConsumerConfig {
             return this;
         }
 
+        public ConsumerConfigBuilder setGroup(String group) {
+            this.config.group = group;
+            return this;
+        }
+
 
         public ConsumerConfig build() {
             return this.config;
@@ -101,6 +108,7 @@ public class ConsumerConfig {
             invocation.setFailType(failType);
             invocation.setSelectMode(selectMode);
             invocation.setLanguageCode(LanguageCode.JAVA);
+            invocation.setGroup(group);
 
             Map<String, String> attachments = new HashMap<>(1);
             attachments.put(Constants.TOKEN_KEY, token);

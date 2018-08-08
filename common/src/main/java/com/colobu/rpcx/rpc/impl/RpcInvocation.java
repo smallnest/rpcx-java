@@ -22,6 +22,8 @@ public class RpcInvocation implements Invocation, Serializable {
 
     private String methodName;
 
+    private String group;
+
     private Class<?>[] parameterTypes;
 
     private Class<?> resultType;
@@ -193,4 +195,11 @@ public class RpcInvocation implements Invocation, Serializable {
         this.languageCode = languageCode;
     }
 
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
+    }
 }

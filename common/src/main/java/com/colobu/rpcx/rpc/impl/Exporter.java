@@ -26,8 +26,13 @@ public class Exporter {
             if (null == weightValue) {
                 weightValue = "1";
             }
+            String group = "";
+            if (null != provider.group()) {
+                group = provider.group();
+            }
             //导出的时候需要确定权重
             url = url.addParameter("weight", weightValue);
+            url = url.addParameter("group", group);
             return url.toFullString();
         }).collect(Collectors.toSet());
     }
