@@ -43,7 +43,7 @@ public class ZkClient {
         String cs = Config.ins().get("zk.connect.string");
         client =
                 CuratorFrameworkFactory.builder()
-                        .connectString("127.0.0.1:2181")
+                        .connectString(cs)
                         .sessionTimeoutMs(5000)
                         .connectionTimeoutMs(5000)
                         .retryPolicy(retryPolicy)
