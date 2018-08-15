@@ -4,6 +4,7 @@ package com.colobu.rpcx.rpc.impl;
 import com.colobu.rpcx.common.NetUtils;
 import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.filter.Filter;
+import com.colobu.rpcx.protocol.LanguageCode;
 import com.colobu.rpcx.rpc.*;
 import com.colobu.rpcx.rpc.annotation.RpcFilter;
 import com.google.gson.Gson;
@@ -24,11 +25,11 @@ public class ConsumerContextFilter implements Filter {
         Gson gson = new Gson();
         URL url = new URL("rpcx", "", 0);
         url = url.setServiceInterface(invocation.getClassName() + "" + invocation.getMethodName());
-        String params = Stream.of(invocation.getArguments()).map(it -> gson.toJson(it)).collect(Collectors.joining(","));
-        url.setPath(invocation.getClassName() + "." + invocation.getMethodName() + "(" + params + ")");
+        if (invocation.getLanguageCode().equals(LanguageCode.JAVA)) {
+            String params = Stream.of(invocation.getArguments()).map(it -> gson.toJson(it)).collect(Collectors.joining(","));
+            url.setPath(invocation.getClassName() + "." + invocation.getMethodName() + "(" + params + ")");
+        }
         invoker.setUrl(url);
-
-
         RpcContext.getContext()
                 .setLocalAddress(NetUtils.getLocalHost(), 0)
                 .setRemoteAddress(invoker.getUrl().getHost(),

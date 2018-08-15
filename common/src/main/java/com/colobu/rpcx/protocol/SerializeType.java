@@ -20,7 +20,10 @@ public enum SerializeType {
     /**
      * msgpack序列化
      */
-    MsgPack(3);
+    MsgPack(3),
+
+
+    Thrift(4);
 
 
     private final int v;

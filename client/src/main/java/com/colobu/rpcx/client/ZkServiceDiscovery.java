@@ -63,8 +63,9 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
         }
     }
 
-
-    //golang 的服务发现
+    /**
+     * golang 的服务发现
+     */
     public ZkServiceDiscovery(final String basePath, final String serviceName) {
         this.basePath = basePath;
         this.serviceName.add(serviceName);

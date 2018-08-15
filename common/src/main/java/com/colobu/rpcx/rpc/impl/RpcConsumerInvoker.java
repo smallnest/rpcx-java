@@ -47,11 +47,18 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
         req.setHeartbeat(false);
         req.setOneway(false);
         req.setCompressType(CompressType.None);
-        req.setSerializeType(SerializeType.SerializeNone);
-        req.metadata.put(Constants.LANGUAGE, LanguageCode.JAVA.name());
+        req.setSerializeType(invocation.getSerializeType());
+
         req.metadata.put(Constants.SEND_TYPE, invocation.getSendType());
         invocation.setUrl(this.url);
-        byte[] data = HessianUtils.write(invocation);
+        byte[] data = null;
+        if (invocation.getLanguageCode().equals(LanguageCode.GO)) {
+            req.metadata.put(Constants.LANGUAGE,LanguageCode.GO.name());
+            data = invocation.getPayload();
+        } else if (invocation.getLanguageCode().equals(LanguageCode.JAVA)){
+            req.metadata.put(Constants.LANGUAGE, LanguageCode.JAVA.name());
+            data = HessianUtils.write(invocation);
+        }
         req.payload = data;
 
         try {
@@ -66,9 +73,15 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
             } else {
                 byte[] d = res.payload;
                 if (d.length > 0) {
-                    Object r = HessianUtils.read(d);
-                    result.setValue(r);
+                    if (invocation.getLanguageCode().equals(LanguageCode.JAVA)) {
+                        Object r = HessianUtils.read(d);
+                        result.setValue(r);
+                    }
+                    if (invocation.getLanguageCode().equals(LanguageCode.GO)) {
+                        result.setValue(d);
+                    }
                 }
+
             }
         } catch (Throwable e) {
             result.setThrowable(e);

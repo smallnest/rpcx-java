@@ -2,6 +2,7 @@ package com.colobu.rpcx.rpc.impl;
 
 import com.colobu.rpcx.fail.FailType;
 import com.colobu.rpcx.protocol.LanguageCode;
+import com.colobu.rpcx.protocol.SerializeType;
 import com.colobu.rpcx.rpc.Invocation;
 import com.colobu.rpcx.rpc.Invoker;
 import com.colobu.rpcx.rpc.URL;
@@ -22,7 +23,7 @@ public class RpcInvocation implements Invocation, Serializable {
 
     private String methodName;
 
-    private String group;
+    private String group = "";
 
     private Class<?>[] parameterTypes;
 
@@ -46,9 +47,15 @@ public class RpcInvocation implements Invocation, Serializable {
 
     public LanguageCode languageCode = LanguageCode.JAVA;
 
+
+    private SerializeType serializeType = SerializeType.SerializeNone;
+
+
     private FailType failType = FailType.FailFast;
 
     private SelectMode selectMode = SelectMode.RandomSelect;
+
+    private transient byte[] payload;
 
     public RpcInvocation() {
     }
@@ -201,5 +208,21 @@ public class RpcInvocation implements Invocation, Serializable {
 
     public void setGroup(String group) {
         this.group = group;
+    }
+
+    public byte[] getPayload() {
+        return payload;
+    }
+
+    public void setPayload(byte[] payload) {
+        this.payload = payload;
+    }
+
+    public SerializeType getSerializeType() {
+        return serializeType;
+    }
+
+    public void setSerializeType(SerializeType serializeType) {
+        this.serializeType = serializeType;
     }
 }

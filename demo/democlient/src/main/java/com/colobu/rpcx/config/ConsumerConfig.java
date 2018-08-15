@@ -28,7 +28,7 @@ public class ConsumerConfig {
     @Bean
     public ITestService testService() {
         return rpcxConsumer.wrap(ITestService.class, new ConsumerConfigBuilder()
-                .setGroup("test")
+//                .setGroup("test")
                 .setToken("zzy123")
                 .setSendType(Constants.SYNC_KEY)
                 .setTimeout(600000)
