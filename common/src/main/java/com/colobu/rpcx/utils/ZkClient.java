@@ -60,7 +60,7 @@ public class ZkClient {
     }
 
 
-    public Set<Pair<String,String>> get(String basePath, String serviceName) {
+    public Set<Pair<String, String>> get(String basePath, String serviceName) {
         try {
             Set<String> set = client.getChildren().forPath(basePath + serviceName).stream().collect(Collectors.toSet());
             Set<Pair<String, String>> pairSet = set.stream().map(it -> {
@@ -74,7 +74,7 @@ public class ZkClient {
             }).collect(Collectors.toSet());
             return pairSet;
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("get error:{}", e.getMessage());
         }
         return new HashSet<>();
     }

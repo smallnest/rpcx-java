@@ -8,6 +8,7 @@ import com.colobu.rpcx.utils.ZkClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,7 +23,7 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
 
     private static final Logger logger = LoggerFactory.getLogger(ZkServiceDiscovery.class);
 
-    private ConcurrentHashMap<String, Set<Pair<String,String>>> map = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, Set<Pair<String, String>>> map = new ConcurrentHashMap<>();
 
     private final String basePath;
 
@@ -49,9 +50,9 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
         });
 
         this.serviceName.stream().forEach(it -> {
-            Set<Pair<String,String>> set = ZkClient.ins().get(basePath, it).stream().map(it2->{
+            Set<Pair<String, String>> set = ZkClient.ins().get(basePath, it).stream().map(it2 -> {
                 String addr = it2.getObject1().split("@")[1];
-                return Pair.of(addr,it2.getObject2());
+                return Pair.of(addr, it2.getObject2());
             }).collect(Collectors.toSet());
             this.map.put(it, set);
         });
@@ -66,17 +67,19 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
     /**
      * golang 的服务发现
      */
-    public ZkServiceDiscovery(final String basePath, final String serviceName) {
+    public ZkServiceDiscovery(final String basePath, final String... serviceName) {
         this.basePath = basePath;
-        this.serviceName.add(serviceName);
+        Arrays.stream(serviceName).forEach(it -> {
+            this.serviceName.add(it);
+        });
         logger.info("consumer:{}", this.map);
 
         //直接获取服务信息
         this.serviceName.stream().forEach(it -> {
-            Set<Pair<String,String>> set = ZkClient.ins().get(basePath, it);
+            Set<Pair<String, String>> set = ZkClient.ins().get(basePath, it);
             this.map.put(it, set.stream().map(it1 -> {
                 String addr = it1.getObject1();
-                return Pair.of(addr.split("@")[1],it1.getObject2());
+                return Pair.of(addr.split("@")[1], it1.getObject2());
             }).collect(Collectors.toSet()));
         });
 
@@ -91,7 +94,7 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
 
     @Override
     public List<String> getServices(String serviceName) {
-        return this.map.get(serviceName).stream().map(it-> it.getObject1()+"?"+it.getObject2()).collect(Collectors.toList());
+        return this.map.get(serviceName).stream().map(it -> it.getObject1() + "?" + it.getObject2()).collect(Collectors.toList());
     }
 
 
@@ -119,9 +122,9 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
                                 return v;
                             });
                         } else if ("CHILD_UPDATED".equals(ps.getType())) {
-                            this.map.compute(service, (k,v)->{
-                                v = v.stream().map(it->{
-                                    if (it.getObject1().equals(ps.getValue().getObject1())){
+                            this.map.compute(service, (k, v) -> {
+                                v = v.stream().map(it -> {
+                                    if (it.getObject1().equals(ps.getValue().getObject1())) {
                                         it.setObject2(ps.getValue().getObject2());
                                         return it;
                                     }
@@ -152,6 +155,6 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
     public void close() {
         this.queue.offer(new PathStatus(true));
         ZkClient.ins().close();
-        stop.compareAndSet(false,true);
+        stop.compareAndSet(false, true);
     }
 }
