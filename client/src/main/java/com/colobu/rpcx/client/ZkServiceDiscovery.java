@@ -38,17 +38,18 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
     private AtomicBoolean stop = new AtomicBoolean(false);
 
     /**
-     * java 的服务发现,会查找所有的consumer
+     * 自动查找依赖的服务
      *
      * @param basePath
      */
     public ZkServiceDiscovery(final String basePath) {
         this.basePath = basePath;
         this.serviceName = findConsumer();
-        this.serviceName.stream().forEach(it -> {
-            this.map.put(it, new HashSet<>());
-        });
+        this.serviceName.stream().forEach(it -> this.map.put(it, new HashSet<>()));
+        zkServiceDiscovery(basePath);
+    }
 
+    private void zkServiceDiscovery(String basePath) {
         this.serviceName.stream().forEach(it -> {
             Set<Pair<String, String>> set = ZkClient.ins().get(basePath, it).stream().map(it2 -> {
                 String addr = it2.getObject1().split("@")[1];
@@ -57,38 +58,18 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
             this.map.put(it, set);
         });
 
-        try {
-            watch();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        //监控zk
+        watch();
     }
 
+
     /**
-     * golang 的服务发现
+     * 根据提供的服务名字
      */
     public ZkServiceDiscovery(final String basePath, final String... serviceName) {
         this.basePath = basePath;
-        Arrays.stream(serviceName).forEach(it -> {
-            this.serviceName.add(it);
-        });
-        logger.info("consumer:{}", this.map);
-
-        //直接获取服务信息
-        this.serviceName.stream().forEach(it -> {
-            Set<Pair<String, String>> set = ZkClient.ins().get(basePath, it);
-            this.map.put(it, set.stream().map(it1 -> {
-                String addr = it1.getObject1();
-                return Pair.of(addr.split("@")[1], it1.getObject2());
-            }).collect(Collectors.toSet()));
-        });
-
-
-        try {
-            watch();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Arrays.stream(serviceName).forEach(it -> this.serviceName.add(it));
+        zkServiceDiscovery(basePath);
     }
 
 
@@ -142,6 +123,7 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
             }
         }).start();
 
+        //根据serviceName 进行监控
         this.serviceName.stream().forEach(it -> {
             try {
                 ZkClient.ins().watch(queue, basePath + it);
