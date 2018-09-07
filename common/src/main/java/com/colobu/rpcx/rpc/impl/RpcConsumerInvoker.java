@@ -64,6 +64,15 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
         try {
             req.setSeq(seq.incrementAndGet());
             Message res = client.call(req, invocation.getTimeOut());
+
+            //golang 记录的错误
+            String rpcxError = res.metadata.get("__rpcx_error__");
+            logger.info("rpcxError:{}", rpcxError);
+            if (null != rpcxError) {
+                result.setThrowable(new RuntimeException(rpcxError));
+                return result;
+            }
+
             if (res.metadata.containsKey("_rpcx_error_code")) {
                 int code = Integer.parseInt(res.metadata.get("_rpcx_error_code"));
                 String message = res.metadata.get("_rpcx_error_message");
