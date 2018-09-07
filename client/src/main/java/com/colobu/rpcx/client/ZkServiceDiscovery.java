@@ -52,7 +52,16 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
     private void zkServiceDiscovery(String basePath) {
         this.serviceName.stream().forEach(it -> {
             Set<Pair<String, String>> set = ZkClient.ins().get(basePath, it).stream().map(it2 -> {
-                String addr = it2.getObject1().split("@")[1];
+                String addr = "";
+                try {
+                    if (it2.getObject1().contains("@")) {
+                        addr = it2.getObject1().split("@")[1];
+                    } else {
+                        addr = it2.getObject1();
+                    }
+                }catch (Exception ex) {
+
+                }
                 return Pair.of(addr, it2.getObject2());
             }).collect(Collectors.toSet());
             this.map.put(it, set);
