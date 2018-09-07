@@ -67,8 +67,8 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
 
             //golang 记录的错误
             String rpcxError = res.metadata.get("__rpcx_error__");
-            logger.info("rpcxError:{}", rpcxError);
             if (null != rpcxError) {
+                logger.info("rpcxError:{}", rpcxError);
                 result.setThrowable(new RuntimeException(rpcxError));
                 return result;
             }
