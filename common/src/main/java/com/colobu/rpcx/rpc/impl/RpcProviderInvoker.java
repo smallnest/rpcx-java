@@ -58,7 +58,7 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
             if (throwable.getCause() != null) {
                 message = throwable.getCause().getMessage();
             }
-            throw new RpcException(message, throwable, -2);
+            throw new RpcException(message, throwable, "-2");
         }
     }
 

@@ -53,9 +53,9 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
         invocation.setUrl(this.url);
         byte[] data = null;
         if (invocation.getLanguageCode().equals(LanguageCode.GO)) {
-            req.metadata.put(Constants.LANGUAGE,LanguageCode.GO.name());
+            req.metadata.put(Constants.LANGUAGE, LanguageCode.GO.name());
             data = invocation.getPayload();
-        } else if (invocation.getLanguageCode().equals(LanguageCode.JAVA)){
+        } else if (invocation.getLanguageCode().equals(LanguageCode.JAVA)) {
             req.metadata.put(Constants.LANGUAGE, LanguageCode.JAVA.name());
             data = HessianUtils.write(invocation);
         }
@@ -65,17 +65,12 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
             req.setSeq(seq.incrementAndGet());
             Message res = client.call(req, invocation.getTimeOut());
 
-            //golang 记录的错误
-            String rpcxError = res.metadata.get("__rpcx_error__");
-            if (null != rpcxError) {
-                logger.info("rpcxError:{}", rpcxError);
-                result.setThrowable(new RuntimeException(rpcxError));
-                return result;
-            }
-
-            if (res.metadata.containsKey("_rpcx_error_code")) {
-                int code = Integer.parseInt(res.metadata.get("_rpcx_error_code"));
-                String message = res.metadata.get("_rpcx_error_message");
+            if (res.metadata.containsKey(Constants.RPCX_ERROR_CODE)) {
+                String code = (res.metadata.get(Constants.RPCX_ERROR_CODE));
+                String message = res.metadata.get(Constants.RPCX_ERROR_MESSAGE);
+                if (message == null) {
+                    message = "";
+                }
                 logger.warn("client call error:{}:{}", code, message);
                 RpcException error = new RpcException(message, code);
                 result.setThrowable(error);

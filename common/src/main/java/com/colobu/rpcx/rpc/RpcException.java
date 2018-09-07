@@ -6,14 +6,14 @@ package com.colobu.rpcx.rpc;
  */
 public class RpcException extends RuntimeException {
 
-    private int code;
+    private String code;
 
-    public RpcException(String message, int code) {
+    public RpcException(String message, String code) {
         super(message);
         this.code = code;
     }
 
-    public RpcException(String message, Throwable cause, int code) {
+    public RpcException(String message, Throwable cause, String code) {
         super(message, cause);
         this.code = code;
     }
@@ -31,7 +31,7 @@ public class RpcException extends RuntimeException {
     }
 
 
-    public int getCode() {
+    public String getCode() {
         return code;
     }
 

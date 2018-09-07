@@ -82,8 +82,11 @@ public class Constants {
 
     public static final String LANGUAGE = "language";
 
-    public static final String RPCX_ERROR_CODE = "_rpcx_error_code";
+    public static final String RPCX_ERROR_CODE = "__rpcx_error__";
 
     public static final String RPCX_ERROR_MESSAGE = "_rpcx_error_message";
+
+
+
 
 }

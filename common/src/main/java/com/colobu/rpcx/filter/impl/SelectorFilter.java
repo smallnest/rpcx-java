@@ -50,7 +50,7 @@ public class SelectorFilter implements Filter {
 
 
         if (serviceList.size() <= 0) {
-            throw new RpcException("service list size <=0 ", -3);
+            throw new RpcException("service list size <=0 ", "-3");
         }
 
         SelectMode selectMode = invocation.getSelectMode();
