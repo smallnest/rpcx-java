@@ -69,7 +69,7 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
 
     private void runEventListener() {
         if (this.channelEventListener != null) {
-            this.nettyEventExecuter.run();
+            new Thread(this.nettyEventExecuter).start();
         }
     }
 
@@ -393,5 +393,25 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
     @Override
     public IServiceDiscovery getServiceDiscovery() {
         return serviceDiscovery;
+    }
+
+    @Override
+    public void close() {
+        logger.info("netty client close");
+        if (null != this.eventLoopGroupWorker) {
+            this.eventLoopGroupWorker.shutdownGracefully();
+        }
+
+        if (this.nettyEventExecuter != null) {
+            this.nettyEventExecuter.shutdown();
+        }
+
+        if (this.defaultEventExecutorGroup != null) {
+            this.defaultEventExecutorGroup.shutdownGracefully();
+        }
+
+        if (null != this.serviceDiscovery) {
+            this.serviceDiscovery.close();
+        }
     }
 }

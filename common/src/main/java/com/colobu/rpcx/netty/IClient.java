@@ -14,6 +14,8 @@ public interface IClient {
 
     IServiceDiscovery getServiceDiscovery();
 
+    void close();
+
 }
 
 

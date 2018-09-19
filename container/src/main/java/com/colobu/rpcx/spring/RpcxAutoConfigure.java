@@ -43,6 +43,9 @@ public class RpcxAutoConfigure {
     @Value("${rpcx.package.path}")
     private String rpcxPackagePath;
 
+    @Value("${rpcx.consumer.package.path}")
+    private String rpcxConsumerPackagePath;
+
     @Value("${rpcx.base.path}")
     private String rpcxBasePath;
 
@@ -63,10 +66,10 @@ public class RpcxAutoConfigure {
         reg.start();
     }
 
-    @Bean
+    @Bean(destroyMethod = "close")
     @ConditionalOnMissingBean
     public RpcxConsumer rpcxConsumer() {
-        IServiceDiscovery serviceDiscovery = new ZkServiceDiscovery(rpcxBasePath);
+        IServiceDiscovery serviceDiscovery = new ZkServiceDiscovery(rpcxBasePath, rpcxConsumerPackagePath);
         IClient client = new NettyClient(serviceDiscovery);
         return new RpcxConsumer(client);
     }

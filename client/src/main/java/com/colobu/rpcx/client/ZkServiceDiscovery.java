@@ -2,6 +2,7 @@ package com.colobu.rpcx.client;
 
 import com.colobu.rpcx.common.Pair;
 import com.colobu.rpcx.discovery.IServiceDiscovery;
+import com.colobu.rpcx.protocol.LanguageCode;
 import com.colobu.rpcx.rpc.impl.ConsumerFinder;
 import com.colobu.rpcx.utils.PathStatus;
 import com.colobu.rpcx.utils.ZkClient;
@@ -31,8 +32,8 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
 
     private LinkedBlockingQueue<PathStatus> queue = new LinkedBlockingQueue<>();
 
-    private Set<String> findConsumer() {
-        return new ConsumerFinder().find();
+    private Set<String> findConsumer(String consumerPackage) {
+        return new ConsumerFinder().find(consumerPackage);
     }
 
     private AtomicBoolean stop = new AtomicBoolean(false);
@@ -42,12 +43,13 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
      *
      * @param basePath
      */
-    public ZkServiceDiscovery(final String basePath) {
+    public ZkServiceDiscovery(final String basePath,String consumerPackage) {
         this.basePath = basePath;
-        this.serviceName = findConsumer();
+        this.serviceName = findConsumer(consumerPackage);
         this.serviceName.stream().forEach(it -> this.map.put(it, new HashSet<>()));
         zkServiceDiscovery(basePath);
     }
+
 
     private void zkServiceDiscovery(String basePath) {
         this.serviceName.stream().forEach(it -> {
@@ -75,7 +77,8 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
     /**
      * 根据提供的服务名字
      */
-    public ZkServiceDiscovery(final String basePath, final String... serviceName) {
+    public ZkServiceDiscovery(final String basePath, LanguageCode languageCode, final String... serviceName) {
+        logger.info("ZkServiceDiscovery languageCode:{}",languageCode);
         this.basePath = basePath;
         Arrays.stream(serviceName).forEach(it -> this.serviceName.add(it));
         zkServiceDiscovery(basePath);

@@ -91,7 +91,7 @@ public class NettyServer extends NettyRemotingAbstract {
         }
 
         if (this.channelEventListener != null) {
-            this.nettyEventExecuter.run();
+            new Thread(this.nettyEventExecuter).start();
         }
 
         runScanResponseTableSchedule();

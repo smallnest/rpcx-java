@@ -12,7 +12,7 @@ public class ServiceDiscoveryTest {
 
     @Test
     public void testWatch() throws Exception {
-        new ZkServiceDiscovery("").watch();
+        new ZkServiceDiscovery("","").watch();
         TimeUnit.HOURS.sleep(1);
     }
 }
