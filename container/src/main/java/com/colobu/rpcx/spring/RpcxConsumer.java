@@ -9,7 +9,10 @@ import com.colobu.rpcx.rpc.Result;
 import com.colobu.rpcx.rpc.impl.ConsumerConfig;
 import com.colobu.rpcx.rpc.impl.RpcConsumerInvoker;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -18,6 +21,9 @@ import java.nio.file.Paths;
  * @author goodjava@qq.com
  */
 public class RpcxConsumer {
+
+    private static final Logger logger = LoggerFactory.getLogger(RpcxConsumer.class);
+
 
     private final IClient client;
 
@@ -115,5 +121,10 @@ public class RpcxConsumer {
             throw new RuntimeException(result.getException());
         }
         return result.getValue().toString();
+    }
+
+    public void close() {
+        logger.info("==================>close");
+        this.client.close();
     }
 }

@@ -14,7 +14,7 @@ import com.colobu.rpcx.service.IArith;
 public class Client {
 
     public static void main(String... args) {
-        IServiceDiscovery serviceDiscovery = new ZkServiceDiscovery("/youpin/services/");
+        IServiceDiscovery serviceDiscovery = new ZkServiceDiscovery("/youpin/services/","");
         IClient client = new NettyClient(serviceDiscovery);
         IArith arith = new ConsumerConfig(client).refer(IArith.class);
 ////        System.out.println(arith.sum(1111, 222));

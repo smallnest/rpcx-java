@@ -15,8 +15,10 @@ public class NettyEventExecuter implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(NettyEventExecuter.class);
 
     private final LinkedBlockingQueue<NettyEvent> eventQueue = new LinkedBlockingQueue<NettyEvent>();
+
     private final int maxSize = 10000;
 
+    private volatile boolean stop = false;
 
     public void putNettyEvent(final NettyEvent event) {
         if (this.eventQueue.size() <= maxSize) {
@@ -60,7 +62,11 @@ public class NettyEventExecuter implements Runnable {
     }
 
     private boolean isStoped() {
-        return true;
+        return stop;
+    }
+
+    public void shutdown() {
+        this.stop = true;
     }
 
     private String getServiceName() {
