@@ -14,6 +14,7 @@ import com.google.common.util.concurrent.JdkFutureAdapters;
 import com.google.common.util.concurrent.ListenableFuture;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.epoll.Epoll;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -216,18 +217,7 @@ public class NettyRemotingAbstract {
 
             try {
                 final RequestTask requestTask = new RequestTask(run, ctx.channel(), cmd);
-                Future<?> future = pair.getObject2().submit(requestTask);
-                ListenableFuture<?> listenableFuture = JdkFutureAdapters.listenInPoolThread(future);
-                Futures.addCallback(listenableFuture, new FutureCallback<Object>() {
-                    @Override
-                    public void onSuccess(Object result) {
-                    }
-
-                    @Override
-                    public void onFailure(Throwable t) {
-                    }
-                });
-
+                pair.getObject2().submit(requestTask);
 
             } catch (RejectedExecutionException e) {
                 if ((System.currentTimeMillis() % 10000) == 0) {
@@ -252,6 +242,10 @@ public class NettyRemotingAbstract {
             ctx.writeAndFlush(response);
             logger.error(RemotingHelper.parseChannelRemoteAddr(ctx.channel()) + error);
         }
+    }
+
+    protected boolean useEpoll() {
+        return RemotingUtil.isLinuxPlatform() && Epoll.isAvailable() && false;
     }
 
 

@@ -81,17 +81,17 @@ public class RpcxAutoConfigure {
      * @param joinPoint
      * @return
      */
-    @Around("execution(public * *(..)) && within(@com.colobu.rpcx.rpc.annotation.Provider *)")
+//    @Around("execution(public * *(..)) && within(@com.colobu.rpcx.rpc.annotation.Provider *)")
     public Object aroundProvider(ProceedingJoinPoint joinPoint) throws Throwable {
         Provider provider = joinPoint.getTarget().getClass().getAnnotation(Provider.class);
         String uuid = UUID.randomUUID().toString();
         Object[] o = joinPoint.getArgs();
-        logger.info("provider execute begin name:{} version:{}  id:{} params:{}", provider.name(), provider.version(), uuid, joinPoint.getArgs());
+        logger.debug("provider execute begin name:{} version:{}  id:{} params:{}", provider.name(), provider.version(), uuid, joinPoint.getArgs());
         long startTime = System.currentTimeMillis();
         try {
             Object result = joinPoint.proceed();
             long useTime = System.currentTimeMillis() - startTime;
-            logger.info("provider execute finish name:{} version:{} id:{} result:{} useTime:{}", provider.name(), provider.version(), uuid, result, useTime);
+            logger.debug("provider execute finish name:{} version:{} id:{} result:{} useTime:{}", provider.name(), provider.version(), uuid, result, useTime);
             return result;
         } catch (RpcException ex) {
             logger.warn("provider execute finish name:{} version:{} id:{} error:{}", provider.name(), provider.version(), uuid, ex.getMessage());

@@ -11,6 +11,8 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -55,8 +57,17 @@ public class NettyServer extends NettyRemotingAbstract {
     public NettyServer() {
         nettyServerConfig = new NettyServerConfig();
         this.serverBootstrap = new ServerBootstrap();
-        this.eventLoopGroupBoss = new NioEventLoopGroup(1, new NamedThreadFactory("NettyBoss_", false));
-        this.eventLoopGroupSelector = new NioEventLoopGroup(nettyServerConfig.getServerSelectorThreads(), new NamedThreadFactory("NettyServerNIOSelector", false));
+
+
+        if (useEpoll()) {
+            logger.info("----->use epollEventLoopGroup");
+            this.eventLoopGroupBoss = new EpollEventLoopGroup(1, new NamedThreadFactory("EpollNettyBoss_", false));
+            this.eventLoopGroupSelector = new EpollEventLoopGroup(nettyServerConfig.getServerSelectorThreads(),new NamedThreadFactory("NettyEpollEventSelector", false));
+        } else {
+            this.eventLoopGroupBoss = new NioEventLoopGroup(1, new NamedThreadFactory("NettyBoss_", false));
+            this.eventLoopGroupSelector = new NioEventLoopGroup(nettyServerConfig.getServerSelectorThreads(), new NamedThreadFactory("NettyServerNIOSelector", false));
+        }
+
     }
 
 
@@ -83,6 +94,7 @@ public class NettyServer extends NettyRemotingAbstract {
             String port = getServerPort();
             ChannelFuture sync = this.serverBootstrap.bind(host, Integer.parseInt(port)).sync();
             InetSocketAddress addr = (InetSocketAddress) sync.channel().localAddress();
+            logger.info("----->server bind finish");
             this.addr = addr.getHostString();
             this.port = addr.getPort();
             logger.info("###########rpc server start addr{} ", this.addr + ":" + this.port);
@@ -102,7 +114,7 @@ public class NettyServer extends NettyRemotingAbstract {
     private Pair<NettyRequestProcessor, ExecutorService> createDefaultRequestProcessor() {
         return new Pair<>(new RpcProcessor(this.getBeanFunc), new ThreadPoolExecutor(50, 50,
                 0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(), new NamedThreadFactory("defaultRequestProcessor")));
+                new LinkedBlockingQueue<>(), new NamedThreadFactory("DefaultRequestProcessorPool")));
     }
 
     private void runScanResponseTableSchedule() {
@@ -126,7 +138,8 @@ public class NettyServer extends NettyRemotingAbstract {
     }
 
     private ServerBootstrap createServerBootstrap(DefaultEventExecutorGroup defaultEventExecutorGroup) {
-        return this.serverBootstrap.group(this.eventLoopGroupBoss, this.eventLoopGroupSelector).channel(NioServerSocketChannel.class)
+        return this.serverBootstrap.group(this.eventLoopGroupBoss, this.eventLoopGroupSelector)
+                .channel(useEpoll() ? EpollServerSocketChannel.class : NioServerSocketChannel.class)
                 .option(ChannelOption.SO_BACKLOG, 1024)
                 .option(ChannelOption.SO_REUSEADDR, true)
                 .option(ChannelOption.SO_KEEPALIVE, false)

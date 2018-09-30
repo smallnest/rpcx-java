@@ -35,7 +35,7 @@ public class NamedThreadFactory implements ThreadFactory {
     @Override
     public Thread newThread(Runnable runnable) {
         String name = mPrefix + mThreadNum.getAndIncrement();
-        logger.info("threadfactory create new thread:{}", name);
+//        logger.debug("threadfactory create new thread:{}", name);
         Thread ret = new Thread(mGroup, runnable, name, 0);
         ret.setDaemon(mDaemo);
         return ret;
