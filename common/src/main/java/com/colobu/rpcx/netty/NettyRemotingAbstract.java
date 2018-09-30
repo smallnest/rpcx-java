@@ -245,7 +245,7 @@ public class NettyRemotingAbstract {
     }
 
     protected boolean useEpoll() {
-        return RemotingUtil.isLinuxPlatform() && Epoll.isAvailable() && false;
+        return RemotingUtil.isLinuxPlatform() && Epoll.isAvailable();
     }
 
 

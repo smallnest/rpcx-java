@@ -62,7 +62,7 @@ public class NettyServer extends NettyRemotingAbstract {
         if (useEpoll()) {
             logger.info("----->use epollEventLoopGroup");
             this.eventLoopGroupBoss = new EpollEventLoopGroup(1, new NamedThreadFactory("EpollNettyBoss_", false));
-            this.eventLoopGroupSelector = new EpollEventLoopGroup(nettyServerConfig.getServerSelectorThreads(),new NamedThreadFactory("NettyEpollEventSelector", false));
+            this.eventLoopGroupSelector = new EpollEventLoopGroup(nettyServerConfig.getServerSelectorThreads(), new NamedThreadFactory("NettyEpollEventSelector", false));
         } else {
             this.eventLoopGroupBoss = new NioEventLoopGroup(1, new NamedThreadFactory("NettyBoss_", false));
             this.eventLoopGroupSelector = new NioEventLoopGroup(nettyServerConfig.getServerSelectorThreads(), new NamedThreadFactory("NettyServerNIOSelector", false));
@@ -112,7 +112,7 @@ public class NettyServer extends NettyRemotingAbstract {
     }
 
     private Pair<NettyRequestProcessor, ExecutorService> createDefaultRequestProcessor() {
-        return new Pair<>(new RpcProcessor(this.getBeanFunc), new ThreadPoolExecutor(50, 50,
+        return new Pair<>(new RpcProcessor(this.getBeanFunc), new ThreadPoolExecutor(250, 250,
                 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(), new NamedThreadFactory("DefaultRequestProcessorPool")));
     }

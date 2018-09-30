@@ -5,7 +5,7 @@ package com.colobu.rpcx.netty;
  */
 public class NettyServerConfig implements Cloneable {
     private int listenPort = 8888;
-    private int serverWorkerThreads = 8;
+    private int serverWorkerThreads = Runtime.getRuntime().availableProcessors() * 2;
     private int serverCallbackExecutorThreads = 0;
     private int serverSelectorThreads = 3;
     private int serverOnewaySemaphoreValue = 256;
