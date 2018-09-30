@@ -16,8 +16,6 @@ import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.timeout.IdleStateHandler;
-import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +44,7 @@ public class NettyServer extends NettyRemotingAbstract {
     private final ScheduledThreadPoolExecutor processingRequestSchedule = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("processingRequestSchedule"));
 
     private final EventLoopGroup eventLoopGroupBoss;
-    private final EventLoopGroup eventLoopGroupSelector;
+    private final EventLoopGroup eventLoopGroupWorker;
     private final NettyServerConfig nettyServerConfig;
 
     /**
@@ -62,10 +60,10 @@ public class NettyServer extends NettyRemotingAbstract {
         if (useEpoll()) {
             logger.info("----->use epollEventLoopGroup");
             this.eventLoopGroupBoss = new EpollEventLoopGroup(1, new NamedThreadFactory("EpollNettyBoss_", false));
-            this.eventLoopGroupSelector = new EpollEventLoopGroup(nettyServerConfig.getServerSelectorThreads(), new NamedThreadFactory("NettyEpollEventSelector", false));
+            this.eventLoopGroupWorker = new EpollEventLoopGroup(nettyServerConfig.getServerWorkerThreads(), new NamedThreadFactory("NettyEpollEventSelector", false));
         } else {
             this.eventLoopGroupBoss = new NioEventLoopGroup(1, new NamedThreadFactory("NettyBoss_", false));
-            this.eventLoopGroupSelector = new NioEventLoopGroup(nettyServerConfig.getServerSelectorThreads(), new NamedThreadFactory("NettyServerNIOSelector", false));
+            this.eventLoopGroupWorker = new NioEventLoopGroup(nettyServerConfig.getServerWorkerThreads(), new NamedThreadFactory("NettyServerNIOSelector", false));
         }
 
     }
@@ -79,11 +77,8 @@ public class NettyServer extends NettyRemotingAbstract {
                 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(), new NamedThreadFactory("httpRequestProcessor")));
 
-        DefaultEventExecutorGroup defaultEventExecutorGroup = new DefaultEventExecutorGroup(
-                nettyServerConfig.getServerWorkerThreads(), new NamedThreadFactory("NettyServerCodecThread_", false));
 
-
-        ServerBootstrap childHandler = createServerBootstrap(defaultEventExecutorGroup);
+        ServerBootstrap childHandler = createServerBootstrap();
 
         if (nettyServerConfig.isServerPooledByteBufAllocatorEnable()) {
             childHandler.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
@@ -112,7 +107,7 @@ public class NettyServer extends NettyRemotingAbstract {
     }
 
     private Pair<NettyRequestProcessor, ExecutorService> createDefaultRequestProcessor() {
-        return new Pair<>(new RpcProcessor(this.getBeanFunc), new ThreadPoolExecutor(250, 250,
+        return new Pair<>(new RpcProcessor(this.getBeanFunc), new ThreadPoolExecutor(100, 100,
                 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(), new NamedThreadFactory("DefaultRequestProcessorPool")));
     }
@@ -137,8 +132,8 @@ public class NettyServer extends NettyRemotingAbstract {
         }, 0, 60, TimeUnit.SECONDS);
     }
 
-    private ServerBootstrap createServerBootstrap(DefaultEventExecutorGroup defaultEventExecutorGroup) {
-        return this.serverBootstrap.group(this.eventLoopGroupBoss, this.eventLoopGroupSelector)
+    private ServerBootstrap createServerBootstrap() {
+        return this.serverBootstrap.group(this.eventLoopGroupBoss, this.eventLoopGroupWorker)
                 .channel(useEpoll() ? EpollServerSocketChannel.class : NioServerSocketChannel.class)
                 .option(ChannelOption.SO_BACKLOG, 1024)
                 .option(ChannelOption.SO_REUSEADDR, true)
@@ -150,9 +145,8 @@ public class NettyServer extends NettyRemotingAbstract {
                 .localAddress(new InetSocketAddress(this.nettyServerConfig.getListenPort()))
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
-                    public void initChannel(SocketChannel ch) throws Exception {
+                    public void initChannel(SocketChannel ch) {
                         ch.pipeline().addLast(
-                                defaultEventExecutorGroup,
                                 new RpcxProcessHandler(nettyServerConfig.getServerChannelMaxIdleTimeSeconds(), NettyServer.this)
                         );
                     }
@@ -180,7 +174,7 @@ public class NettyServer extends NettyRemotingAbstract {
     }
 
     private void shutdown() {
-        this.eventLoopGroupSelector.shutdownGracefully();
+        this.eventLoopGroupWorker.shutdownGracefully();
         this.eventLoopGroupBoss.shutdownGracefully();
     }
 
