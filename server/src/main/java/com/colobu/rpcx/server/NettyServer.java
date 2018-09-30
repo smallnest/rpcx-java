@@ -107,9 +107,20 @@ public class NettyServer extends NettyRemotingAbstract {
     }
 
     private Pair<NettyRequestProcessor, ExecutorService> createDefaultRequestProcessor() {
-        return new Pair<>(new RpcProcessor(this.getBeanFunc), new ThreadPoolExecutor(100, 100,
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(2000, 2000,
                 0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(), new NamedThreadFactory("DefaultRequestProcessorPool")));
+                new LinkedBlockingQueue<>(), new NamedThreadFactory("DefaultRequestProcessorPool"));
+
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
+            try {
+                logger.info("default request pool----->{} {} {}", executor.getActiveCount(), executor.getCompletedTaskCount(), executor.getQueue().size());
+            } catch (Exception ex) {
+
+            }
+        }, 0, 5, TimeUnit.SECONDS);
+
+        return new Pair<>(new RpcProcessor(this.getBeanFunc), executor);
+
     }
 
     private void runScanResponseTableSchedule() {
@@ -138,7 +149,7 @@ public class NettyServer extends NettyRemotingAbstract {
                 .option(ChannelOption.SO_BACKLOG, 1024)
                 .option(ChannelOption.SO_REUSEADDR, true)
                 .option(ChannelOption.SO_KEEPALIVE, false)
-                .option(ChannelOption.SO_LINGER, 10)
+                .option(ChannelOption.SO_LINGER, 3)
                 .childOption(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.SO_SNDBUF, nettyServerConfig.getServerSocketSndBufSize())
                 .option(ChannelOption.SO_RCVBUF, nettyServerConfig.getServerSocketRcvBufSize())
