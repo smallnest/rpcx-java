@@ -102,6 +102,11 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
     }
 
     @Override
+    public Method getMethod() {
+        return null;
+    }
+
+    @Override
     public void setInterface(Class clazz) {
 
     }

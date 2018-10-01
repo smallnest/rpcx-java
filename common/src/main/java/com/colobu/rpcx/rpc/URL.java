@@ -1094,11 +1094,11 @@ public final class URL implements Serializable {
 		return buf.toString();
 	}
 	
-	private void buildParameters(StringBuilder buf, boolean concat, String[] parameters) {
+	private synchronized void buildParameters(StringBuilder buf, boolean concat, String[] parameters) {
 	    if (getParameters() !=null && getParameters().size() > 0) {
             List<String> includes = (parameters == null || parameters.length == 0 ? null : Arrays.asList(parameters));
             boolean first = true;
-            for (Map.Entry<String, String> entry : new TreeMap<String, String>(getParameters()).entrySet()) {
+            for (Map.Entry<String, String> entry : new TreeMap<>(getParameters()).entrySet()) {
                 if (entry.getKey() != null && entry.getKey().length() > 0
                         && (includes == null || includes.contains(entry.getKey()))) {
                     if (first) {

@@ -108,6 +108,11 @@ public class FilterWrapper {
                     }
 
                     @Override
+                    public Method getMethod() {
+                        return invoker.getMethod();
+                    }
+
+                    @Override
                     public void setInterface(Class clazz) {
                         invoker.setInterface(clazz);
                     }

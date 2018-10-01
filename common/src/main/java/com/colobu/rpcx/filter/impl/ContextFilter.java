@@ -28,37 +28,19 @@ public class ContextFilter implements Filter {
 
     private static final Logger logger = LoggerFactory.getLogger(ContextFilter.class);
 
-    private static ConcurrentHashMap<String,Method> methods = new ConcurrentHashMap<>();
-
     @Override
     public Result invoke(Invoker<?> invoker, RpcInvocation invocation) throws RpcException {
         logger.debug("ContextFilter begin className:{} methodName:{}", invocation.getClassName(), invocation.getMethodName());
+        Provider typeProvider = invoker.getInterface().getAnnotation(Provider.class);
 
-        Class clazz = ClassUtils.getClassByName(invocation.getClassName());
-        invoker.setInterface(clazz);
-        Provider typeProvider = (Provider) clazz.getAnnotation(Provider.class);
-
-
-        URL url = invocation.getUrl().copy();
-        url.setHost(NetUtils.getLocalHost());
-        url.setPort(0);
-        invoker.setUrl(url);
+        URL url = invocation.getUrl();
 
         Map<String, String> parameters = url.getParameters();
         parameters.put(Constants.SIDE_KEY, Constants.PROVIDER_SIDE);
 
         setTypeParameters(typeProvider, parameters);
 
-        String methodName = invocation.getMethodName();
-
-        String key = ClassUtils.getMethodKey(invocation.getClassName(),invocation.getMethodName(),invocation.getParameterTypeNames());
-        Method method= methods.get(key);
-        if (null == method) {
-            method = this.getMethod(invocation.getClassName(), methodName, invocation.getParameterTypeNames());
-            methods.putIfAbsent(key,method);
-        }
-        invoker.setMethod(method);
-        Provider methodProvider = method.getAnnotation(Provider.class);
+        Provider methodProvider = invoker.getMethod().getAnnotation(Provider.class);
 
         //方法级别的会覆盖type级别的
         if (null != methodProvider) {

@@ -1,6 +1,7 @@
 package com.colobu.rpcx.processor;
 
 import com.colobu.rpcx.common.ClassUtils;
+import com.colobu.rpcx.common.NetUtils;
 import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.filter.FilterWrapper;
 import com.colobu.rpcx.netty.NettyRequestProcessor;
@@ -16,6 +17,7 @@ import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.IntStream;
@@ -29,7 +31,7 @@ public class RpcProcessor implements NettyRequestProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(RpcProcessor.class);
 
-    private static final ConcurrentHashMap<String,Invoker<Object>> invokerMap = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, Invoker<Object>> invokerMap = new ConcurrentHashMap<>();
 
     private final Function<Class, Object> getBeanFunc;
 
@@ -48,7 +50,7 @@ public class RpcProcessor implements NettyRequestProcessor {
             invocation = new RpcInvocation();
             invocation.setLanguageCode(LanguageCode.GO);
             invocation.url = new URL("rpcx", "", 0);
-            invocation.url.setPath(className+"."+methodName);
+            invocation.url.setPath(className + "." + methodName);
             //golang 参数是byte[]
             invocation.setParameterTypeNames(new String[]{"byte[]"});
             //参数就是payload数据
@@ -62,19 +64,19 @@ public class RpcProcessor implements NettyRequestProcessor {
         invocation.setClassName(className);
         invocation.setMethodName(methodName);
 
-        String key = ClassUtils.getMethodKey(className,methodName,invocation.getParameterTypeNames());
+        String key = ClassUtils.getMethodKey(className, methodName, invocation.getParameterTypeNames());
 
         Invoker<Object> wrapperInvoker = null;
+
         if (invokerMap.containsKey(key)) {
             wrapperInvoker = invokerMap.get(key);
         } else {
-            Invoker<Object> invoker = new RpcProviderInvoker<>(getBeanFunc);
-            wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.PROVIDER);
-            invokerMap.putIfAbsent(key,wrapperInvoker);
+            wrapperInvoker = initInvoker(key, methodName, invocation);
+
         }
         Result rpcResult = wrapperInvoker.invoke(invocation);
 
-        RemotingCommand res = RemotingCommand.createResponseCommand(new Message(invocation.getClassName(),invocation.getMethodName(),MessageType.Response, request.getOpaque()));
+        RemotingCommand res = RemotingCommand.createResponseCommand(new Message(invocation.getClassName(), invocation.getMethodName(), MessageType.Response, request.getOpaque()));
 
         if (invocation.languageCode.equals(LanguageCode.HTTP)) {
             res.getMessage().payload = new Gson().toJson(rpcResult.getValue()).getBytes();
@@ -91,8 +93,44 @@ public class RpcProcessor implements NettyRequestProcessor {
         return res;
     }
 
+    private synchronized Invoker<Object> initInvoker(String key, String methodName, RpcInvocation invocation) {
+        if (invokerMap.containsKey(key)) {
+            return invokerMap.get(key);
+        }
+        Invoker<Object> wrapperInvoker;
+        Invoker<Object> invoker = new RpcProviderInvoker<>(getBeanFunc);
+        Class clazz = ClassUtils.getClassByName(invocation.getClassName());
+        invoker.setInterface(clazz);
+
+        URL url = invocation.getUrl().copy();
+        url.setHost(NetUtils.getLocalHost());
+        url.setPort(0);
+        invoker.setUrl(url);
+
+        Method method = this.getMethod(invocation.getClassName(), methodName, invocation.getParameterTypeNames());
+        invoker.setMethod(method);
+
+        wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.PROVIDER);
+
+        invokerMap.putIfAbsent(key, wrapperInvoker);
+        return wrapperInvoker;
+    }
+
     @Override
     public boolean rejectRequest() {
         return false;
+    }
+
+
+    private Method getMethod(String className, String methodName, String[] parameterTypeNames) {
+        Class<?> clazz = ClassUtils.getClassByName(className);
+        Class[] clazzArray = Stream.of(parameterTypeNames).map(it -> ReflectUtils.forName(it)).toArray(Class[]::new);
+        Method m = null;
+        try {
+            m = clazz.getMethod(methodName, clazzArray);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        return m;
     }
 }

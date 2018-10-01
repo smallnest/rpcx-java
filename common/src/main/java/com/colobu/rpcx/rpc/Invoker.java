@@ -17,6 +17,8 @@ public interface Invoker<T> extends Node {
 
     void setMethod(Method method);
 
+    Method getMethod();
+
     void setInterface(Class clazz);
 
     /**

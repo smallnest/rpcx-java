@@ -1,6 +1,7 @@
 package com.colobu.rpcx.common;
 
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 /**
  * @author goodjava@qq.com
@@ -46,8 +47,7 @@ public class ClassUtils {
     }
 
     public static String getMethodKey(String className, String methodName, String[] parameterNames) {
-        String key = className + "." + methodName + "(" + Arrays.toString(parameterNames) + ")";
-        return key;
+        return className + "." + methodName + "(" + Arrays.stream(parameterNames).collect(Collectors.joining(",")) + ")";
     }
 
 

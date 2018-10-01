@@ -83,6 +83,11 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
     }
 
     @Override
+    public Method getMethod() {
+        return this.method;
+    }
+
+    @Override
     public void setInterface(Class clazz) {
         this.clazz = clazz;
     }
