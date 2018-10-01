@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Created by goodjava@qq.com.
  * @author goodjava@qq.com
  */
-@RpcFilter(group = {Constants.PROVIDER})
+//@RpcFilter(group = {Constants.PROVIDER})
 public class MonitorFilter implements Filter {
 
     private static final Logger logger = LoggerFactory.getLogger(MonitorFilter.class);

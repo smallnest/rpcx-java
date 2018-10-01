@@ -26,7 +26,7 @@ import java.util.UUID;
  * @author goodjava@qq.com
  * 支持热更新
  */
-@RpcFilter(order = -2002, group = {Constants.PROVIDER})
+//@RpcFilter(order = -2002, group = {Constants.PROVIDER})
 public class HotDeployFilter implements Filter {
 
     private static final Logger logger = LoggerFactory.getLogger(HotDeployFilter.class);

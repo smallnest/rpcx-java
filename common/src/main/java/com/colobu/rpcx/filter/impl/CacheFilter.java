@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author goodjava@qq.com
  */
-@RpcFilter(order = -998, group = {Constants.PROVIDER})
+//@RpcFilter(order = -998, group = {Constants.PROVIDER})
 public class CacheFilter implements Filter {
 
     private static final Logger logger = LoggerFactory.getLogger(CacheFilter.class);

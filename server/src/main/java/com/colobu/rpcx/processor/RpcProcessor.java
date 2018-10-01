@@ -2,6 +2,7 @@ package com.colobu.rpcx.processor;
 
 import com.colobu.rpcx.common.ClassUtils;
 import com.colobu.rpcx.common.NetUtils;
+import com.colobu.rpcx.common.StringUtils;
 import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.filter.FilterWrapper;
 import com.colobu.rpcx.netty.NettyRequestProcessor;
@@ -10,6 +11,7 @@ import com.colobu.rpcx.protocol.Message;
 import com.colobu.rpcx.protocol.MessageType;
 import com.colobu.rpcx.protocol.RemotingCommand;
 import com.colobu.rpcx.rpc.*;
+import com.colobu.rpcx.rpc.annotation.Provider;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
 import com.colobu.rpcx.rpc.impl.RpcProviderInvoker;
 import com.google.gson.Gson;
@@ -18,9 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -67,12 +69,10 @@ public class RpcProcessor implements NettyRequestProcessor {
         String key = ClassUtils.getMethodKey(className, methodName, invocation.getParameterTypeNames());
 
         Invoker<Object> wrapperInvoker = null;
-
         if (invokerMap.containsKey(key)) {
             wrapperInvoker = invokerMap.get(key);
         } else {
-            wrapperInvoker = initInvoker(key, methodName, invocation);
-
+            wrapperInvoker = initProviderInvoker(key, methodName, invocation);
         }
         Result rpcResult = wrapperInvoker.invoke(invocation);
 
@@ -93,7 +93,10 @@ public class RpcProcessor implements NettyRequestProcessor {
         return res;
     }
 
-    private synchronized Invoker<Object> initInvoker(String key, String methodName, RpcInvocation invocation) {
+    /**
+     * 初始化providerInvoker
+     */
+    private synchronized Invoker<Object> initProviderInvoker(String key, String methodName, RpcInvocation invocation) {
         if (invokerMap.containsKey(key)) {
             return invokerMap.get(key);
         }
@@ -102,19 +105,69 @@ public class RpcProcessor implements NettyRequestProcessor {
         Class clazz = ClassUtils.getClassByName(invocation.getClassName());
         invoker.setInterface(clazz);
 
+
         URL url = invocation.getUrl().copy();
         url.setHost(NetUtils.getLocalHost());
         url.setPort(0);
+
         invoker.setUrl(url);
+
+
+        Provider typeProvider = invoker.getInterface().getAnnotation(Provider.class);
+        setTypeParameters(typeProvider, url.getParameters());
 
         Method method = this.getMethod(invocation.getClassName(), methodName, invocation.getParameterTypeNames());
         invoker.setMethod(method);
+
+        Provider methodProvider = method.getAnnotation(Provider.class);
+
+        //方法级别的会覆盖type级别的
+        if (null != methodProvider) {
+            setMethodParameters(methodProvider, url.getParameters());
+        }
 
         wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.PROVIDER);
 
         invokerMap.putIfAbsent(key, wrapperInvoker);
         return wrapperInvoker;
     }
+
+    private void setTypeParameters(Provider provider, Map<String, String> parameters) {
+        parameters.put(Constants.SIDE_KEY, Constants.PROVIDER_SIDE);
+        parameters.put(Constants.TOKEN_KEY, provider.token());
+        parameters.put(Constants.TIMEOUT_KEY, String.valueOf(provider.timeout()));
+        parameters.put(Constants.CACHE_KEY, String.valueOf(provider.cache()));
+        parameters.put(Constants.TPS_LIMIT_RATE_KEY, String.valueOf(provider.tps()));
+        parameters.put(Constants.MONITOR_KEY, String.valueOf(provider.monitor()));
+        parameters.put(Constants.GROUP_KEY, String.valueOf(provider.group()));
+        parameters.put(Constants.VERSION_KEY, String.valueOf(provider.version()));
+    }
+
+
+    private void setMethodParameters(Provider provider, Map<String, String> parameters) {
+        if (StringUtils.isNotEmpty(provider.token())) {
+            parameters.put(Constants.TOKEN_KEY, provider.token());
+        }
+        if (-1 != provider.timeout()) {
+            parameters.put(Constants.TIMEOUT_KEY, String.valueOf(provider.timeout()));
+        }
+        if (false != provider.cache()) {
+            parameters.put(Constants.CACHE_KEY, String.valueOf(provider.cache()));
+        }
+        if (-1 != provider.tps()) {
+            parameters.put(Constants.TPS_LIMIT_RATE_KEY, String.valueOf(provider.tps()));
+        }
+        if (false != provider.monitor()) {
+            parameters.put(Constants.MONITOR_KEY, String.valueOf(provider.monitor()));
+        }
+        if (StringUtils.isNotEmpty(provider.group())) {
+            parameters.put(Constants.GROUP_KEY, String.valueOf(provider.group()));
+        }
+        if (StringUtils.isNotEmpty(provider.version())) {
+            parameters.put(Constants.VERSION_KEY, String.valueOf(provider.version()));
+        }
+    }
+
 
     @Override
     public boolean rejectRequest() {

@@ -25,22 +25,6 @@ public class ContextFilter implements Filter {
     @Override
     public Result invoke(Invoker<?> invoker, RpcInvocation invocation) throws RpcException {
         logger.debug("ContextFilter begin className:{} methodName:{}", invocation.getClassName(), invocation.getMethodName());
-        Provider typeProvider = invoker.getInterface().getAnnotation(Provider.class);
-
-        URL url = invocation.getUrl().copy();
-
-        Map<String, String> parameters = url.getParameters();
-        parameters.put(Constants.SIDE_KEY, Constants.PROVIDER_SIDE);
-
-        setTypeParameters(typeProvider, parameters);
-
-        Provider methodProvider = invoker.getMethod().getAnnotation(Provider.class);
-
-        //方法级别的会覆盖type级别的
-        if (null != methodProvider) {
-            setMethodParameters(methodProvider, parameters);
-        }
-
         Map<String, String> attachments = invocation.getAttachments();
         if (attachments != null) {
             attachments = new HashMap<>(attachments);
@@ -64,40 +48,5 @@ public class ContextFilter implements Filter {
         }
     }
 
-
-    private void setTypeParameters(Provider provider, Map<String, String> parameters) {
-        parameters.put(Constants.TOKEN_KEY, provider.token());
-        parameters.put(Constants.TIMEOUT_KEY, String.valueOf(provider.timeout()));
-        parameters.put(Constants.CACHE_KEY, String.valueOf(provider.cache()));
-        parameters.put(Constants.TPS_LIMIT_RATE_KEY, String.valueOf(provider.tps()));
-        parameters.put(Constants.MONITOR_KEY, String.valueOf(provider.monitor()));
-        parameters.put(Constants.GROUP_KEY, String.valueOf(provider.group()));
-        parameters.put(Constants.VERSION_KEY, String.valueOf(provider.version()));
-    }
-
-
-    private void setMethodParameters(Provider provider, Map<String, String> parameters) {
-        if (StringUtils.isNotEmpty(provider.token())) {
-            parameters.put(Constants.TOKEN_KEY, provider.token());
-        }
-        if (-1 != provider.timeout()) {
-            parameters.put(Constants.TIMEOUT_KEY, String.valueOf(provider.timeout()));
-        }
-        if (false != provider.cache()) {
-            parameters.put(Constants.CACHE_KEY, String.valueOf(provider.cache()));
-        }
-        if (-1 != provider.tps()) {
-            parameters.put(Constants.TPS_LIMIT_RATE_KEY, String.valueOf(provider.tps()));
-        }
-        if (false != provider.monitor()) {
-            parameters.put(Constants.MONITOR_KEY, String.valueOf(provider.monitor()));
-        }
-        if (StringUtils.isNotEmpty(provider.group())) {
-            parameters.put(Constants.GROUP_KEY, String.valueOf(provider.group()));
-        }
-        if (StringUtils.isNotEmpty(provider.version())) {
-            parameters.put(Constants.VERSION_KEY, String.valueOf(provider.version()));
-        }
-    }
 
 }
