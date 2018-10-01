@@ -1,8 +1,6 @@
 package com.colobu.rpcx.filter.impl;
 
 
-import com.colobu.rpcx.common.ClassUtils;
-import com.colobu.rpcx.common.NetUtils;
 import com.colobu.rpcx.common.StringUtils;
 import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.filter.Filter;
@@ -13,12 +11,8 @@ import com.colobu.rpcx.rpc.impl.RpcInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Stream;
 
 /**
  * @author goodjava@qq.com
@@ -33,7 +27,7 @@ public class ContextFilter implements Filter {
         logger.debug("ContextFilter begin className:{} methodName:{}", invocation.getClassName(), invocation.getMethodName());
         Provider typeProvider = invoker.getInterface().getAnnotation(Provider.class);
 
-        URL url = invocation.getUrl();
+        URL url = invocation.getUrl().copy();
 
         Map<String, String> parameters = url.getParameters();
         parameters.put(Constants.SIDE_KEY, Constants.PROVIDER_SIDE);
@@ -106,16 +100,4 @@ public class ContextFilter implements Filter {
         }
     }
 
-
-    private Method getMethod(String className, String methodName, String[] parameterTypeNames) {
-        Class<?> clazz = ClassUtils.getClassByName(className);
-        Class[] clazzArray = Stream.of(parameterTypeNames).map(it -> ReflectUtils.forName(it)).toArray(Class[]::new);
-        Method m = null;
-        try {
-            m = clazz.getMethod(methodName, clazzArray);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-        return m;
-    }
 }
