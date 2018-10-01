@@ -16,7 +16,7 @@ import java.util.Map;
 /**
  * Created by goodjava@qq.com.
  */
-@RpcFilter(order = -999, group = {Constants.PROVIDER})
+//@RpcFilter(order = -999, group = {Constants.PROVIDER})
 public class TokenFilter implements Filter {
 
     @Override

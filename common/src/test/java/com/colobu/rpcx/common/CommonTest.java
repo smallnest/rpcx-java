@@ -2,28 +2,128 @@ package com.colobu.rpcx.common;
 
 import com.colobu.rpcx.common.retry.RetryNTimes;
 import com.colobu.rpcx.common.retry.RetryPolicy;
+import com.colobu.rpcx.protocol.Message;
 import com.colobu.rpcx.protocol.RemotingCommand;
 import com.colobu.rpcx.rpc.A;
 import com.colobu.rpcx.rpc.HessianUtils;
 import com.colobu.rpcx.rpc.ReflectUtils;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
+import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 
 /**
  * Created by goodjava@qq.com.
  */
 public class CommonTest {
+
+
+    @Test
+    public void testMessage() {
+        Message m = new Message();
+        m.serviceMethod = "abc";
+        m.clear();
+        System.out.println(m.serviceMethod);
+    }
+
+
+    @Test
+    public void testWrite() {
+
+        Map<String, String> m = Maps.newHashMap();
+        m.put("a", "aaaaaaaaaaaaaaaaaad");
+        m.put("b", "aaaaaaaaaaaaaaaaaad");
+
+        long now = System.currentTimeMillis();
+        IntStream.range(0, 1).forEach(i -> {
+            try {
+                System.out.println(Arrays.toString(encodeMetadata(m)));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+        System.out.println(System.currentTimeMillis() - now);
+
+        now = System.currentTimeMillis();
+
+        IntStream.range(0, 1).forEach(i -> {
+            try {
+                System.out.println(Arrays.toString(encodeMetadata2(m)));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        System.out.println(System.currentTimeMillis() - now);
+    }
+
+
+    private byte[] encodeMetadata(Map<String, String> metadata) throws IOException {
+        if (metadata.size() == 0) {
+            return new byte[]{};
+        }
+        ByteArrayOutputStream os = new ByteArrayOutputStream(20);
+
+        for (Map.Entry<String, String> entry : metadata.entrySet()) {
+            String key = entry.getKey();
+            byte[] keyBytes = key.getBytes("UTF-8");
+            os.write(ByteBuffer.allocate(4).putInt(keyBytes.length).array());
+            os.write(keyBytes);
+
+            String v = entry.getValue();
+            if (null == v) {
+                v = "null";
+            }
+            byte[] vBytes = v.getBytes("UTF-8");
+            os.write(ByteBuffer.allocate(4).putInt(vBytes.length).array());
+            os.write(vBytes);
+        }
+
+        return os.toByteArray();
+    }
+
+    private byte[] encodeMetadata2(Map<String, String> metadata) throws IOException {
+        if (metadata.size() == 0) {
+            return new byte[]{};
+        }
+
+        ByteBuf buffer = Unpooled.buffer(20);
+
+        for (Map.Entry<String, String> entry : metadata.entrySet()) {
+            String key = entry.getKey();
+            byte[] keyBytes = key.getBytes("UTF-8");
+            buffer.writeInt(keyBytes.length);
+            buffer.writeBytes(keyBytes);
+
+            String v = entry.getValue();
+            if (null == v) {
+                v = "null";
+            }
+            byte[] vBytes = v.getBytes("UTF-8");
+            buffer.writeInt(vBytes.length);
+            buffer.writeBytes(vBytes);
+        }
+
+
+        return buffer.array();
+    }
 
 
     class Bean {

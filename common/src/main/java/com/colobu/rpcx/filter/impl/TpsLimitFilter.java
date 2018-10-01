@@ -14,7 +14,7 @@ import com.colobu.rpcx.tps.TPSLimiter;
 /**
  * Created by goodjava@qq.com.
  */
-@RpcFilter(group = {Constants.PROVIDER})
+//@RpcFilter(group = {Constants.PROVIDER})
 public class TpsLimitFilter implements Filter {
 
     private static final TPSLimiter tpsLimiter = new DefaultTPSLimiter();

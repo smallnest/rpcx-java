@@ -68,8 +68,10 @@ public class RpcxConsumer {
         params1[0] = methodName;
         System.arraycopy(params, 0, params1, 1, params.length);
         invocation.setArguments(params1);
+
         Invoker invoker = new RpcConsumerInvoker(client);
         Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.CONSUMER);
+
         Result result = wrapperInvoker.invoke(invocation);
         if (result.hasException()) {
             throw new RuntimeException(result.getException());

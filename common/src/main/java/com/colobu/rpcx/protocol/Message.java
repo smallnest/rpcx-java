@@ -1,9 +1,11 @@
 package com.colobu.rpcx.protocol;
 
+import com.colobu.rpcx.common.Bytes;
 import lombok.Data;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
@@ -35,6 +37,16 @@ public class Message {
         servicePath = "";
         serviceMethod = "";
         metadata = new HashMap<>();
+        payload = new byte[]{};
+    }
+
+
+    public void clear() {
+        Arrays.fill(header, (byte) 0);
+        header[0] = magicNumber;
+        servicePath = "";
+        serviceMethod = "";
+        metadata.clear();
         payload = new byte[]{};
     }
 
@@ -152,15 +164,11 @@ public class Message {
     }
 
     public long getSeq() {
-        ByteBuffer buf = ByteBuffer.wrap(header);
-        buf.position(4);
-        return buf.getLong();
+        return Bytes.bytes2long(Arrays.copyOfRange(header,4,12));
     }
 
     public void setSeq(long seq) {
-        ByteBuffer buf = ByteBuffer.wrap(header);
-        buf.position(4);
-        buf.putLong(seq);
+        System.arraycopy(Bytes.long2bytes(seq), 0, header, 4, 8);
     }
 
 
@@ -221,7 +229,7 @@ public class Message {
         for (Map.Entry<String, String> entry : metadata.entrySet()) {
             String key = entry.getKey();
             byte[] keyBytes = key.getBytes("UTF-8");
-            os.write(ByteBuffer.allocate(4).putInt(keyBytes.length).array());
+            os.write(Bytes.int2bytes(keyBytes.length));
             os.write(keyBytes);
 
             String v = entry.getValue();
@@ -229,7 +237,7 @@ public class Message {
                 v = "null";
             }
             byte[] vBytes = v.getBytes("UTF-8");
-            os.write(ByteBuffer.allocate(4).putInt(vBytes.length).array());
+            os.write(Bytes.int2bytes(vBytes.length));
             os.write(vBytes);
         }
 

@@ -17,7 +17,7 @@ import java.util.Arrays;
 /**
  * @author goodjava@qq.com
  */
-@RpcFilter(order = -1000, group = {Constants.PROVIDER})
+//@RpcFilter(order = -1000, group = {Constants.PROVIDER})
 public class TimeoutFilter implements Filter {
 
     private static final Logger logger = LoggerFactory.getLogger(TimeoutFilter.class);
