@@ -46,6 +46,12 @@ public class Constants {
 
     public static final String CACHE_KEY = "cache";
 
+    public static final String ACCESSLOG_KEY = "accesslog";
+
+    public static final String FALSE = "false";
+
+    public static final String TRUE = "true";
+
     public static final String COMMA_SEPARATOR = ",";
 
     public static final String TPS_LIMIT_RATE_KEY = "tps";

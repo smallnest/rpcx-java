@@ -6,6 +6,7 @@ import com.colobu.rpcx.netty.IClient;
 import com.colobu.rpcx.rpc.Invoker;
 import com.colobu.rpcx.rpc.ReflectUtils;
 import com.colobu.rpcx.rpc.Result;
+import com.colobu.rpcx.rpc.RpcException;
 import com.colobu.rpcx.rpc.impl.ConsumerConfig;
 import com.colobu.rpcx.rpc.impl.RpcConsumerInvoker;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
@@ -74,7 +75,7 @@ public class RpcxConsumer {
 
         Result result = wrapperInvoker.invoke(invocation);
         if (result.hasException()) {
-            throw new RuntimeException(result.getException());
+            throw new RpcException(result.getException());
         }
         return result.getValue().toString();
     }

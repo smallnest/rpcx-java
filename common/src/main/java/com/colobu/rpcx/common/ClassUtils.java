@@ -1,5 +1,7 @@
 package com.colobu.rpcx.common;
 
+import java.util.Arrays;
+
 /**
  * @author goodjava@qq.com
  */
@@ -41,6 +43,11 @@ public class ClassUtils {
             e.printStackTrace();
         }
         return clazz;
+    }
+
+    public static String getMethodKey(String className, String methodName, String[] parameterNames) {
+        String key = className + "." + methodName + "(" + Arrays.toString(parameterNames) + ")";
+        return key;
     }
 
 

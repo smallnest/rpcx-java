@@ -22,7 +22,7 @@ public class TokenFilter implements Filter {
     @Override
     public Result invoke(Invoker<?> invoker, RpcInvocation inv)
             throws RpcException {
-        String token = invoker.getUrl().getParameter(Constants.TOKEN_KEY);
+        String token = invoker.getUrl().getParameter(Constants.TOKEN_KEY,"");
         if (!StringUtils.isEmpty(token)) {
             Class<?> serviceType = invoker.getInterface();
             Map<String, String> attachments = inv.getAttachments();

@@ -16,6 +16,7 @@ import java.util.stream.IntStream;
 
 /**
  * @author goodjava@qq.com
+ * 泛化调用
  */
 @RpcFilter(group = {Constants.PROVIDER}, order = -2001)
 public class GenericFilter implements Filter {

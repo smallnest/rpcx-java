@@ -56,8 +56,6 @@ public final class URL implements Serializable {
     }
 
     
-    // ==== cache ====
-    
     private volatile transient Map<String, Number> numbers;
 
     private volatile transient Map<String, URL> urls;

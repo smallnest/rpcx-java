@@ -32,7 +32,7 @@ public class MonitorFilter implements Filter {
 
     @Override
     public Result invoke(Invoker<?> invoker, RpcInvocation invocation) throws RpcException {
-        if ("true".equals(invoker.getUrl().getParameter(Constants.MONITOR_KEY, "false"))) {
+        if (Constants.TRUE.equals(invoker.getUrl().getParameter(Constants.MONITOR_KEY, Constants.FALSE))) {
             // 提供方必须在invoke()之前获取context信息
             RpcContext context = RpcContext.getContext();
             // 记录起始时间戮

@@ -52,7 +52,10 @@ public @interface Provider {
      */
     int tps() default -1;
 
-
+    /**
+     * 权重
+     * @return
+     */
     String weight() default "";
 
 }

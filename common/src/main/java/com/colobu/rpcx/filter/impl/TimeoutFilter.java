@@ -24,9 +24,8 @@ public class TimeoutFilter implements Filter {
 
     @Override
     public Result invoke(Invoker<?> invoker, RpcInvocation invocation) throws RpcException {
-        logger.debug("TimeoutFilter begin");
-
         if (!"-1".equals(invoker.getUrl().getParameter(Constants.TIMEOUT_KEY))) {
+            logger.debug("TimeoutFilter begin");
             long start = System.currentTimeMillis();
             Result result = invoker.invoke(invocation);
             long elapsed = System.currentTimeMillis() - start;
@@ -37,9 +36,9 @@ public class TimeoutFilter implements Filter {
                         + "arguments: " + Arrays.toString(invocation.getArguments()) + " , url is "
                         + invoker.getUrl() + ", invoke elapsed " + elapsed + " ms.");
             }
+            logger.debug("TimeoutFilter end");
             return result;
         }
-        logger.debug("TimeoutFilter end");
 
         return invoker.invoke(invocation);
     }

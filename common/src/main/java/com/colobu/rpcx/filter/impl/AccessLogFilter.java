@@ -115,6 +115,10 @@ public class AccessLogFilter implements Filter {
 
     @Override
     public Result invoke(Invoker<?> invoker, RpcInvocation inv) throws RpcException {
+        if (inv.getUrl().getParameter(Constants.ACCESSLOG_KEY,Constants.FALSE).equals(Constants.FALSE)) {
+            return invoker.invoke(inv);
+        }
+
         try {
             RpcContext context = RpcContext.getContext();
             String serviceName = invoker.getInterface().getName();

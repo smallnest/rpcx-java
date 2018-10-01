@@ -21,6 +21,9 @@ public class TpsLimitFilter implements Filter {
 
     @Override
     public Result invoke(Invoker<?> invoker, RpcInvocation invocation) throws RpcException {
+        if (invocation.getUrl().getParameter(Constants.TPS_LIMIT_RATE_KEY,"-1").equals("-1")) {
+            return invoker.invoke(invocation);
+        }
 
         if (!tpsLimiter.isAllowable(invoker.getUrl(), invocation)) {
             throw new RpcException(

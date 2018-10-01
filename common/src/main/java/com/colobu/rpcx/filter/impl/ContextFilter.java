@@ -51,7 +51,7 @@ public class ContextFilter implements Filter {
 
         String methodName = invocation.getMethodName();
 
-        String key = invocation.getClassName()+"."+invocation.getMethodName()+"("+ Arrays.toString(invocation.getParameterTypes())+")";
+        String key = ClassUtils.getMethodKey(invocation.getClassName(),invocation.getMethodName(),invocation.getParameterTypeNames());
         Method method= methods.get(key);
         if (null == method) {
             method = this.getMethod(invocation.getClassName(), methodName, invocation.getParameterTypeNames());

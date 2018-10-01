@@ -1,5 +1,6 @@
 package com.colobu.rpcx.processor;
 
+import com.colobu.rpcx.common.ClassUtils;
 import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.filter.FilterWrapper;
 import com.colobu.rpcx.netty.NettyRequestProcessor;
@@ -15,6 +16,7 @@ import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -27,6 +29,8 @@ public class RpcProcessor implements NettyRequestProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(RpcProcessor.class);
 
+    private static final ConcurrentHashMap<String,Invoker<Object>> invokerMap = new ConcurrentHashMap<>();
+
     private final Function<Class, Object> getBeanFunc;
 
     public RpcProcessor(Function<Class, Object> getBeanFunc) {
@@ -35,12 +39,10 @@ public class RpcProcessor implements NettyRequestProcessor {
 
     @Override
     public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request) {
-        String language = request.getMessage().metadata.get("language");
-        RpcInvocation invocation = null;
-
+        String language = request.getMessage().metadata.get(Constants.LANGUAGE);
         String className = request.getMessage().servicePath;
         String methodName = request.getMessage().serviceMethod;
-
+        RpcInvocation invocation = null;
         //golang调用是没有language的
         if (null == language) {
             invocation = new RpcInvocation();
@@ -60,12 +62,20 @@ public class RpcProcessor implements NettyRequestProcessor {
         invocation.setClassName(className);
         invocation.setMethodName(methodName);
 
-        Invoker<Object> invoker = new RpcProviderInvoker<>(getBeanFunc);
-        Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.PROVIDER);
+        String key = ClassUtils.getMethodKey(className,methodName,invocation.getParameterTypeNames());
+
+        Invoker<Object> wrapperInvoker = null;
+        if (invokerMap.containsKey(key)) {
+            wrapperInvoker = invokerMap.get(key);
+        } else {
+            Invoker<Object> invoker = new RpcProviderInvoker<>(getBeanFunc);
+            wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.PROVIDER);
+            invokerMap.putIfAbsent(key,wrapperInvoker);
+        }
+        Result rpcResult = wrapperInvoker.invoke(invocation);
 
         RemotingCommand res = RemotingCommand.createResponseCommand(new Message(invocation.getClassName(),invocation.getMethodName(),MessageType.Response, request.getOpaque()));
 
-        Result rpcResult = wrapperInvoker.invoke(invocation);
         if (invocation.languageCode.equals(LanguageCode.HTTP)) {
             res.getMessage().payload = new Gson().toJson(rpcResult.getValue()).getBytes();
         } else if (invocation.languageCode.equals(LanguageCode.JAVA)) {
