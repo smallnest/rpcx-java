@@ -36,6 +36,26 @@ public class CommonTest {
 
 
     @Test
+    public void testBuffer() {
+        byte[] b = new byte[]{0, 0, 0, 1, 0, 0, 0, 2};
+        long begin = System.currentTimeMillis();
+        IntStream.range(0, 1).forEach(it -> {
+            ByteBuffer buffer = ByteBuffer.wrap(b);
+            buffer.position(4);
+            System.out.println(buffer.getInt());
+        });
+        System.out.println(System.currentTimeMillis() - begin);
+
+        begin = System.currentTimeMillis();
+        IntStream.range(0, 1).forEach(it -> {
+            System.out.println(Bytes.bytes2int(b,4));
+        });
+        System.out.println(System.currentTimeMillis() - begin);
+
+    }
+
+
+    @Test
     public void testMessage() {
         Message m = new Message();
         m.serviceMethod = "abc";

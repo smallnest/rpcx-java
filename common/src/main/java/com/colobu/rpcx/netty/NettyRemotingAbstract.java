@@ -256,6 +256,7 @@ public class NettyRemotingAbstract {
      * @param cmd
      */
     public void processResponseCommand(ChannelHandlerContext ctx, RemotingCommand cmd) {
+        cmd.decode();
         //获取request带过去的唯一码
         final int opaque = cmd.getOpaque();
         //查询responseFuture

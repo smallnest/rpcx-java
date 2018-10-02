@@ -19,6 +19,7 @@ import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,7 +43,10 @@ public class RpcProcessor implements NettyRequestProcessor {
     }
 
     @Override
-    public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request) {
+    public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request) throws UnsupportedEncodingException {
+
+        request.decode();
+
         String language = request.getMessage().metadata.get(Constants.LANGUAGE);
         String className = request.getMessage().servicePath;
         String methodName = request.getMessage().serviceMethod;
