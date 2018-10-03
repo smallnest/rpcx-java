@@ -14,6 +14,7 @@ import com.colobu.rpcx.rpc.*;
 import com.colobu.rpcx.rpc.annotation.Provider;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
 import com.colobu.rpcx.rpc.impl.RpcProviderInvoker;
+import com.esotericsoftware.reflectasm.MethodAccess;
 import com.google.gson.Gson;
 import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;
@@ -34,6 +35,8 @@ public class RpcProcessor implements NettyRequestProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(RpcProcessor.class);
 
+    private static final boolean useMethodAccess = true;
+
     private static final ConcurrentHashMap<String, Invoker<Object>> invokerMap = new ConcurrentHashMap<>();
 
     private final Function<Class, Object> getBeanFunc;
@@ -43,7 +46,7 @@ public class RpcProcessor implements NettyRequestProcessor {
     }
 
     @Override
-    public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request) throws UnsupportedEncodingException {
+    public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request) {
 
         request.decode();
 
@@ -122,6 +125,10 @@ public class RpcProcessor implements NettyRequestProcessor {
 
         Method method = this.getMethod(invocation.getClassName(), methodName, invocation.getParameterTypeNames());
         invoker.setMethod(method);
+
+
+        MethodAccess methodAccess = MethodAccess.get(ClassUtils.getClassByName(invocation.getClassName()));
+        invoker.setMethodAccess(methodAccess);
 
         Provider methodProvider = method.getAnnotation(Provider.class);
 

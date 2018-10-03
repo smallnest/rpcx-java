@@ -4,6 +4,7 @@ import com.colobu.rpcx.rpc.Invoker;
 import com.colobu.rpcx.rpc.Result;
 import com.colobu.rpcx.rpc.RpcException;
 import com.colobu.rpcx.rpc.URL;
+import com.esotericsoftware.reflectasm.MethodAccess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +19,8 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(RpcProviderInvoker.class);
 
+    private static final boolean useMethodAccess = true;
+
     /**
      * 如果是基于ioc容器的,需要提供获取bean的function
      */
@@ -28,6 +31,8 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
     private Class clazz;
 
     private Method method;
+
+    private MethodAccess methodAccess;
 
     public RpcProviderInvoker(Function<Class, Object> getBeanFunc) {
         this.getBeanFunc = getBeanFunc;
@@ -47,9 +52,17 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
             //使用容器
             if (null != this.getBeanFunc) {
                 Object b = getBeanFunc.apply(clazz);
-                obj = this.method.invoke(b, invocation.getArguments());
+                if (useMethodAccess) {
+                    obj = methodAccess.invoke(b, invocation.getMethodName(),invocation.getArguments());
+                } else {
+                    obj = this.method.invoke(b, invocation.getArguments());
+                }
             } else {//不使用容器
-                obj = this.method.invoke(clazz.newInstance(), invocation.getArguments());
+                if (useMethodAccess) {
+                   obj = methodAccess.invoke(clazz.newInstance(), invocation.getMethodName(), invocation.getArguments());
+                } else {
+                    obj = this.method.invoke(clazz.newInstance(), invocation.getArguments());
+                }
             }
             rpcResult.setValue(obj);
             return rpcResult;

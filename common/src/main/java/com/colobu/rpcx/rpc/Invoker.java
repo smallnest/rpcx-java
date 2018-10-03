@@ -2,6 +2,7 @@ package com.colobu.rpcx.rpc;
 
 import com.colobu.rpcx.discovery.IServiceDiscovery;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
+import com.esotericsoftware.reflectasm.MethodAccess;
 
 import java.lang.reflect.Method;
 
@@ -16,6 +17,10 @@ public interface Invoker<T> extends Node {
     Result invoke(RpcInvocation invocation) throws RpcException;
 
     void setMethod(Method method);
+
+    default void setMethodAccess(MethodAccess methodAccess){
+
+    }
 
     Method getMethod();
 

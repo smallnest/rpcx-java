@@ -8,12 +8,17 @@ import com.colobu.rpcx.rpc.A;
 import com.colobu.rpcx.rpc.HessianUtils;
 import com.colobu.rpcx.rpc.ReflectUtils;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
+import com.esotericsoftware.reflectasm.MethodAccess;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import org.apache.commons.pool2.KeyedObjectPool;
+import org.apache.commons.pool2.impl.GenericKeyedObjectPool;
 import org.junit.Test;
+import sun.reflect.MethodAccessor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -36,6 +41,32 @@ public class CommonTest {
 
 
     @Test
+    public void testPool() {
+        Stopwatch sw = Stopwatch.createStarted();
+        IntStream.range(0, 10000000).forEach(it -> {
+            RemotingCommand.createRequestCommand(2);
+        });
+        System.out.println(sw.elapsed(TimeUnit.MILLISECONDS));
+
+        TestPoolFactory factory = new TestPoolFactory();
+        KeyedObjectPool<String, String> pool = new GenericKeyedObjectPool<>(factory);
+        ((GenericKeyedObjectPool<String, String>) pool).setMaxTotal(100);
+        sw.reset();
+        sw.start();
+        IntStream.range(0, 10000000).forEach(it -> {
+            try {
+                String v = pool.borrowObject("zzy");
+//                System.out.println(v);
+                pool.returnObject("zzy", v);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        System.out.println(sw.elapsed(TimeUnit.MILLISECONDS));
+    }
+
+
+    @Test
     public void testBuffer() {
         byte[] b = new byte[]{0, 0, 0, 1, 0, 0, 0, 2};
         long begin = System.currentTimeMillis();
@@ -48,7 +79,7 @@ public class CommonTest {
 
         begin = System.currentTimeMillis();
         IntStream.range(0, 1).forEach(it -> {
-            System.out.println(Bytes.bytes2int(b,4));
+            System.out.println(Bytes.bytes2int(b, 4));
         });
         System.out.println(System.currentTimeMillis() - begin);
 
@@ -166,6 +197,7 @@ public class CommonTest {
         System.out.println(System.currentTimeMillis() - begin);
     }
 
+    //1702 1562 1537
     @Test
     public void testReflect() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         Bean bean = new Bean();
@@ -174,6 +206,19 @@ public class CommonTest {
         for (int i = 0; i < 100000000; i++) {
             String res = (String) method.invoke(bean, "zzy");
 //            System.out.println(res);
+        }
+        System.out.println(System.currentTimeMillis() - begin);
+    }
+
+    //1340 1244 1202
+    @Test
+    public void testReflect2() {
+        Bean bean = new Bean();
+        MethodAccess access = MethodAccess.get(Bean.class);
+        long begin = System.currentTimeMillis();
+        for (int i = 0; i < 100000000; i++) {
+            String r = (String) access.invoke(bean, "str", "zzy");
+//            System.out.println(r);
         }
         System.out.println(System.currentTimeMillis() - begin);
     }
