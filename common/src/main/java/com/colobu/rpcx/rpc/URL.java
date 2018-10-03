@@ -5,6 +5,7 @@ import com.colobu.rpcx.common.CollectionUtils;
 import com.colobu.rpcx.common.NetUtils;
 import com.colobu.rpcx.common.StringUtils;
 import com.colobu.rpcx.config.Constants;
+import com.google.common.collect.Maps;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -82,6 +83,7 @@ public final class URL implements Serializable {
     
 	public URL(String protocol, String host, int port) {
 	    this(protocol, null, null, host, port, null, (Map<String, String>) null);
+	    this.setParameters(Maps.newHashMap());
 	}
 	
 	public URL(String protocol, String host, int port, String[] pairs) { // 变长参数...与下面的path参数冲突，改为数组

@@ -119,7 +119,7 @@ public class NettyServer extends NettyRemotingAbstract {
             }
         }, 0, 5, TimeUnit.SECONDS);
 
-        return new Pair<>(new RpcProcessor(this.getBeanFunc), executor);
+        return new Pair<>(new RpcProcessor(), executor);
 
     }
 

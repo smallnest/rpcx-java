@@ -26,6 +26,7 @@ import org.springframework.context.annotation.Configuration;
 import javax.annotation.PostConstruct;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 
 /**
  * @author goodjava@qq.com
@@ -59,9 +60,10 @@ public class RpcxAutoConfigure {
         });
 
         NettyServer server = new NettyServer();
-        server.setGetBeanFunc((clazz) -> context.getBean(clazz));
+        Function<Class, Object> getBeanFunc = (clazz) -> context.getBean(clazz);
+        server.setGetBeanFunc(getBeanFunc);
         server.start();
-        IServiceRegister reg = new ZkServiceRegister(rpcxBasePath, server.getAddr() + ":" + server.getPort(), rpcxPackagePath);
+        IServiceRegister reg = new ZkServiceRegister(rpcxBasePath, server.getAddr() + ":" + server.getPort(), rpcxPackagePath, getBeanFunc);
         reg.register();
         reg.start();
     }

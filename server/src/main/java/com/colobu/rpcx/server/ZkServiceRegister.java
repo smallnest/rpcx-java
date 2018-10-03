@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Set;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 /**
  * @author goodjava@qq.com
@@ -21,11 +22,11 @@ public class ZkServiceRegister implements IServiceRegister {
     private Set<String> serviceNameSet;
     private String addr;
 
-    public ZkServiceRegister(String basePath, String addr, String providerPackage) {
+    public ZkServiceRegister(String basePath, String addr, String providerPackage, Function<Class, Object> getBeanFunc) {
         this.basePath = basePath;
         this.addr = addr;
         //导出所有有注解的service
-        this.serviceNameSet = new Exporter().export(providerPackage);
+        this.serviceNameSet = new Exporter(getBeanFunc).export(providerPackage);
         logger.info("export service names:{}", this.serviceNameSet);
     }
 

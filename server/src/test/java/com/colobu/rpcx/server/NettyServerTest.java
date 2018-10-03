@@ -15,7 +15,7 @@ public class NettyServerTest {
     public void testNettyServer() throws InterruptedException {
         NettyServer server = new NettyServer();
         server.start();
-        ZkServiceRegister reg = new ZkServiceRegister("/youpin/services/", server.getAddr() + ":" + server.getPort(), "");
+        ZkServiceRegister reg = new ZkServiceRegister("/youpin/services/", server.getAddr() + ":" + server.getPort(), "", null);
         reg.register();
         reg.start();
         TimeUnit.HOURS.sleep(1);

@@ -1,13 +1,9 @@
-package com.colobu.rpcx.rpc;
+package com.colobu.rpcx.rpc.test;
 
 import com.colobu.rpcx.rpc.impl.Exporter;
 import org.junit.Test;
 
-/**
- * Created by goodjava@qq.com.
- */
 public class ExporterTest {
-
 
     @Test
     public void testExport() {

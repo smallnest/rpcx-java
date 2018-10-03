@@ -17,6 +17,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.apache.commons.pool2.KeyedObjectPool;
 import org.apache.commons.pool2.impl.GenericKeyedObjectPool;
+import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.junit.Test;
 import sun.reflect.MethodAccessor;
 
@@ -29,9 +30,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -39,9 +41,57 @@ import java.util.stream.IntStream;
  */
 public class CommonTest {
 
+    //2540 20153
+    @Test
+    public void testMap2() {
+        ExecutorService pool = Executors.newFixedThreadPool(20);
+
+        ConcurrentHashMap<String,String>m2 = new ConcurrentHashMap<>();
+        m2.put("a","1");
+
+        Stopwatch sw2 = Stopwatch.createStarted();
+        IntStream.range(0,1000000).forEach(i->{
+            try {
+                pool.invokeAll(IntStream.range(0,20).mapToObj(ii->(Callable<Void>)()->{
+                    m2.get("a");
+                    return null;
+                }).collect(Collectors.toList()));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        System.out.println(sw2.elapsed(TimeUnit.MILLISECONDS));
+
+    }
+
+    //2554 22076
+    @Test
+    public void testMap1() {
+        ExecutorService pool = Executors.newFixedThreadPool(20);
+
+        Map<String,String> m = new HashMap<>();
+        m.put("a","1");
+        Stopwatch sw = Stopwatch.createStarted();
+        IntStream.range(0,1000000).forEach(i->{
+            try {
+                pool.invokeAll(IntStream.range(0,20).mapToObj(ii->(Callable<Void>)()->{
+                    m.get("a");
+                    return null;
+                }).collect(Collectors.toList()));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        System.out.println(sw.elapsed(TimeUnit.MILLISECONDS));
+
+
+
+
+    }
+
 
     @Test
-    public void testPool() {
+    public void testPool() throws Exception {
         Stopwatch sw = Stopwatch.createStarted();
         IntStream.range(0, 10000000).forEach(it -> {
             RemotingCommand.createRequestCommand(2);
@@ -49,15 +99,20 @@ public class CommonTest {
         System.out.println(sw.elapsed(TimeUnit.MILLISECONDS));
 
         TestPoolFactory factory = new TestPoolFactory();
-        KeyedObjectPool<String, String> pool = new GenericKeyedObjectPool<>(factory);
-        ((GenericKeyedObjectPool<String, String>) pool).setMaxTotal(100);
+        GenericObjectPool pool = new GenericObjectPool(factory);
         sw.reset();
         sw.start();
+
+        pool.addObject();
+        pool.addObject();
+        pool.addObject();
+        pool.addObject();
+        pool.addObject();
         IntStream.range(0, 10000000).forEach(it -> {
             try {
-                String v = pool.borrowObject("zzy");
+                Object v = pool.borrowObject();
 //                System.out.println(v);
-                pool.returnObject("zzy", v);
+                pool.returnObject( v);
             } catch (Exception e) {
                 e.printStackTrace();
             }

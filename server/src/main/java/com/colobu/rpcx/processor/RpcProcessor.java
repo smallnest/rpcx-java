@@ -12,6 +12,7 @@ import com.colobu.rpcx.protocol.MessageType;
 import com.colobu.rpcx.protocol.RemotingCommand;
 import com.colobu.rpcx.rpc.*;
 import com.colobu.rpcx.rpc.annotation.Provider;
+import com.colobu.rpcx.rpc.impl.Exporter;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
 import com.colobu.rpcx.rpc.impl.RpcProviderInvoker;
 import com.esotericsoftware.reflectasm.MethodAccess;
@@ -35,19 +36,8 @@ public class RpcProcessor implements NettyRequestProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(RpcProcessor.class);
 
-    private static final boolean useMethodAccess = true;
-
-    private static final ConcurrentHashMap<String, Invoker<Object>> invokerMap = new ConcurrentHashMap<>();
-
-    private final Function<Class, Object> getBeanFunc;
-
-    public RpcProcessor(Function<Class, Object> getBeanFunc) {
-        this.getBeanFunc = getBeanFunc;
-    }
-
     @Override
     public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request) {
-
         request.decode();
 
         String language = request.getMessage().metadata.get(Constants.LANGUAGE);
@@ -75,12 +65,8 @@ public class RpcProcessor implements NettyRequestProcessor {
 
         String key = ClassUtils.getMethodKey(className, methodName, invocation.getParameterTypeNames());
 
-        Invoker<Object> wrapperInvoker = null;
-        if (invokerMap.containsKey(key)) {
-            wrapperInvoker = invokerMap.get(key);
-        } else {
-            wrapperInvoker = initProviderInvoker(key, methodName, invocation);
-        }
+        Invoker<Object> wrapperInvoker = Exporter.invokerMap.get(key);
+
         Result rpcResult = wrapperInvoker.invoke(invocation);
 
         RemotingCommand res = RemotingCommand.createResponseCommand(new Message(invocation.getClassName(), invocation.getMethodName(), MessageType.Response, request.getOpaque()));
@@ -100,84 +86,6 @@ public class RpcProcessor implements NettyRequestProcessor {
         return res;
     }
 
-    /**
-     * 初始化providerInvoker
-     */
-    private synchronized Invoker<Object> initProviderInvoker(String key, String methodName, RpcInvocation invocation) {
-        if (invokerMap.containsKey(key)) {
-            return invokerMap.get(key);
-        }
-        Invoker<Object> wrapperInvoker;
-        Invoker<Object> invoker = new RpcProviderInvoker<>(getBeanFunc);
-        Class clazz = ClassUtils.getClassByName(invocation.getClassName());
-        invoker.setInterface(clazz);
-
-
-        URL url = invocation.getUrl().copy();
-        url.setHost(NetUtils.getLocalHost());
-        url.setPort(0);
-
-        invoker.setUrl(url);
-
-
-        Provider typeProvider = invoker.getInterface().getAnnotation(Provider.class);
-        setTypeParameters(typeProvider, url.getParameters());
-
-        Method method = this.getMethod(invocation.getClassName(), methodName, invocation.getParameterTypeNames());
-        invoker.setMethod(method);
-
-
-        MethodAccess methodAccess = MethodAccess.get(ClassUtils.getClassByName(invocation.getClassName()));
-        invoker.setMethodAccess(methodAccess);
-
-        Provider methodProvider = method.getAnnotation(Provider.class);
-
-        //方法级别的会覆盖type级别的
-        if (null != methodProvider) {
-            setMethodParameters(methodProvider, url.getParameters());
-        }
-
-        wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.PROVIDER);
-
-        invokerMap.putIfAbsent(key, wrapperInvoker);
-        return wrapperInvoker;
-    }
-
-    private void setTypeParameters(Provider provider, Map<String, String> parameters) {
-        parameters.put(Constants.SIDE_KEY, Constants.PROVIDER_SIDE);
-        parameters.put(Constants.TOKEN_KEY, provider.token());
-        parameters.put(Constants.TIMEOUT_KEY, String.valueOf(provider.timeout()));
-        parameters.put(Constants.CACHE_KEY, String.valueOf(provider.cache()));
-        parameters.put(Constants.TPS_LIMIT_RATE_KEY, String.valueOf(provider.tps()));
-        parameters.put(Constants.MONITOR_KEY, String.valueOf(provider.monitor()));
-        parameters.put(Constants.GROUP_KEY, String.valueOf(provider.group()));
-        parameters.put(Constants.VERSION_KEY, String.valueOf(provider.version()));
-    }
-
-
-    private void setMethodParameters(Provider provider, Map<String, String> parameters) {
-        if (StringUtils.isNotEmpty(provider.token())) {
-            parameters.put(Constants.TOKEN_KEY, provider.token());
-        }
-        if (-1 != provider.timeout()) {
-            parameters.put(Constants.TIMEOUT_KEY, String.valueOf(provider.timeout()));
-        }
-        if (false != provider.cache()) {
-            parameters.put(Constants.CACHE_KEY, String.valueOf(provider.cache()));
-        }
-        if (-1 != provider.tps()) {
-            parameters.put(Constants.TPS_LIMIT_RATE_KEY, String.valueOf(provider.tps()));
-        }
-        if (false != provider.monitor()) {
-            parameters.put(Constants.MONITOR_KEY, String.valueOf(provider.monitor()));
-        }
-        if (StringUtils.isNotEmpty(provider.group())) {
-            parameters.put(Constants.GROUP_KEY, String.valueOf(provider.group()));
-        }
-        if (StringUtils.isNotEmpty(provider.version())) {
-            parameters.put(Constants.VERSION_KEY, String.valueOf(provider.version()));
-        }
-    }
 
 
     @Override
@@ -186,15 +94,4 @@ public class RpcProcessor implements NettyRequestProcessor {
     }
 
 
-    private Method getMethod(String className, String methodName, String[] parameterTypeNames) {
-        Class<?> clazz = ClassUtils.getClassByName(className);
-        Class[] clazzArray = Stream.of(parameterTypeNames).map(it -> ReflectUtils.forName(it)).toArray(Class[]::new);
-        Method m = null;
-        try {
-            m = clazz.getMethod(methodName, clazzArray);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-        return m;
-    }
 }

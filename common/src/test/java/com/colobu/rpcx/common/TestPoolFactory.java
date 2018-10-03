@@ -1,18 +1,19 @@
 package com.colobu.rpcx.common;
 
-import org.apache.commons.pool2.BaseKeyedPooledObjectFactory;
+import com.colobu.rpcx.protocol.RemotingCommand;
+import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
 
-public class TestPoolFactory extends BaseKeyedPooledObjectFactory<String, String> {
+public class TestPoolFactory extends BasePooledObjectFactory<RemotingCommand> {
 
     @Override
-    public String create(String o) throws Exception {
-        return "abc:" + System.currentTimeMillis();
+    public RemotingCommand create() {
+        return RemotingCommand.createRequestCommand(0);
     }
 
     @Override
-    public PooledObject wrap(String v) {
-        return new DefaultPooledObject(v);
+    public PooledObject<RemotingCommand> wrap(RemotingCommand remotingCommand) {
+        return new DefaultPooledObject<>(remotingCommand);
     }
 }

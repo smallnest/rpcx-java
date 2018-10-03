@@ -1,21 +1,62 @@
 package com.colobu.rpcx.rpc.impl;
 
+import com.colobu.rpcx.common.ClassUtils;
 import com.colobu.rpcx.common.Config;
+import com.colobu.rpcx.common.NetUtils;
+import com.colobu.rpcx.common.StringUtils;
+import com.colobu.rpcx.config.Constants;
+import com.colobu.rpcx.filter.FilterWrapper;
+import com.colobu.rpcx.rpc.Invoker;
+import com.colobu.rpcx.rpc.ReflectUtils;
 import com.colobu.rpcx.rpc.URL;
 import com.colobu.rpcx.rpc.annotation.Provider;
+import com.esotericsoftware.reflectasm.MethodAccess;
 
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author goodjava@qq.com
  */
 public class Exporter {
 
+    public static final Map<String, Invoker<Object>> invokerMap = new HashMap<>(20);
+
+    private final Function<Class, Object> getBeanFunc;
+
+    public Exporter(Function<Class, Object> getBeanFunc) {
+        this.getBeanFunc = getBeanFunc;
+    }
+
+
     public Set<String> export(String providerPackage) {
         Set<Class<?>> set = new ProviderFinder(providerPackage).find();
         return set.stream().map(it -> {
             String name = it.getName();
+
+            Method[] methods = it.getDeclaredMethods();
+            Arrays.stream(methods).forEach(m -> {
+                System.out.println("----------->" + m.getName());
+                String className = it.getName();
+                String method = m.getName();
+                String[] parameterTypeNames = ClassUtils.getMethodParameterNames(m);
+
+                String key = ClassUtils.getMethodKey(className, method, parameterTypeNames);
+                System.out.println("--------->key:" + key);
+
+                URL url = new URL("rpcx", "", 0);
+                url.setPath(ClassUtils.getMethodKey(className, method, parameterTypeNames));
+                initProviderInvoker(key, className, method, parameterTypeNames, url);
+            });
+
+
             URL url = new URL("rpcx", "", 0);
             url.setPath(name);
             //类名称
@@ -36,4 +77,94 @@ public class Exporter {
             return url.toFullString();
         }).collect(Collectors.toSet());
     }
+
+
+    /**
+     * 初始化providerInvoker
+     */
+    private Invoker<Object> initProviderInvoker(String key, String className, String methodName, String[] parameterTypeNames, URL url) {
+        Invoker<Object> wrapperInvoker;
+        Invoker<Object> invoker = new RpcProviderInvoker<>(getBeanFunc);
+        Class clazz = ClassUtils.getClassByName(className);
+        invoker.setInterface(clazz);
+
+
+        url.setHost(NetUtils.getLocalHost());
+        url.setPort(0);
+
+        invoker.setUrl(url);
+
+
+        Provider typeProvider = invoker.getInterface().getAnnotation(Provider.class);
+        setTypeParameters(typeProvider, url.getParameters());
+
+        //兼容性更好些
+        Method method = this.getMethod(className, methodName, parameterTypeNames);
+        invoker.setMethod(method);
+
+        //更快些
+        MethodAccess methodAccess = MethodAccess.get(ClassUtils.getClassByName(className));
+        invoker.setMethodAccess(methodAccess);
+
+        Provider methodProvider = method.getAnnotation(Provider.class);
+
+        //方法级别的会覆盖type级别的
+        if (null != methodProvider) {
+            setMethodParameters(methodProvider, url.getParameters());
+        }
+
+        wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.PROVIDER);
+
+        invokerMap.putIfAbsent(key, wrapperInvoker);
+        return wrapperInvoker;
+    }
+
+    private void setTypeParameters(Provider provider, Map<String, String> parameters) {
+        parameters.put(Constants.SIDE_KEY, Constants.PROVIDER_SIDE);
+        parameters.put(Constants.TOKEN_KEY, provider.token());
+        parameters.put(Constants.TIMEOUT_KEY, String.valueOf(provider.timeout()));
+        parameters.put(Constants.CACHE_KEY, String.valueOf(provider.cache()));
+        parameters.put(Constants.TPS_LIMIT_RATE_KEY, String.valueOf(provider.tps()));
+        parameters.put(Constants.MONITOR_KEY, String.valueOf(provider.monitor()));
+        parameters.put(Constants.GROUP_KEY, String.valueOf(provider.group()));
+        parameters.put(Constants.VERSION_KEY, String.valueOf(provider.version()));
+    }
+
+    private void setMethodParameters(Provider provider, Map<String, String> parameters) {
+        if (StringUtils.isNotEmpty(provider.token())) {
+            parameters.put(Constants.TOKEN_KEY, provider.token());
+        }
+        if (-1 != provider.timeout()) {
+            parameters.put(Constants.TIMEOUT_KEY, String.valueOf(provider.timeout()));
+        }
+        if (false != provider.cache()) {
+            parameters.put(Constants.CACHE_KEY, String.valueOf(provider.cache()));
+        }
+        if (-1 != provider.tps()) {
+            parameters.put(Constants.TPS_LIMIT_RATE_KEY, String.valueOf(provider.tps()));
+        }
+        if (false != provider.monitor()) {
+            parameters.put(Constants.MONITOR_KEY, String.valueOf(provider.monitor()));
+        }
+        if (StringUtils.isNotEmpty(provider.group())) {
+            parameters.put(Constants.GROUP_KEY, String.valueOf(provider.group()));
+        }
+        if (StringUtils.isNotEmpty(provider.version())) {
+            parameters.put(Constants.VERSION_KEY, String.valueOf(provider.version()));
+        }
+    }
+
+    private Method getMethod(String className, String methodName, String[] parameterTypeNames) {
+        Class<?> clazz = ClassUtils.getClassByName(className);
+        Class[] clazzArray = Stream.of(parameterTypeNames).map(it -> ReflectUtils.forName(it)).toArray(Class[]::new);
+        Method m = null;
+        try {
+            m = clazz.getMethod(methodName, clazzArray);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        return m;
+    }
+
+
 }

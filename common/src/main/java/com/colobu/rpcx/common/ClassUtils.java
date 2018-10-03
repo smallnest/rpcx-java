@@ -1,7 +1,11 @@
 package com.colobu.rpcx.common;
 
+import com.colobu.rpcx.rpc.ReflectUtils;
+
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author goodjava@qq.com
@@ -48,6 +52,11 @@ public class ClassUtils {
 
     public static String getMethodKey(String className, String methodName, String[] parameterNames) {
         return className + "." + methodName + "(" + Arrays.stream(parameterNames).collect(Collectors.joining(",")) + ")";
+    }
+
+    public static String[] getMethodParameterNames(Method method) {
+        Class<?>[] types = method.getParameterTypes();
+        return Stream.of(types).map(it -> ReflectUtils.getName(it)).toArray(String[]::new);
     }
 
 
