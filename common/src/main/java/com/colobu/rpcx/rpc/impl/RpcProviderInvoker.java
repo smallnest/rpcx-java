@@ -109,4 +109,9 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
     public void setUrl(URL url) {
         this.url = url;
     }
+
+    @Override
+    public void setMethodAccess(MethodAccess methodAccess) {
+        this.methodAccess = methodAccess;
+    }
 }
