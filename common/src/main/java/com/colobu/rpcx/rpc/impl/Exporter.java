@@ -51,14 +51,16 @@ public class Exporter {
                 System.out.println("----------->" + m.getName());
                 String className = it.getName();
                 String method = m.getName();
-                String[] parameterTypeNames = ClassUtils.getMethodParameterNames(m);
+                if (!method.startsWith("access$")) {
+                    String[] parameterTypeNames = ClassUtils.getMethodParameterNames(m);
 
-                String key = ClassUtils.getMethodKey(className, method, parameterTypeNames);
-                System.out.println("--------->key:" + key);
+                    String key = ClassUtils.getMethodKey(className, method, parameterTypeNames);
+                    System.out.println("--------->key:" + key);
 
-                URL url = new URL("rpcx", "", 0);
-                url.setPath(ClassUtils.getMethodKey(className, method, parameterTypeNames));
-                initProviderInvoker(key, className, method, parameterTypeNames, url);
+                    URL url = new URL("rpcx", "", 0);
+                    url.setPath(ClassUtils.getMethodKey(className, method, parameterTypeNames));
+                    initProviderInvoker(key, className, method, parameterTypeNames, url);
+                }
             });
 
 

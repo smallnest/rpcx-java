@@ -14,6 +14,7 @@
       <module>common</module>
       <module>server</module>
       <module>demo</module>
+      <module>container</module>
    </modules>
 
    <name>Basic Maven Project</name>
