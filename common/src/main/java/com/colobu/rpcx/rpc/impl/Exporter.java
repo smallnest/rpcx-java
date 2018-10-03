@@ -11,6 +11,8 @@ import com.colobu.rpcx.rpc.ReflectUtils;
 import com.colobu.rpcx.rpc.URL;
 import com.colobu.rpcx.rpc.annotation.Provider;
 import com.esotericsoftware.reflectasm.MethodAccess;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -27,6 +29,8 @@ import java.util.stream.Stream;
  */
 public class Exporter {
 
+    private static final Logger logger = LoggerFactory.getLogger(Exporter.class);
+
     public static final Map<String, Invoker<Object>> invokerMap = new HashMap<>(20);
 
     private final Function<Class, Object> getBeanFunc;
@@ -37,6 +41,7 @@ public class Exporter {
 
 
     public Set<String> export(String providerPackage) {
+        logger.info("export");
         Set<Class<?>> set = new ProviderFinder(providerPackage).find();
         return set.stream().map(it -> {
             String name = it.getName();

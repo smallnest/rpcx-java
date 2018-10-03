@@ -23,6 +23,7 @@ import sun.reflect.MethodAccessor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -41,18 +42,177 @@ import java.util.stream.IntStream;
  */
 public class CommonTest {
 
+
+    @Test
+    public void testEncode1() throws IOException {
+
+        Map<String, String> metadata = Maps.newHashMap();
+        metadata.put("a", "11111111111111111111111");
+        metadata.put("b", "21111111111111111111111");
+        metadata.put("c", "31111111111111111111111");
+
+        long begin = System.currentTimeMillis();
+
+        ByteArrayOutputStream os = new ByteArrayOutputStream(20);
+
+        for (Map.Entry<String, String> entry : metadata.entrySet()) {
+            String key = entry.getKey();
+            byte[] keyBytes = key.getBytes("UTF-8");
+            os.write(Bytes.int2bytes(keyBytes.length));
+            os.write(keyBytes);
+
+            String v = entry.getValue();
+            if (null == v) {
+                v = "null";
+            }
+            byte[] vBytes = v.getBytes("UTF-8");
+            os.write(Bytes.int2bytes(vBytes.length));
+            os.write(vBytes);
+        }
+
+        byte[] d = os.toByteArray();
+        System.out.println(System.currentTimeMillis()-begin);
+        System.out.println(Arrays.toString(d));
+    }
+
+    @Test
+    public void testEncode2() throws IOException {
+
+        Map<String, String> metadata = Maps.newHashMap();
+        metadata.put("a", "11111111111111111111111");
+        metadata.put("b", "21111111111111111111111");
+        metadata.put("c", "31111111111111111111111");
+
+        long begin = System.currentTimeMillis();
+
+        ByteArrayOutputStream os = new ByteArrayOutputStream(20);
+
+        for (Map.Entry<String, String> entry : metadata.entrySet()) {
+            String key = entry.getKey();
+            byte[] keyBytes = key.getBytes("UTF-8");
+            os.write(Bytes.int2bytes(keyBytes.length));
+            os.write(keyBytes);
+
+            String v = entry.getValue();
+            if (null == v) {
+                v = "null";
+            }
+            byte[] vBytes = v.getBytes("UTF-8");
+            os.write(Bytes.int2bytes(vBytes.length));
+            os.write(vBytes);
+        }
+
+        byte[] d = os.toByteArray();
+        System.out.println(System.currentTimeMillis()-begin);
+        System.out.println(Arrays.toString(d));
+    }
+
+
+    //168
+    @Test
+    public void testDecode1() throws UnsupportedEncodingException {
+
+        final byte[] b = new byte[]{0, 0, 0, 1, 97, 0, 0, 0, 23, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 0, 0, 0, 1, 98, 0, 0, 0, 23, 50, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 0, 0, 0, 1, 99, 0, 0, 0, 23, 51, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49};
+
+        Map<String, String> m = Maps.newHashMap();
+        long begin = System.currentTimeMillis();
+        IntStream.range(0, 100000).forEach(it -> {
+            ByteBuffer buf = ByteBuffer.wrap(b);
+            int len;
+            byte[] data = null;
+            for (; ; ) {
+                if (buf.remaining() < 4) {
+                    break;
+                }
+                len = buf.getInt();
+                data = new byte[len];
+                buf.get(data);
+                String k = null;
+                try {
+                    k = new String(data, "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+
+                len = buf.getInt();
+                data = new byte[len];
+                buf.get(data);
+                String v = null;
+                try {
+                    v = new String(data, "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                m.put(k, v);
+            }
+        });
+
+        System.out.println(System.currentTimeMillis() - begin);
+        System.out.println(m);
+    }
+
+
+    //148
+    @Test
+    public void testDecode2() throws UnsupportedEncodingException {
+
+        byte[] d = new byte[]{0, 0, 0, 1, 97, 0, 0, 0, 23, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 0, 0, 0, 1, 98, 0, 0, 0, 23, 50, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 0, 0, 0, 1, 99, 0, 0, 0, 23, 51, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49};
+        Map<String, String> m = Maps.newHashMap();
+
+        long begin = System.currentTimeMillis();
+        IntStream.range(0, 100000).forEach(it -> {
+            int blen = d.length;
+            int index = 0;
+            int len = 0;
+            byte[] b = null;
+            for (; ; ) {
+                if (blen - index < 4) {
+                    break;
+                }
+                len = Bytes.bytes2int(d, index);
+                index = index + 4;
+                b = new byte[len];
+                System.arraycopy(d, index, b, 0, len);
+                String k = null;
+                try {
+                    k = new String(b, "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                index = index + len;
+
+                len = Bytes.bytes2int(d, index);
+                index = index + 4;
+                b = new byte[len];
+                System.arraycopy(d, index, b, 0, len);
+                index = index + len;
+                String v = null;
+                try {
+                    v = new String(b, "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                m.put(k, v);
+            }
+        });
+
+        System.out.println(System.currentTimeMillis() - begin);
+        System.out.println(m);
+    }
+
+
     //2540 20153
     @Test
     public void testMap2() {
         ExecutorService pool = Executors.newFixedThreadPool(20);
 
-        ConcurrentHashMap<String,String>m2 = new ConcurrentHashMap<>();
-        m2.put("a","1");
+        ConcurrentHashMap<String, String> m2 = new ConcurrentHashMap<>();
+        m2.put("a", "1");
 
         Stopwatch sw2 = Stopwatch.createStarted();
-        IntStream.range(0,1000000).forEach(i->{
+        IntStream.range(0, 1000000).forEach(i -> {
             try {
-                pool.invokeAll(IntStream.range(0,20).mapToObj(ii->(Callable<Void>)()->{
+                pool.invokeAll(IntStream.range(0, 20).mapToObj(ii -> (Callable<Void>) () -> {
                     m2.get("a");
                     return null;
                 }).collect(Collectors.toList()));
@@ -69,12 +229,12 @@ public class CommonTest {
     public void testMap1() {
         ExecutorService pool = Executors.newFixedThreadPool(20);
 
-        Map<String,String> m = new HashMap<>();
-        m.put("a","1");
+        Map<String, String> m = new HashMap<>();
+        m.put("a", "1");
         Stopwatch sw = Stopwatch.createStarted();
-        IntStream.range(0,1000000).forEach(i->{
+        IntStream.range(0, 1000000).forEach(i -> {
             try {
-                pool.invokeAll(IntStream.range(0,20).mapToObj(ii->(Callable<Void>)()->{
+                pool.invokeAll(IntStream.range(0, 20).mapToObj(ii -> (Callable<Void>) () -> {
                     m.get("a");
                     return null;
                 }).collect(Collectors.toList()));
@@ -83,8 +243,6 @@ public class CommonTest {
             }
         });
         System.out.println(sw.elapsed(TimeUnit.MILLISECONDS));
-
-
 
 
     }
@@ -112,7 +270,7 @@ public class CommonTest {
             try {
                 Object v = pool.borrowObject();
 //                System.out.println(v);
-                pool.returnObject( v);
+                pool.returnObject(v);
             } catch (Exception e) {
                 e.printStackTrace();
             }
