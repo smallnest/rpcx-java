@@ -11,14 +11,12 @@ import com.colobu.rpcx.rpc.ReflectUtils;
 import com.colobu.rpcx.rpc.URL;
 import com.colobu.rpcx.rpc.annotation.Provider;
 import com.esotericsoftware.reflectasm.MethodAccess;
+import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -51,6 +49,7 @@ public class Exporter {
                 System.out.println("----------->" + m.getName());
                 String className = it.getName();
                 String method = m.getName();
+                //reflectasm 生成的方法需要过滤掉
                 if (!method.startsWith("access$")) {
                     String[] parameterTypeNames = ClassUtils.getMethodParameterNames(m);
 
@@ -59,11 +58,12 @@ public class Exporter {
 
                     URL url = new URL("rpcx", "", 0);
                     url.setPath(ClassUtils.getMethodKey(className, method, parameterTypeNames));
+                    //暴露出invoker,使得远程可以调用
                     initProviderInvoker(key, className, method, parameterTypeNames, url);
                 }
             });
 
-
+            //这里的url是注册到zk
             URL url = new URL("rpcx", "", 0);
             url.setPath(name);
             //类名称
@@ -101,18 +101,20 @@ public class Exporter {
 
         invoker.setUrl(url);
 
-
+        //类级别的注解
         Provider typeProvider = invoker.getInterface().getAnnotation(Provider.class);
         setTypeParameters(typeProvider, url.getParameters());
+        Set<String> excludeFilters = Arrays.stream(typeProvider.excludeFilters()).collect(Collectors.toSet());
 
         //兼容性更好些
         Method method = this.getMethod(className, methodName, parameterTypeNames);
         invoker.setMethod(method);
 
-        //更快些
+        //reflectasm更快些(实际上是把反射生成了直接调用的代码)
         MethodAccess methodAccess = MethodAccess.get(ClassUtils.getClassByName(className));
         invoker.setMethodAccess(methodAccess);
 
+        //方法级别的注解
         Provider methodProvider = method.getAnnotation(Provider.class);
 
         //方法级别的会覆盖type级别的
@@ -120,7 +122,8 @@ public class Exporter {
             setMethodParameters(methodProvider, url.getParameters());
         }
 
-        wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.PROVIDER);
+        Set<String> filterNames = new HashSet<>();
+        wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.PROVIDER, excludeFilters);
 
         invokerMap.putIfAbsent(key, wrapperInvoker);
         return wrapperInvoker;
@@ -138,6 +141,7 @@ public class Exporter {
     }
 
     private void setMethodParameters(Provider provider, Map<String, String> parameters) {
+        //使用了那些注解,实际的含义就是启用了那些filter
         if (StringUtils.isNotEmpty(provider.token())) {
             parameters.put(Constants.TOKEN_KEY, provider.token());
         }

@@ -17,6 +17,8 @@ public @interface Provider {
 
     String version() default "";
 
+    String[] excludeFilters() default "";
+
     /**
      * 服务启动token验证,客户端需要提供相同的token
      *
@@ -26,13 +28,14 @@ public @interface Provider {
 
     /**
      * 服务器超时调用后会打印警告,不影响正常调用
+     * 超时filter
      *
      * @return
      */
     long timeout() default -1;
 
     /**
-     * 调用缓存
+     * 缓存filter
      *
      * @return
      */
@@ -40,6 +43,7 @@ public @interface Provider {
 
     /**
      * 是否开启监控
+     * 监控filter
      *
      * @return
      */
@@ -47,6 +51,7 @@ public @interface Provider {
 
     /**
      * 一分钟内tps 能达到的上限  -1 是没有上限
+     * tps filter
      *
      * @return
      */
@@ -54,6 +59,7 @@ public @interface Provider {
 
     /**
      * 权重
+     *
      * @return
      */
     String weight() default "";

@@ -12,4 +12,12 @@ public interface Filter {
 
     Result invoke(Invoker<?> invoker, RpcInvocation invocation) throws RpcException;
 
+    /**
+     * filter name
+     * @return
+     */
+    default String name() {
+        return this.getClass().getSimpleName();
+    }
+
 }

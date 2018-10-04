@@ -10,6 +10,7 @@ import com.colobu.rpcx.protocol.RemotingCommand;
 import com.colobu.rpcx.rpc.*;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
 import com.colobu.rpcx.rpc.impl.RpcProviderInvoker;
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -59,7 +60,8 @@ public class RpcHttpProcessor implements NettyRequestProcessor {
         invocation.url.setPort(Integer.parseInt(req.metadata.get("_port")));
 
         Invoker<Object> invoker = new RpcProviderInvoker<>(getBeanFunc);
-        Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.PROVIDER);
+        //TODO $---
+        Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.PROVIDER, Sets.newHashSet());
 
         RemotingCommand res = RemotingCommand.createResponseCommand();
         Message resMessage = new Message();

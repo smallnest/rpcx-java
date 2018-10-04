@@ -10,6 +10,7 @@ import com.colobu.rpcx.rpc.RpcException;
 import com.colobu.rpcx.rpc.impl.ConsumerConfig;
 import com.colobu.rpcx.rpc.impl.RpcConsumerInvoker;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
+import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,7 +72,7 @@ public class RpcxConsumer {
         invocation.setArguments(params1);
 
         Invoker invoker = new RpcConsumerInvoker(client);
-        Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.CONSUMER);
+        Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.CONSUMER, Sets.newHashSet());
 
         Result result = wrapperInvoker.invoke(invocation);
         if (result.hasException()) {
@@ -91,7 +92,7 @@ public class RpcxConsumer {
         invocation.setParameterTypeNames(new String[]{ReflectUtils.getName(String.class)});
         invocation.setArguments(new String[]{str});
         RpcConsumerInvoker invoker = new RpcConsumerInvoker(client);
-        Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.CONSUMER);
+        Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.CONSUMER, Sets.newHashSet());
         Result result = wrapperInvoker.invoke(invocation);
         if (result.hasException()) {
             throw new RuntimeException(result.getException());
@@ -118,7 +119,7 @@ public class RpcxConsumer {
         Object[] params = new Object[]{className, token, classData};
         invocation.setArguments(params);
         RpcConsumerInvoker invoker = new RpcConsumerInvoker(client);
-        Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.CONSUMER);
+        Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.CONSUMER, Sets.newHashSet());
         Result result = wrapperInvoker.invoke(invocation);
         if (result.hasException()) {
             throw new RuntimeException(result.getException());

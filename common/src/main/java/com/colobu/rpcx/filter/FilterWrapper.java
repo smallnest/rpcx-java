@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -62,8 +63,16 @@ public class FilterWrapper {
         return LazyHolder.ins;
     }
 
-
-    public <T> Invoker<T> buildInvokerChain(final Invoker<T> invoker, String key, String group) {
+    /**
+     *
+     * @param invoker
+     * @param key
+     * @param group
+     * @param excludeFilters 不需要构建的filter
+     * @param <T>
+     * @return
+     */
+    public <T> Invoker<T> buildInvokerChain(final Invoker<T> invoker, String key, String group, Set<String> excludeFilters) {
         Invoker<T> last = invoker;
         List<Filter> list = null;
         if (group.equals(Constants.PROVIDER)) {
@@ -74,6 +83,12 @@ public class FilterWrapper {
         if (list.size() > 0) {
             for (int i = list.size() - 1; i >= 0; i--) {
                 final Filter filter = list.get(i);
+
+                //如果没有启用此filter,则不加入此filter到chain
+                if (excludeFilters.contains(filter.name())) {
+                    continue;
+                }
+
                 final Invoker<T> next = last;
                 last = new Invoker<T>() {
 

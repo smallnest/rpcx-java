@@ -8,6 +8,7 @@ import com.colobu.rpcx.protocol.LanguageCode;
 import com.colobu.rpcx.rpc.*;
 import com.colobu.rpcx.rpc.annotation.Consumer;
 import com.colobu.rpcx.selector.SelectMode;
+import com.google.common.collect.Sets;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -120,7 +121,8 @@ public class ConsumerConfig {
             invocation.setResultType(method.getReturnType());
 
             Invoker invoker = new RpcConsumerInvoker(client);
-            Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.CONSUMER);
+            //TODO $---
+            Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.CONSUMER,Sets.newHashSet());
 
             Result result = wrapperInvoker.invoke(invocation);
 
