@@ -1,6 +1,7 @@
 package com.colobu.rpcx.protocol;
 
 import com.colobu.rpcx.common.Bytes;
+import com.colobu.rpcx.rpc.RpcException;
 import lombok.Data;
 
 import java.io.*;
@@ -164,7 +165,7 @@ public class Message {
     }
 
     public long getSeq() {
-        return Bytes.bytes2long(Arrays.copyOfRange(header,4,12));
+        return Bytes.bytes2long(Arrays.copyOfRange(header, 4, 12));
     }
 
     public void setSeq(long seq) {
@@ -191,8 +192,8 @@ public class Message {
             this.payload = compress();
         }
 
-        byte[] spBytes = servicePath.getBytes("UTF-8");
-        byte[] smBytes = serviceMethod.getBytes("UTF-8");
+        byte[] spBytes = servicePath.getBytes();
+        byte[] smBytes = serviceMethod.getBytes();
         byte[] metaBytes = encodeMetadata();
 
         int headLen = header.length;
@@ -224,11 +225,11 @@ public class Message {
         if (metadata.size() == 0) {
             return new byte[]{};
         }
-        ByteArrayOutputStream os = new ByteArrayOutputStream(20);
+        ByteArrayOutputStream os = new ByteArrayOutputStream(40);
 
         for (Map.Entry<String, String> entry : metadata.entrySet()) {
             String key = entry.getKey();
-            byte[] keyBytes = key.getBytes("UTF-8");
+            byte[] keyBytes = key.getBytes();
             os.write(Bytes.int2bytes(keyBytes.length));
             os.write(keyBytes);
 
@@ -236,12 +237,58 @@ public class Message {
             if (null == v) {
                 v = "null";
             }
-            byte[] vBytes = v.getBytes("UTF-8");
+            byte[] vBytes = v.getBytes();
             os.write(Bytes.int2bytes(vBytes.length));
             os.write(vBytes);
         }
 
         return os.toByteArray();
+    }
+
+
+    /**
+     * 业务解码
+     */
+    public void decode(byte[] data) {
+        ByteBuffer buf = ByteBuffer.wrap(data);
+        int len = buf.getInt();
+        byte[] b = new byte[len];
+        buf.get(b);
+        servicePath = new String(b);
+
+        len = buf.getInt();
+        b = new byte[len];
+        buf.get(b);
+        serviceMethod = new String(b);
+        len = buf.getInt();
+        b = new byte[len];
+        buf.get(b);
+        decodeMetadata(b);
+
+        len = buf.getInt();
+        byte[] payload = new byte[len];
+        buf.get(payload);
+        this.payload = payload;
+    }
+
+    private void decodeMetadata(byte[] b) {
+        ByteBuffer buf = ByteBuffer.wrap(b);
+        int len;
+        for (; ; ) {
+            if (buf.remaining() < 4) {
+                break;
+            }
+            len = buf.getInt();
+            b = new byte[len];
+            buf.get(b);
+            String k = new String(b);
+
+            len = buf.getInt();
+            b = new byte[len];
+            buf.get(b);
+            String v = new String(b);
+            this.metadata.put(k, v);
+        }
     }
 
 

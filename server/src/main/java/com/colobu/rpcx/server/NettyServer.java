@@ -140,7 +140,7 @@ public class NettyServer extends NettyRemotingAbstract {
             } catch (Exception ex) {
                 logger.error("runProcessingRequestSchedule error:{}", ex.getMessage());
             }
-        }, 0, 60, TimeUnit.SECONDS);
+        }, 0, 600, TimeUnit.SECONDS);
     }
 
     private ServerBootstrap createServerBootstrap() {

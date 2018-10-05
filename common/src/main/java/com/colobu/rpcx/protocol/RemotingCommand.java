@@ -1,9 +1,5 @@
 package com.colobu.rpcx.protocol;
 
-import com.colobu.rpcx.rpc.RpcException;
-
-import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -149,57 +145,5 @@ public class RemotingCommand {
         this.data = data;
     }
 
-    /**
-     * 业务解码
-     */
-    public void decode() {
-        try {
-            ByteBuffer buf = ByteBuffer.wrap(this.data);
-            int len = buf.getInt();
-            byte[] b = new byte[len];
-            buf.get(b);
-            message.servicePath = new String(b, "UTF-8");
 
-            len = buf.getInt();
-            b = new byte[len];
-            buf.get(b);
-            message.serviceMethod = new String(b, "UTF-8");
-            len = buf.getInt();
-            b = new byte[len];
-            buf.get(b);
-            decodeMetadata(b, message);
-
-            len = buf.getInt();
-            byte[] payload = new byte[len];
-            buf.get(payload);
-            message.payload = payload;
-
-            if (message.isOneway()) {
-                markOnewayRPC();
-            }
-        } catch (Exception ex) {
-            throw new RpcException(ex);
-        }
-    }
-
-
-    private void decodeMetadata(byte[] b, Message message) throws UnsupportedEncodingException {
-        ByteBuffer buf = ByteBuffer.wrap(b);
-        int len;
-        for (; ; ) {
-            if (buf.remaining() < 4) {
-                break;
-            }
-            len = buf.getInt();
-            b = new byte[len];
-            buf.get(b);
-            String k = new String(b, "UTF-8");
-
-            len = buf.getInt();
-            b = new byte[len];
-            buf.get(b);
-            String v = new String(b, "UTF-8");
-            message.metadata.put(k, v);
-        }
-    }
 }

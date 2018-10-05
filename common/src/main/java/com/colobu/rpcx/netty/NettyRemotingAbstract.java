@@ -8,10 +8,6 @@ import com.colobu.rpcx.protocol.Message;
 import com.colobu.rpcx.protocol.MessageType;
 import com.colobu.rpcx.protocol.RemotingCommand;
 import com.colobu.rpcx.protocol.RemotingSysResponseCode;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.JdkFutureAdapters;
-import com.google.common.util.concurrent.ListenableFuture;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.epoll.Epoll;
@@ -20,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -47,7 +43,7 @@ public class NettyRemotingAbstract {
 
     protected static final long LockTimeoutMillis = 3000;
 
-    private AtomicInteger processingRequest = new AtomicInteger();
+    private LongAdder processingRequest = new LongAdder();
 
     private volatile boolean stop = false;
 
@@ -57,7 +53,7 @@ public class NettyRemotingAbstract {
 
 
     public void scanProcessingRequest() {
-        logger.info("processing request num:{}", processingRequest.get());
+        logger.info("processing request num:{}", processingRequest.longValue());
     }
 
     public void scanResponseTable() {
@@ -175,7 +171,7 @@ public class NettyRemotingAbstract {
         if (pair != null) {
             Runnable run = () -> {
                 try {
-                    processingRequest.incrementAndGet();
+                    processingRequest.increment();
                     final RemotingCommand response = pair.getObject1().processRequest(ctx, cmd);
                     //是否是oneway是根据来的request计算的
                     if (!cmd.isOnewayRPC()) {
@@ -203,7 +199,7 @@ public class NettyRemotingAbstract {
                         ctx.writeAndFlush(response);
                     }
                 } finally {
-                    processingRequest.decrementAndGet();
+                    processingRequest.decrement();
                 }
             };
 
@@ -256,7 +252,7 @@ public class NettyRemotingAbstract {
      * @param cmd
      */
     public void processResponseCommand(ChannelHandlerContext ctx, RemotingCommand cmd) {
-        cmd.decode();
+        cmd.getMessage().decode(cmd.getData());
         //获取request带过去的唯一码
         final int opaque = cmd.getOpaque();
         //查询responseFuture
@@ -326,7 +322,7 @@ public class NettyRemotingAbstract {
             if (i++ >= 30) {
                 break;
             }
-            int num = this.processingRequest.get();
+            long num = this.processingRequest.sum();
             logger.info("shutdown processing request num:{}", num);
             if (num == 0) {
                 break;

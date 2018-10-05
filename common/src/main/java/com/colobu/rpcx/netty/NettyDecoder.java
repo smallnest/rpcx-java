@@ -41,6 +41,7 @@ public class NettyDecoder extends ReplayingDecoder<DecoderState> {
                 //消息的序列号
                 long seq = Bytes.bytes2long(header, 4);
                 message.setSeq(seq);
+
                 checkpoint(DecoderState.Body);
             case Body:
                 int totalLen = in.readInt();
@@ -51,6 +52,9 @@ public class NettyDecoder extends ReplayingDecoder<DecoderState> {
                 //业务解码交给业务层
                 command.setData(data);
                 command.setMessage(message);
+                if (message.isOneway()) {
+                    command.markOnewayRPC();
+                }
                 checkpoint(DecoderState.MagicNumber);
                 out.add(command);
                 break;
