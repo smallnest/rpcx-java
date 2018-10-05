@@ -15,11 +15,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import org.apache.commons.pool2.KeyedObjectPool;
-import org.apache.commons.pool2.impl.GenericKeyedObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.junit.Test;
-import sun.reflect.MethodAccessor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -274,6 +271,16 @@ public class CommonTest {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        });
+        System.out.println(sw.elapsed(TimeUnit.MILLISECONDS));
+    }
+
+
+    @Test
+    public void testPool2() {
+        Stopwatch sw = Stopwatch.createStarted();
+        IntStream.range(0, 10000000).forEach(it -> {
+            RemotingCommand.createRequestCommand(2);
         });
         System.out.println(sw.elapsed(TimeUnit.MILLISECONDS));
     }

@@ -107,7 +107,7 @@ public class NettyServer extends NettyRemotingAbstract {
     }
 
     private Pair<NettyRequestProcessor, ExecutorService> createDefaultRequestProcessor() {
-        ThreadPoolExecutor executor = new ThreadPoolExecutor(2000, 2000,
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(1000, 1000,
                 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(), new NamedThreadFactory("DefaultRequestProcessorPool"));
 
