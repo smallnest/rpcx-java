@@ -1,32 +1,22 @@
 package com.colobu.rpcx.processor;
 
 import com.colobu.rpcx.common.ClassUtils;
-import com.colobu.rpcx.common.NetUtils;
-import com.colobu.rpcx.common.StringUtils;
 import com.colobu.rpcx.config.Constants;
-import com.colobu.rpcx.filter.FilterWrapper;
 import com.colobu.rpcx.netty.NettyRequestProcessor;
 import com.colobu.rpcx.protocol.LanguageCode;
 import com.colobu.rpcx.protocol.Message;
 import com.colobu.rpcx.protocol.MessageType;
 import com.colobu.rpcx.protocol.RemotingCommand;
-import com.colobu.rpcx.rpc.*;
-import com.colobu.rpcx.rpc.annotation.Provider;
+import com.colobu.rpcx.rpc.HessianUtils;
+import com.colobu.rpcx.rpc.Invoker;
+import com.colobu.rpcx.rpc.Result;
+import com.colobu.rpcx.rpc.URL;
 import com.colobu.rpcx.rpc.impl.Exporter;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
-import com.colobu.rpcx.rpc.impl.RpcProviderInvoker;
-import com.esotericsoftware.reflectasm.MethodAccess;
 import com.google.gson.Gson;
 import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 /**
  * @author goodjava@qq.com
@@ -38,7 +28,7 @@ public class RpcProcessor implements NettyRequestProcessor {
 
     @Override
     public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request) {
-        request.decode();
+        request.getMessage().decode(request.getData());
 
         String language = request.getMessage().metadata.get(Constants.LANGUAGE);
         String className = request.getMessage().servicePath;

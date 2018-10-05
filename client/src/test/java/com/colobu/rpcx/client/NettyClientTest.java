@@ -8,6 +8,8 @@ import com.colobu.rpcx.rpc.Result;
 import com.colobu.rpcx.rpc.URL;
 import com.colobu.rpcx.rpc.impl.RpcConsumerInvoker;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.junit.Test;
 
 import java.util.stream.IntStream;
@@ -26,7 +28,7 @@ public class NettyClientTest {
         ZkServiceDiscovery serviceDiscovery = new ZkServiceDiscovery("/youpin/services/", "Arith");
         NettyClient client = new NettyClient(serviceDiscovery);
         Invoker invoker = new RpcConsumerInvoker(client);
-        Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.CONSUMER);
+        Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.CONSUMER, Sets.newHashSet());
 
         RpcInvocation invocation = new RpcInvocation();
         invocation.setMethodName("Echo");
