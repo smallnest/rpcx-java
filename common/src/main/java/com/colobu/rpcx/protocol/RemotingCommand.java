@@ -1,5 +1,7 @@
 package com.colobu.rpcx.protocol;
 
+import com.colobu.rpcx.config.Constants;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -20,7 +22,10 @@ public class RemotingCommand {
     private int version = 0;
     private int opaque = requestId.getAndIncrement();
     private int flag = 0;
-    private byte[] data;
+    /**
+     * 解码的时候会用到,不会实际传输
+     */
+    private transient byte[] data;
 
 
     private Message message;
@@ -143,6 +148,18 @@ public class RemotingCommand {
 
     public void setData(byte[] data) {
         this.data = data;
+    }
+
+    /**
+     * rpcx 是通过 meta 传递错误信息的
+     * @param code
+     * @param message
+     */
+    public void setErrorMessage(String code,String message) {
+        //带有错误的返回结果
+        getMessage().setMessageStatusType(MessageStatusType.Error);
+        getMessage().metadata.put(Constants.RPCX_ERROR_CODE, code);
+        getMessage().metadata.put(Constants.RPCX_ERROR_MESSAGE, message);
     }
 
 

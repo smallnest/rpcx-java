@@ -57,9 +57,16 @@ public class RpcProcessor implements NettyRequestProcessor {
 
         Invoker<Object> wrapperInvoker = Exporter.invokerMap.get(key);
 
+        RemotingCommand res = RemotingCommand.createResponseCommand(new Message(invocation.getClassName(), invocation.getMethodName(), MessageType.Response, request.getOpaque()));
+
+        if (null == wrapperInvoker) {
+            logger.warn("get invoker is null key:{}", key);
+            res.setErrorMessage("-3", "get invoker is null  key:" + key);
+            return res;
+        }
+
         Result rpcResult = wrapperInvoker.invoke(invocation);
 
-        RemotingCommand res = RemotingCommand.createResponseCommand(new Message(invocation.getClassName(), invocation.getMethodName(), MessageType.Response, request.getOpaque()));
 
         if (invocation.languageCode.equals(LanguageCode.HTTP)) {
             res.getMessage().payload = new Gson().toJson(rpcResult.getValue()).getBytes();
@@ -70,12 +77,10 @@ public class RpcProcessor implements NettyRequestProcessor {
         }
         if (rpcResult.hasException()) {
             logger.error(rpcResult.getException().getMessage(), rpcResult.getException());
-            res.getMessage().metadata.put(Constants.RPCX_ERROR_CODE, "-2");
-            res.getMessage().metadata.put(Constants.RPCX_ERROR_MESSAGE, rpcResult.getException().getMessage());
+            res.setErrorMessage("-2", rpcResult.getException().getMessage());
         }
         return res;
     }
-
 
 
     @Override

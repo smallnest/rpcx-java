@@ -147,6 +147,7 @@ public class Message {
         return MessageStatusType.getValue(v);
     }
 
+    //如果返回结果有error,这里需要设置
     public void setMessageStatusType(MessageStatusType mst) {
         int v = mst.value();
         header[2] &= ~0x03;
