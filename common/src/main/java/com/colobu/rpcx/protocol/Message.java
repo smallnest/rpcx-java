@@ -30,28 +30,10 @@ public class Message {
      * java-->methodName
      */
     public String serviceMethod;
+
     public Map<String, String> metadata;
+
     public byte[] payload;
-
-
-    public Message() {
-        header = new byte[12];
-        header[0] = magicNumber;
-        servicePath = "";
-        serviceMethod = "";
-        metadata = new HashMap<>();
-        payload = new byte[]{};
-    }
-
-
-    public void clear() {
-        Arrays.fill(header, (byte) 0);
-        header[0] = magicNumber;
-        servicePath = "";
-        serviceMethod = "";
-        metadata.clear();
-        payload = new byte[]{};
-    }
 
     public Message(String servicePath, String serviceMethod) {
         this();
@@ -59,11 +41,16 @@ public class Message {
         this.serviceMethod = serviceMethod;
     }
 
+    public Message() {
+        header = new byte[12];
+        header[0] = magicNumber;
+        payload = new byte[]{};
+        this.metadata = new HashMap<>();
+    }
+
 
     public Message(String servicePath, String serviceMethod, MessageType messageType, long seq) {
-        this();
-        this.servicePath = servicePath;
-        this.serviceMethod = serviceMethod;
+        this(servicePath, serviceMethod);
         this.setMessageType(messageType);
         this.setSeq(seq);
     }
@@ -168,7 +155,7 @@ public class Message {
     }
 
     public long getSeq() {
-        return Bytes.bytes2long(Arrays.copyOfRange(header, 4, 12));
+        return Bytes.bytes2long(header, 4);
     }
 
     public void setSeq(long seq) {
@@ -203,7 +190,7 @@ public class Message {
         int bodyLen = spBytes.length + 4 + smBytes.length + 4 + metaBytes.capacity() + 4 + payload.length + 4;
 
         int capacity = headLen + 4 + bodyLen;
-        ByteBuffer buffer = ByteBuffer.allocateDirect(capacity);
+        ByteBuffer buffer = ByteBuffer.allocate(capacity);
         buffer.put(header);
 
         buffer.putInt(bodyLen);
@@ -224,7 +211,7 @@ public class Message {
     }
 
 
-    private ByteBuf encodeMetadata() throws IOException {
+    private ByteBuf encodeMetadata() {
         if (metadata.size() == 0) {
             return Unpooled.EMPTY_BUFFER;
         }
@@ -275,22 +262,31 @@ public class Message {
     }
 
     private void decodeMetadata(byte[] b) {
-        ByteBuffer buf = ByteBuffer.wrap(b);
-        int len;
-        for (; ; ) {
-            if (buf.remaining() < 4) {
-                break;
-            }
-            len = buf.getInt();
-            b = new byte[len];
-            buf.get(b);
-            String k = new String(b);
+        int blen = b.length;
+        if (blen > 8) {
+            int len;
+            int index = 0;
+            byte[] data = null;
+            for (; ; ) {
+                if (blen - index < 4) {
+                    break;
+                }
+                len = Bytes.bytes2int(b, index);
+                index = index + 4;
+                data = new byte[len];
+                System.arraycopy(b, index, data, 0, len);
+                String key = new String(data);
+                index = index + len;
 
-            len = buf.getInt();
-            b = new byte[len];
-            buf.get(b);
-            String v = new String(b);
-            this.metadata.put(k, v);
+
+                len = Bytes.bytes2int(b, index);
+                index = index + 4;
+                data = new byte[len];
+                System.arraycopy(b, index, data, 0, len);
+                String value = new String(data);
+                index = index + len;
+                this.metadata.put(key, value);
+            }
         }
     }
 

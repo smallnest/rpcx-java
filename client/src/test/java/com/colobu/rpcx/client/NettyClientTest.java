@@ -35,13 +35,13 @@ public class NettyClientTest {
         invocation.setClassName("Arith");
         invocation.setLanguageCode(LanguageCode.GO);
         invocation.setPayload("zzy".getBytes());
-        invocation.setUrl(new URL("rpcx","",0));
+        invocation.setUrl(new URL("rpcx", "", 0));
         invocation.setSerializeType(SerializeType.SerializeNone);
 
         Result result = wrapperInvoker.invoke(invocation);
 
-        if (!result.hasException()){
-            System.out.println(new String((byte[])(result.getValue())));
+        if (!result.hasException()) {
+            System.out.println(new String((byte[]) (result.getValue())));
         } else {
             result.getException().printStackTrace();
         }
@@ -87,7 +87,7 @@ public class NettyClientTest {
 
         ZkServiceDiscovery serviceDiscovery = new ZkServiceDiscovery("/youpin/services/", "Arith");//发现golang的服务
         NettyClient client = new NettyClient(serviceDiscovery);
-        Message res = client.call(req, 2000);
+        Message res = client.call(req, 2000, Constants.SYNC_KEY);
         System.out.println(new String(res.payload));
     }
 

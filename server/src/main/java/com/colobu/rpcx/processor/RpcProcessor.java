@@ -46,8 +46,6 @@ public class RpcProcessor implements NettyRequestProcessor {
             invocation.setArguments(new Object[]{request.getMessage().payload});
         } else if (LanguageCode.JAVA.name().equals(language)) {
             invocation = (RpcInvocation) HessianUtils.read(request.getMessage().payload);
-            invocation.url.setHost(request.getMessage().metadata.get("_host"));
-            invocation.url.setPort(Integer.parseInt(request.getMessage().metadata.get("_port")));
         }
 
         invocation.setClassName(className);
@@ -57,7 +55,7 @@ public class RpcProcessor implements NettyRequestProcessor {
 
         Invoker<Object> wrapperInvoker = Exporter.invokerMap.get(key);
 
-        RemotingCommand res = RemotingCommand.createResponseCommand(new Message(invocation.getClassName(), invocation.getMethodName(), MessageType.Response, request.getOpaque()));
+        RemotingCommand res = request.requestToResponse();
 
         if (null == wrapperInvoker) {
             logger.warn("get invoker is null key:{}", key);

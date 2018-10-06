@@ -124,7 +124,7 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
 
 
     @Override
-    public Message call(Message req, long timeoutMillis) throws Exception {
+    public Message call(Message req, long timeoutMillis, String sendType) throws Exception {
         final RemotingCommand request = RemotingCommand.createRequestCommand(1);
         request.setMessage(req);
 
@@ -138,17 +138,17 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
         }
         setHostAndPort(req, channel);
         Message res = null;
-        if (StringUtils.isEmpty(req.metadata.get(Constants.SEND_TYPE))) {
-            req.metadata.put(Constants.SEND_TYPE, Constants.SYNC_KEY);
+        if (StringUtils.isEmpty(sendType)) {
+            sendType = Constants.SYNC_KEY;
         }
-        if (req.metadata.get(Constants.SEND_TYPE).equals(Constants.SYNC_KEY)) {
+        if (sendType.equals(Constants.SYNC_KEY)) {
             RemotingCommand response = this.invokeSyncImpl(channel, request, timeoutMillis);
             res = response.getMessage();
-        } else if (req.metadata.get(Constants.SEND_TYPE).equals(Constants.ASYNC_KEY)) {
+        } else if (sendType.equals(Constants.ASYNC_KEY)) {
             ResponseFuture future = this.invokeAsyncImpl(channel, request, timeoutMillis, null);
             res = new Message();
             RpcContext.getContext().setFuture(future);
-        } else if (req.metadata.get(Constants.SEND_TYPE).equals(Constants.ONE_WAY_KEY)) {
+        } else if (sendType.equals(Constants.ONE_WAY_KEY)) {
             this.invokeOnewayImpl(channel, request, timeoutMillis);
             res = new Message();
         }
@@ -156,15 +156,15 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
     }
 
     private void setHostAndPort(Message req, Channel channel) {
-        String host = "";
-        int port = 0;
-        if (channel.localAddress() instanceof InetSocketAddress) {
-            host = ((InetSocketAddress) channel.localAddress()).getAddress().toString();
-            port = ((InetSocketAddress) channel.localAddress()).getPort();
-        }
+//        String host = "";
+//        int port = 0;
+//        if (channel.localAddress() instanceof InetSocketAddress) {
+//            host = ((InetSocketAddress) channel.localAddress()).getAddress().toString();
+//            port = ((InetSocketAddress) channel.localAddress()).getPort();
+//        }
 
-        req.metadata.put("_host", host);
-        req.metadata.put("_port", String.valueOf(port));
+//        req.metadata.put("_host", host);
+//        req.metadata.put("_port", String.valueOf(port));
     }
 
 

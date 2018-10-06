@@ -41,6 +41,18 @@ public class CommonTest {
 
 
     @Test
+    public void testFlag() {
+//        RemotingCommand c = RemotingCommand.createResponseCommand();
+        RemotingCommand c = RemotingCommand.createRequestCommand(2);
+        System.out.println(c.flag);
+
+        int bits = 1 << 0;
+        System.out.println(bits);
+
+    }
+
+
+    @Test
     public void testEncode1() throws IOException {
 
         Map<String, String> metadata = Maps.newHashMap();
@@ -341,14 +353,6 @@ public class CommonTest {
 
     }
 
-
-    @Test
-    public void testMessage() {
-        Message m = new Message();
-        m.serviceMethod = "abc";
-        m.clear();
-        System.out.println(m.serviceMethod);
-    }
 
 
     @Test

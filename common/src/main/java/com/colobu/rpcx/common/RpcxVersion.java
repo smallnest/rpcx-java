@@ -5,7 +5,7 @@ package com.colobu.rpcx.common;
  */
 public class RpcxVersion {
 
-    private String version = "0.0.1";
+    private String version = "0.0.6";
     private String date = "20181006";
 
 

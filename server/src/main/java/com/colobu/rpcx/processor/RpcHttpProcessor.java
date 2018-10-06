@@ -60,7 +60,7 @@ public class RpcHttpProcessor implements NettyRequestProcessor {
         invocation.url.setPort(Integer.parseInt(req.metadata.get("_port")));
 
         Invoker<Object> invoker = new RpcProviderInvoker<>(getBeanFunc);
-        //TODO $---
+
         Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.PROVIDER, Sets.newHashSet());
 
         RemotingCommand res = RemotingCommand.createResponseCommand();

@@ -49,7 +49,6 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
         req.setCompressType(CompressType.None);
         req.setSerializeType(invocation.getSerializeType());
 
-        req.metadata.put(Constants.SEND_TYPE, invocation.getSendType());
         invocation.setUrl(this.url);
         byte[] data = null;
         if (invocation.getLanguageCode().equals(LanguageCode.GO)) {
@@ -63,7 +62,7 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
 
         try {
             req.setSeq(seq.incrementAndGet());
-            Message res = client.call(req, invocation.getTimeOut());
+            Message res = client.call(req, invocation.getTimeOut(), invocation.getSendType());
 
             if (res.metadata.containsKey(Constants.RPCX_ERROR_CODE)) {
                 String code = (res.metadata.get(Constants.RPCX_ERROR_CODE));

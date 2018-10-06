@@ -8,7 +8,7 @@ import com.colobu.rpcx.protocol.Message;
  */
 public interface IClient {
 
-    Message call(Message req, long timeOut) throws Exception;
+    Message call(Message req, long timeOut, String sendType) throws Exception;
 
     Message call(String addr, Message req, long timeOut) throws Exception;
 

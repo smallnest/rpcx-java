@@ -2,7 +2,8 @@ package com.colobu.rpcx.protocol;
 
 import com.colobu.rpcx.config.Constants;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by goodjava@qq.com.
@@ -13,20 +14,14 @@ public class RemotingCommand {
 
     private static final int RPC_ONEWAY = 1;
 
-
-    private static AtomicInteger requestId = new AtomicInteger(0);
-
-    private static SerializeType serializeTypeConfigInThisServer = SerializeType.JSON;
-
-    private int code;
+    private int code = 0;
     private int version = 0;
-    private int opaque = requestId.getAndIncrement();
-    private int flag = 0;
+    private int opaque = 0;
+    public int flag = 0;
     /**
      * 解码的时候会用到,不会实际传输
      */
     private transient byte[] data;
-
 
     private Message message;
 
@@ -42,11 +37,6 @@ public class RemotingCommand {
     protected RemotingCommand() {
     }
 
-    public static RemotingCommand createRequestCommand(int code, CommandCustomHeader customHeader) {
-        RemotingCommand cmd = new RemotingCommand();
-        cmd.setCode(code);
-        return cmd;
-    }
 
     public static RemotingCommand createRequestCommand(int code) {
         RemotingCommand cmd = new RemotingCommand();
@@ -72,15 +62,6 @@ public class RemotingCommand {
     public void markResponseType() {
         int bits = 1 << RPC_TYPE;
         this.flag |= bits;
-    }
-
-
-    public static int createNewRequestId() {
-        return requestId.incrementAndGet();
-    }
-
-    public static SerializeType getSerializeTypeConfigInThisServer() {
-        return serializeTypeConfigInThisServer;
     }
 
 
@@ -135,10 +116,16 @@ public class RemotingCommand {
         }
     }
 
-    public static RemotingCommand createResponseCommand(int systemError, String s) {
+    public static RemotingCommand createResponseCommand(int errorCode, String errorMessage) {
         RemotingCommand cmd = new RemotingCommand();
         cmd.markResponseType();
-        cmd.setCode(systemError);
+        cmd.getMessage().setMessageStatusType(MessageStatusType.Error);
+        if (null == cmd.getMessage().metadata) {
+            Map<String, String> map = new HashMap<>(2);
+            cmd.getMessage().setMetadata(map);
+        }
+        cmd.getMessage().metadata.put(Constants.RPCX_ERROR_CODE, String.valueOf(errorCode));
+        cmd.getMessage().metadata.put(Constants.RPCX_ERROR_MESSAGE, errorMessage);
         return cmd;
     }
 
@@ -152,15 +139,28 @@ public class RemotingCommand {
 
     /**
      * rpcx 是通过 meta 传递错误信息的
+     *
      * @param code
      * @param message
      */
-    public void setErrorMessage(String code,String message) {
+    public void setErrorMessage(String code, String message) {
         //带有错误的返回结果
         getMessage().setMessageStatusType(MessageStatusType.Error);
+        if (null == getMessage().metadata) {
+            Map<String, String> map = new HashMap<>(2);
+            getMessage().setMetadata(map);
+        }
         getMessage().metadata.put(Constants.RPCX_ERROR_CODE, code);
         getMessage().metadata.put(Constants.RPCX_ERROR_MESSAGE, message);
     }
 
+    public RemotingCommand requestToResponse() {
+        this.flag ^= 1 << RPC_TYPE;
+        this.message.setMessageType(MessageType.Response);
+        this.data = null;
+        this.message.payload = null;
+        this.message.metadata.clear();
+        return this;
+    }
 
 }
