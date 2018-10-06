@@ -13,7 +13,6 @@ public class NettyServerConfig implements Cloneable {
 
     private int serverSocketSndBufSize = 1024 * 32;
     private int serverSocketRcvBufSize = 1024 * 32;
-    private boolean serverPooledByteBufAllocatorEnable = true;
 
 
     private boolean useEpollNativeSelector = false;
@@ -96,16 +95,6 @@ public class NettyServerConfig implements Cloneable {
 
     public void setServerSocketRcvBufSize(int serverSocketRcvBufSize) {
         this.serverSocketRcvBufSize = serverSocketRcvBufSize;
-    }
-
-
-    public boolean isServerPooledByteBufAllocatorEnable() {
-        return serverPooledByteBufAllocatorEnable;
-    }
-
-
-    public void setServerPooledByteBufAllocatorEnable(boolean serverPooledByteBufAllocatorEnable) {
-        this.serverPooledByteBufAllocatorEnable = serverPooledByteBufAllocatorEnable;
     }
 
 

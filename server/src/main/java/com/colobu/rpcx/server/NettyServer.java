@@ -59,11 +59,11 @@ public class NettyServer extends NettyRemotingAbstract {
 
         if (useEpoll()) {
             logger.info("----->use epollEventLoopGroup");
-            this.eventLoopGroupBoss = new EpollEventLoopGroup(1, new NamedThreadFactory("EpollNettyBoss_", false));
-            this.eventLoopGroupWorker = new EpollEventLoopGroup(nettyServerConfig.getServerWorkerThreads(), new NamedThreadFactory("NettyEpollEventSelector", false));
+            this.eventLoopGroupBoss = new EpollEventLoopGroup(1, new NamedThreadFactory("EpollNettyServerBoss_", false));
+            this.eventLoopGroupWorker = new EpollEventLoopGroup(nettyServerConfig.getServerWorkerThreads(), new NamedThreadFactory("NettyEpollServerWorker_", false));
         } else {
-            this.eventLoopGroupBoss = new NioEventLoopGroup(1, new NamedThreadFactory("NettyBoss_", false));
-            this.eventLoopGroupWorker = new NioEventLoopGroup(nettyServerConfig.getServerWorkerThreads(), new NamedThreadFactory("NettyServerNIOSelector", false));
+            this.eventLoopGroupBoss = new NioEventLoopGroup(1, new NamedThreadFactory("NettyServerBoss_", false));
+            this.eventLoopGroupWorker = new NioEventLoopGroup(nettyServerConfig.getServerWorkerThreads(), new NamedThreadFactory("NettyServerWorker_", false));
         }
 
     }
@@ -79,11 +79,6 @@ public class NettyServer extends NettyRemotingAbstract {
 
 
         ServerBootstrap childHandler = createServerBootstrap();
-
-        if (nettyServerConfig.isServerPooledByteBufAllocatorEnable()) {
-            childHandler.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
-        }
-
         try {
             String host = RemotingUtil.getLocalAddress();
             String port = getServerPort();
@@ -146,6 +141,7 @@ public class NettyServer extends NettyRemotingAbstract {
     private ServerBootstrap createServerBootstrap() {
         return this.serverBootstrap.group(this.eventLoopGroupBoss, this.eventLoopGroupWorker)
                 .channel(useEpoll() ? EpollServerSocketChannel.class : NioServerSocketChannel.class)
+                .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                 .option(ChannelOption.SO_BACKLOG, 1024)
                 .option(ChannelOption.SO_REUSEADDR, true)
                 .option(ChannelOption.SO_KEEPALIVE, false)
