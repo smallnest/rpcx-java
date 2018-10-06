@@ -104,6 +104,40 @@ public class CommonTest {
         System.out.println(Arrays.toString(d));
     }
 
+    @Test
+    public void testEncode3() throws IOException {
+
+        Map<String, String> metadata = Maps.newHashMap();
+        metadata.put("a", "11111111111111111111111");
+        metadata.put("b", "21111111111111111111111");
+        metadata.put("c", "31111111111111111111111");
+
+        long begin = System.currentTimeMillis();
+
+        ByteBuf buffer = Unpooled.buffer(metadata.size() * 30);
+
+        for (Map.Entry<String, String> entry : metadata.entrySet()) {
+            String key = entry.getKey();
+            byte[] keyBytes = key.getBytes();
+
+            buffer.writeBytes(Bytes.int2bytes(keyBytes.length));
+            buffer.writeBytes(keyBytes);
+
+            String v = entry.getValue();
+            if (null == v) {
+                v = "null";
+            }
+            byte[] vBytes = v.getBytes();
+            buffer.writeBytes(Bytes.int2bytes(vBytes.length));
+            buffer.writeBytes(vBytes);
+        }
+
+        buffer.capacity(buffer.writerIndex());
+        System.out.println(System.currentTimeMillis()-begin);
+        System.out.println(Arrays.toString(buffer.array()));
+    }
+
+
 
     //168
     @Test
@@ -256,13 +290,15 @@ public class CommonTest {
         TestPoolFactory factory = new TestPoolFactory();
         GenericObjectPool pool = new GenericObjectPool(factory);
         sw.reset();
-        sw.start();
 
-        pool.addObject();
-        pool.addObject();
-        pool.addObject();
-        pool.addObject();
-        pool.addObject();
+        IntStream.range(0,10000000).forEach(it->{
+            try {
+                pool.addObject();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        sw.start();
         IntStream.range(0, 10000000).forEach(it -> {
             try {
                 Object v = pool.borrowObject();

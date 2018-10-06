@@ -2,6 +2,8 @@ package com.colobu.rpcx.protocol;
 
 import com.colobu.rpcx.common.Bytes;
 import com.colobu.rpcx.rpc.RpcException;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import lombok.Data;
 
 import java.io.*;
@@ -195,13 +197,13 @@ public class Message {
 
         byte[] spBytes = servicePath.getBytes();
         byte[] smBytes = serviceMethod.getBytes();
-        byte[] metaBytes = encodeMetadata();
+        ByteBuf metaBytes = encodeMetadata();
 
         int headLen = header.length;
-        int bodyLen = spBytes.length + 4 + smBytes.length + 4 + metaBytes.length + 4 + payload.length + 4;
+        int bodyLen = spBytes.length + 4 + smBytes.length + 4 + metaBytes.capacity() + 4 + payload.length + 4;
 
         int capacity = headLen + 4 + bodyLen;
-        ByteBuffer buffer = ByteBuffer.allocate(capacity);
+        ByteBuffer buffer = ByteBuffer.allocateDirect(capacity);
         buffer.put(header);
 
         buffer.putInt(bodyLen);
@@ -212,8 +214,8 @@ public class Message {
         buffer.putInt(smBytes.length);
         buffer.put(smBytes);
 
-        buffer.putInt(metaBytes.length);
-        buffer.put(metaBytes);
+        buffer.putInt(metaBytes.capacity());
+        buffer.put(metaBytes.array());
 
         buffer.putInt(payload.length);
         buffer.put(payload);
@@ -222,28 +224,28 @@ public class Message {
     }
 
 
-    private byte[] encodeMetadata() throws IOException {
+    private ByteBuf encodeMetadata() throws IOException {
         if (metadata.size() == 0) {
-            return new byte[]{};
+            return Unpooled.EMPTY_BUFFER;
         }
-        ByteArrayOutputStream os = new ByteArrayOutputStream(40);
+
+        ByteBuf buf = Unpooled.buffer(metadata.size() * 15);
 
         for (Map.Entry<String, String> entry : metadata.entrySet()) {
             String key = entry.getKey();
             byte[] keyBytes = key.getBytes();
-            os.write(Bytes.int2bytes(keyBytes.length));
-            os.write(keyBytes);
+            buf.writeInt(keyBytes.length);
+            buf.writeBytes(keyBytes);
 
             String v = entry.getValue();
             if (null == v) {
                 v = "null";
             }
             byte[] vBytes = v.getBytes();
-            os.write(Bytes.int2bytes(vBytes.length));
-            os.write(vBytes);
+            buf.writeInt(vBytes.length);
+            buf.writeBytes(vBytes);
         }
-
-        return os.toByteArray();
+        return buf.capacity(buf.writerIndex());
     }
 
 
