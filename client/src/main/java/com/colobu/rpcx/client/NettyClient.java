@@ -111,8 +111,7 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
 
     @Override
     public Message call(String addr, Message req, long timeOut) throws Exception {
-        final RemotingCommand request = RemotingCommand.createRequestCommand(1);
-        request.setMessage(req);
+        final RemotingCommand request = RemotingCommand.createRequestCommand(req);
         long timeoutMillis = timeOut;
         //获取或者创建channel
         final Channel channel = this.getAndCreateChannel(addr);
@@ -124,8 +123,7 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
 
     @Override
     public Message call(Message req, long timeoutMillis, String sendType) throws Exception {
-        final RemotingCommand request = RemotingCommand.createRequestCommand(1);
-        request.setMessage(req);
+        final RemotingCommand request = RemotingCommand.createRequestCommand(req);
 
         Channel channel = null;
         String serviceAddr = RpcContext.getContext().getServiceAddr();

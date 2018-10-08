@@ -1,5 +1,6 @@
 package com.colobu.rpcx.common;
 
+import com.colobu.rpcx.protocol.Message;
 import com.colobu.rpcx.protocol.RemotingCommand;
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
@@ -9,7 +10,7 @@ public class TestPoolFactory extends BasePooledObjectFactory<RemotingCommand> {
 
     @Override
     public RemotingCommand create() {
-        return RemotingCommand.createRequestCommand(0);
+        return RemotingCommand.createRequestCommand(new Message());
     }
 
     @Override

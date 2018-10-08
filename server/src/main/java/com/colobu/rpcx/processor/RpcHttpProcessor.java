@@ -62,8 +62,6 @@ public class RpcHttpProcessor implements NettyRequestProcessor {
         String key = ClassUtils.getMethodKey(invocation.getClassName(), invocation.getMethodName(), invocation.getParameterTypeNames());
         Invoker<Object> wrapperInvoker = Exporter.invokerMap.get(key);
 
-        
-        RemotingCommand res = RemotingCommand.createResponseCommand();
         Message resMessage = new Message();
         resMessage.servicePath = invocation.getClassName();
         resMessage.serviceMethod = invocation.getMethodName();
@@ -77,7 +75,8 @@ public class RpcHttpProcessor implements NettyRequestProcessor {
             resMessage.metadata.put(Constants.RPCX_ERROR_CODE, String.valueOf(RemotingSysResponseCode.SYSTEM_ERROR));
             resMessage.metadata.put(Constants.RPCX_ERROR_MESSAGE, rpcResult.getException().getMessage());
         }
-        res.setMessage(resMessage);
+
+        RemotingCommand res = RemotingCommand.createResponseCommand(resMessage);
 
         logger.info("message:{}", res.getMessage());
 

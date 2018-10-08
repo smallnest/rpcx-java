@@ -1,5 +1,6 @@
 package com.colobu.rpcx.netty;
 
+import com.colobu.rpcx.common.Config;
 import com.colobu.rpcx.common.Pair;
 import com.colobu.rpcx.common.RemotingHelper;
 import com.colobu.rpcx.common.RemotingUtil;
@@ -53,7 +54,9 @@ public class NettyRemotingAbstract {
 
 
     public void scanProcessingRequest() {
-        logger.info("processing request num:{}", processingRequest.longValue());
+        if (gracefullyShutDown) {
+            logger.info("processing request num:{}", processingRequest.longValue());
+        }
     }
 
     public void scanResponseTable() {
@@ -147,18 +150,18 @@ public class NettyRemotingAbstract {
         }
     }
 
+    private static final boolean gracefullyShutDown = Boolean.parseBoolean(Config.ins().get("rpcx.gracefully.shutdown", "false"));
+
     public void processRequestCommand(final ChannelHandlerContext ctx, final RemotingCommand cmd) {
         final int opaque = cmd.getOpaque();
         if (this.stop) {
             if (!cmd.isOnewayRPC()) {
-                final RemotingCommand response = RemotingCommand.createResponseCommand();
                 Message message = new Message();
                 message.setMessageType(MessageType.Response);
                 message.setSeq(opaque);
                 message.metadata.put(Constants.RPCX_ERROR_CODE, "-9");
                 message.metadata.put(Constants.RPCX_ERROR_MESSAGE, "server begin shutdown");
-                response.setMessage(message);
-                response.setOpaque(opaque);
+                final RemotingCommand response = RemotingCommand.createResponseCommand(message);
                 ctx.writeAndFlush(response);
             }
             return;
@@ -171,7 +174,9 @@ public class NettyRemotingAbstract {
         if (pair != null) {
             Runnable run = () -> {
                 try {
-                    processingRequest.increment();
+                    if (gracefullyShutDown) {
+                        processingRequest.increment();
+                    }
                     final RemotingCommand response = pair.getObject1().processRequest(ctx, cmd);
                     //是否是oneway是根据来的request计算的
                     if (!cmd.isOnewayRPC()) {
@@ -185,8 +190,6 @@ public class NettyRemotingAbstract {
                                 logger.error(cmd.toString());
                                 logger.error(response.toString());
                             }
-                        } else {
-
                         }
                     }
                 } catch (Throwable e) {
@@ -199,7 +202,9 @@ public class NettyRemotingAbstract {
                         ctx.writeAndFlush(response);
                     }
                 } finally {
-                    processingRequest.decrement();
+                    if (gracefullyShutDown) {
+                        processingRequest.decrement();
+                    }
                 }
             };
 
@@ -318,19 +323,21 @@ public class NettyRemotingAbstract {
         logger.info("server shutdown begin");
         stop = true;
         int i = 0;
-        while (true) {
-            if (i++ >= 30) {
-                break;
-            }
-            long num = this.processingRequest.sum();
-            logger.info("shutdown processing request num:{}", num);
-            if (num == 0) {
-                break;
-            }
-            try {
-                TimeUnit.SECONDS.sleep(1);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        if (gracefullyShutDown) {
+            while (true) {
+                if (i++ >= 30) {
+                    break;
+                }
+                long num = this.processingRequest.sum();
+                logger.info("shutdown processing request num:{}", num);
+                if (num == 0) {
+                    break;
+                }
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
         logger.info("server shutdown finish");

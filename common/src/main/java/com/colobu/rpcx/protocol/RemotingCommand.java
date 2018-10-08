@@ -10,14 +10,11 @@ import java.util.Map;
  */
 public class RemotingCommand {
 
-    private static final int RPC_TYPE = 0;
-
-    private static final int RPC_ONEWAY = 1;
 
     private int code = 0;
     private int version = 0;
-    private int opaque = 0;
-    public int flag = 0;
+
+
     /**
      * 解码的时候会用到,不会实际传输
      */
@@ -34,34 +31,32 @@ public class RemotingCommand {
         this.setOpaque((int) this.message.getSeq());
     }
 
-    protected RemotingCommand() {
+    public RemotingCommand() {
+    }
+
+    public RemotingCommand(Message message, byte[] body) {
+        this.message = message;
+        this.data = body;
     }
 
 
-    public static RemotingCommand createRequestCommand(int code) {
+    public static RemotingCommand createRequestCommand(Message message) {
         RemotingCommand cmd = new RemotingCommand();
-        cmd.setCode(code);
-        return cmd;
-    }
-
-
-    public static RemotingCommand createResponseCommand() {
-        RemotingCommand cmd = new RemotingCommand();
-        cmd.markResponseType();
+        cmd.setMessage(message);
         return cmd;
     }
 
 
     public static RemotingCommand createResponseCommand(Message message) {
         RemotingCommand cmd = new RemotingCommand();
-        cmd.markResponseType();
         cmd.setMessage(message);
         return cmd;
     }
 
+
+
     public void markResponseType() {
-        int bits = 1 << RPC_TYPE;
-        this.flag |= bits;
+        this.message.setMessageType(MessageType.Response);
     }
 
 
@@ -82,17 +77,16 @@ public class RemotingCommand {
     }
 
     public int getOpaque() {
-        return this.opaque;
+        return (int) this.message.getSeq();
     }
 
     public void setOpaque(int opaque) {
-        this.opaque = opaque;
+        this.message.setSeq(opaque);
     }
 
 
     public boolean isOnewayRPC() {
-        int bits = 1 << RPC_ONEWAY;
-        return (this.flag & bits) == bits;
+        return this.message.isOneway();
     }
 
 
@@ -103,17 +97,13 @@ public class RemotingCommand {
         return RemotingCommandType.REQUEST_COMMAND;
     }
 
+
     public boolean isResponseType() {
-        int bits = 1 << RPC_TYPE;
-        return (this.flag & bits) == bits;
+        return this.message.getMessageType().equals(MessageType.Response);
     }
 
     public void markOnewayRPC() {
-        int bits = 1 << RPC_ONEWAY;
-        this.flag |= bits;
-        if (null != message) {
-            this.message.setOneway(true);
-        }
+        this.message.setOneway(true);
     }
 
     public static RemotingCommand createResponseCommand(int errorCode, String errorMessage) {
@@ -157,7 +147,6 @@ public class RemotingCommand {
     }
 
     public RemotingCommand requestToResponse() {
-        this.flag ^= 1 << RPC_TYPE;
         this.message.setMessageType(MessageType.Response);
         this.data = new byte[]{};
         this.message.payload = new byte[]{};

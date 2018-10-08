@@ -1,8 +1,6 @@
 package com.colobu.rpcx.netty;
 
-import com.colobu.rpcx.common.Bytes;
 import com.colobu.rpcx.protocol.Message;
-import com.colobu.rpcx.protocol.MessageType;
 import com.colobu.rpcx.protocol.RemotingCommand;
 import com.colobu.rpcx.rpc.RpcException;
 import io.netty.buffer.ByteBuf;
@@ -36,26 +34,15 @@ public class NettyDecoder extends ReplayingDecoder<DecoderState> {
                 byte[] header = new byte[12];
                 header[0] = Message.magicNumber;
                 in.readBytes(header, 1, 11);
-                //消息类型
-                message.setMessageType(header[2]);
-                //消息的序列号
-                long seq = Bytes.bytes2long(header, 4);
-                message.setSeq(seq);
-
+                message.header = header;
                 checkpoint(DecoderState.Body);
             case Body:
                 int totalLen = in.readInt();
                 byte[] data = new byte[totalLen];
                 in.readBytes(data);
-                MessageType type = message.getMessageType();
-                RemotingCommand command = type == MessageType.Request ? RemotingCommand.createRequestCommand(2) : RemotingCommand.createResponseCommand();
-                //业务解码交给业务层
-                command.setData(data);
-                command.setMessage(message);
-                if (message.isOneway()) {
-                    command.markOnewayRPC();
-                }
+                RemotingCommand command = new RemotingCommand(message, data);
                 checkpoint(DecoderState.MagicNumber);
+                //业务解码交给业务层
                 out.add(command);
                 break;
             default:

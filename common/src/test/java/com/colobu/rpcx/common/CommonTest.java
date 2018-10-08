@@ -43,9 +43,7 @@ public class CommonTest {
     @Test
     public void testFlag() {
 //        RemotingCommand c = RemotingCommand.createResponseCommand();
-        RemotingCommand c = RemotingCommand.createRequestCommand(2);
-        System.out.println(c.flag);
-
+        RemotingCommand c = RemotingCommand.createRequestCommand(new Message());
         int bits = 1 << 0;
         System.out.println(bits);
 
@@ -295,7 +293,7 @@ public class CommonTest {
     public void testPool() throws Exception {
         Stopwatch sw = Stopwatch.createStarted();
         IntStream.range(0, 10000000).forEach(it -> {
-            RemotingCommand.createRequestCommand(2);
+            RemotingCommand.createRequestCommand(new Message());
         });
         System.out.println(sw.elapsed(TimeUnit.MILLISECONDS));
 
@@ -328,7 +326,7 @@ public class CommonTest {
     public void testPool2() {
         Stopwatch sw = Stopwatch.createStarted();
         IntStream.range(0, 10000000).forEach(it -> {
-            RemotingCommand.createRequestCommand(2);
+            RemotingCommand.createRequestCommand(new Message());
         });
         System.out.println(sw.elapsed(TimeUnit.MILLISECONDS));
     }
@@ -505,7 +503,7 @@ public class CommonTest {
 
     @Test
     public void testCode() {
-        RemotingCommand c = RemotingCommand.createResponseCommand();
+        RemotingCommand c = RemotingCommand.createResponseCommand(new Message());
         c.markOnewayRPC();
         System.out.println(c.isOnewayRPC());
     }

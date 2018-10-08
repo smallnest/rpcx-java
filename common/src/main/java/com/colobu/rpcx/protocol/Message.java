@@ -250,6 +250,7 @@ public class Message {
         b = new byte[len];
         buf.get(b);
         serviceMethod = new String(b);
+
         len = buf.getInt();
         b = new byte[len];
         buf.get(b);

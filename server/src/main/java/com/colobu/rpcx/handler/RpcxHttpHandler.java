@@ -2,6 +2,7 @@ package com.colobu.rpcx.handler;
 
 import com.colobu.rpcx.protocol.LanguageCode;
 import com.colobu.rpcx.protocol.Message;
+import com.colobu.rpcx.protocol.MessageType;
 import com.colobu.rpcx.protocol.RemotingCommand;
 import com.colobu.rpcx.server.NettyServer;
 import io.netty.buffer.ByteBuf;
@@ -9,6 +10,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaders;
+import org.jboss.netty.handler.codec.socks.SocksMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +58,6 @@ public class RpcxHttpHandler extends SimpleChannelInboundHandler<FullHttpRequest
         byte[] payload = new byte[len];
         buf.readBytes(payload);
 
-        RemotingCommand command = RemotingCommand.createRequestCommand(1984);
         Message message = new Message();
         message.metadata.put("language", LanguageCode.HTTP.name());
         message.metadata.put("_host", getClientIp(ctx, msg));
@@ -64,8 +65,10 @@ public class RpcxHttpHandler extends SimpleChannelInboundHandler<FullHttpRequest
         message.servicePath = servicePath;
         message.serviceMethod = serviceMethod;
         message.payload = payload;
-        command.setMessage(message);
-        command.markOnewayRPC();
+        message.setMessageType(MessageType.Request);
+        message.setOneway(true);
+        RemotingCommand command = RemotingCommand.createRequestCommand(message);
+        command.setCode(1984);
         //这里会异步处理
         nettyServer.processRequestCommand(ctx, command);
     }
