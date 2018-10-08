@@ -73,7 +73,8 @@ public class NettyServer extends NettyRemotingAbstract {
         //默认的处理器
         this.defaultRequestProcessor = createDefaultRequestProcessor();
         //http网关请求处理器
-        this.registerProcessor(1984, new RpcHttpProcessor(this.getBeanFunc), new ThreadPoolExecutor(50, 50,
+        int httpProcessorNum = Integer.valueOf(Config.ins().get("rpcx.http.processor.num", "50"));
+        this.registerProcessor(1984, new RpcHttpProcessor(this.getBeanFunc), new ThreadPoolExecutor(httpProcessorNum, httpProcessorNum,
                 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(), new NamedThreadFactory("httpRequestProcessor")));
 
@@ -102,7 +103,8 @@ public class NettyServer extends NettyRemotingAbstract {
     }
 
     private Pair<NettyRequestProcessor, ExecutorService> createDefaultRequestProcessor() {
-        ThreadPoolExecutor executor = new ThreadPoolExecutor(1000, 1000,
+        int processorNum = Integer.valueOf(Config.ins().get("rpcx.processor.num", "1000"));
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(processorNum, processorNum,
                 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(), new NamedThreadFactory("DefaultRequestProcessorPool"));
 

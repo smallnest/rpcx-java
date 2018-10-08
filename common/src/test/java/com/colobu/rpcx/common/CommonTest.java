@@ -550,6 +550,7 @@ public class CommonTest {
     @Test
     public void testConfig() {
         System.out.println(Config.ins().get("server.type"));
+        System.out.println(Config.ins().get("server.type1","aaaa"));
     }
 
 

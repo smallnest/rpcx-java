@@ -26,4 +26,13 @@ public class Config {
     public String get(String key) {
         return this.properties.getProperty(key);
     }
+
+    public String get(String key,String defaultValue) {
+        String value = this.properties.getProperty(key);
+        if (null == value) {
+            return defaultValue;
+        } else {
+            return value;
+        }
+    }
 }
