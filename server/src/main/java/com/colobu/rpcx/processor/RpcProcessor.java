@@ -12,7 +12,6 @@ import com.colobu.rpcx.rpc.Result;
 import com.colobu.rpcx.rpc.URL;
 import com.colobu.rpcx.rpc.impl.Exporter;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
-import com.google.gson.Gson;
 import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,9 +77,7 @@ public class RpcProcessor implements NettyRequestProcessor {
 
         Result rpcResult = wrapperInvoker.invoke(invocation);
 
-        if (invocation.languageCode.equals(LanguageCode.HTTP)) {
-            res.getMessage().payload = new Gson().toJson(rpcResult.getValue()).getBytes();
-        } else if (invocation.languageCode.equals(LanguageCode.JAVA)) {
+        if (invocation.languageCode.equals(LanguageCode.JAVA)) {
             res.getMessage().payload = HessianUtils.write(rpcResult.getValue());
         } else {
             res.getMessage().payload = (byte[]) rpcResult.getValue();
