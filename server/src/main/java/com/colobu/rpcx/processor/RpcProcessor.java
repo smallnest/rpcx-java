@@ -51,11 +51,23 @@ public class RpcProcessor implements NettyRequestProcessor {
         invocation.setClassName(className);
         invocation.setMethodName(methodName);
 
-        String key = ClassUtils.getMethodKey(className, methodName, invocation.getParameterTypeNames());
-
-        Invoker<Object> wrapperInvoker = Exporter.invokerMap.get(key);
+        Invoker<Object> wrapperInvoker = null;
 
         RemotingCommand res = request.requestToResponse();
+
+        String key = "";
+
+        //泛化调用
+        if (methodName.equals(Constants.$ECHO)) {
+            key = Constants.$ECHO;
+        } else if (methodName.equals(Constants.$INVOKE)) {
+            key = Constants.$INVOKE;
+        }
+        else {
+            key = ClassUtils.getMethodKey(className, methodName, invocation.getParameterTypeNames());
+        }
+
+        wrapperInvoker = Exporter.invokerMap.get(key);
 
         if (null == wrapperInvoker) {
             logger.warn("get invoker is null key:{}", key);

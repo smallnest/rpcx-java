@@ -7,20 +7,20 @@ import com.colobu.rpcx.common.StringUtils;
 import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.filter.FilterWrapper;
 import com.colobu.rpcx.rpc.Invoker;
-import com.colobu.rpcx.rpc.ReflectUtils;
 import com.colobu.rpcx.rpc.URL;
 import com.colobu.rpcx.rpc.annotation.Provider;
 import com.esotericsoftware.reflectasm.MethodAccess;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author goodjava@qq.com
@@ -38,6 +38,11 @@ public class Exporter {
     }
 
 
+    /**
+     * 导出所有对外服务(包括 echo 和 泛化调用)
+     * @param providerPackage
+     * @return
+     */
     public Set<String> export(String providerPackage) {
         logger.info("export");
         Set<Class<?>> set = new ProviderFinder(providerPackage).find();
@@ -62,6 +67,10 @@ public class Exporter {
                     initProviderInvoker(key, className, method, parameterTypeNames, url);
                 }
             });
+            //echo invoker
+            initEchoInvoker();
+            //generic invoker
+            initGenericInvoker();
 
             //这里的url是注册到zk
             URL url = new URL("rpcx", "", 0);
@@ -86,6 +95,7 @@ public class Exporter {
     }
 
 
+
     /**
      * 初始化providerInvoker
      */
@@ -107,7 +117,7 @@ public class Exporter {
         Set<String> excludeFilters = Arrays.stream(typeProvider.excludeFilters()).collect(Collectors.toSet());
 
         //兼容性更好些
-        Method method = this.getMethod(className, methodName, parameterTypeNames);
+        Method method = ClassUtils.getMethod(className, methodName, parameterTypeNames);
         invoker.setMethod(method);
 
         //reflectasm更快些(实际上是把反射生成了直接调用的代码)
@@ -122,11 +132,37 @@ public class Exporter {
             setMethodParameters(methodProvider, url.getParameters());
         }
 
-        Set<String> filterNames = new HashSet<>();
         wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.PROVIDER, excludeFilters);
 
         invokerMap.putIfAbsent(key, wrapperInvoker);
         return wrapperInvoker;
+    }
+
+    /**
+     * echo
+     */
+    private void initEchoInvoker() {
+        Invoker<Object> invoker = new RpcProviderInvoker<>(getBeanFunc);
+        URL url = new URL("rpcx", "", 0);
+        url.setHost(NetUtils.getLocalHost());
+        url.setPort(0);
+        invoker.setUrl(url);
+        Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.PROVIDER, Sets.newHashSet());
+        invokerMap.putIfAbsent(Constants.$ECHO, wrapperInvoker);
+    }
+
+    /**
+     * 泛化调用
+     */
+    private void initGenericInvoker() {
+        Invoker<Object> invoker = new RpcProviderInvoker<>(getBeanFunc);
+        URL url = new URL("rpcx", "", 0);
+        url.setHost(NetUtils.getLocalHost());
+        url.setPort(0);
+        invoker.setUrl(url);
+        ((RpcProviderInvoker<Object>) invoker).setUseMethodAccess(false);
+        Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.PROVIDER, Sets.newHashSet());
+        invokerMap.putIfAbsent(Constants.$INVOKE, wrapperInvoker);
     }
 
     private void setTypeParameters(Provider provider, Map<String, String> parameters) {
@@ -163,18 +199,6 @@ public class Exporter {
         if (StringUtils.isNotEmpty(provider.version())) {
             parameters.put(Constants.VERSION_KEY, String.valueOf(provider.version()));
         }
-    }
-
-    private Method getMethod(String className, String methodName, String[] parameterTypeNames) {
-        Class<?> clazz = ClassUtils.getClassByName(className);
-        Class[] clazzArray = Stream.of(parameterTypeNames).map(it -> ReflectUtils.forName(it)).toArray(Class[]::new);
-        Method m = null;
-        try {
-            m = clazz.getMethod(methodName, clazzArray);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        }
-        return m;
     }
 
 

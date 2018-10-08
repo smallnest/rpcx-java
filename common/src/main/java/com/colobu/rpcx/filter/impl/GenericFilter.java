@@ -1,6 +1,7 @@
 package com.colobu.rpcx.filter.impl;
 
 
+import com.colobu.rpcx.common.ClassUtils;
 import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.filter.Filter;
 import com.colobu.rpcx.rpc.Invoker;
@@ -8,9 +9,11 @@ import com.colobu.rpcx.rpc.ReflectUtils;
 import com.colobu.rpcx.rpc.Result;
 import com.colobu.rpcx.rpc.RpcException;
 import com.colobu.rpcx.rpc.annotation.RpcFilter;
+import com.colobu.rpcx.rpc.impl.Exporter;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
 import com.google.gson.Gson;
 
+import java.lang.reflect.Method;
 import java.util.stream.IntStream;
 
 
@@ -46,6 +49,10 @@ public class GenericFilter implements Filter {
             inv.setMethodName(args[0]);
             inv.setParameterTypes(classTypes);
             inv.setArguments(params);
+
+
+            Method method = ClassUtils.getMethod(inv.getClassName(), inv.getMethodName(), inv.getParameterTypeNames());
+            invoker.setMethod(method);
 
             Result res = invoker.invoke(inv);
 

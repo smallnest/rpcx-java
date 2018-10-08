@@ -60,4 +60,17 @@ public class ClassUtils {
     }
 
 
+    public static Method getMethod(String className, String methodName, String[] parameterTypeNames) {
+        Class<?> clazz = ClassUtils.getClassByName(className);
+        Class[] clazzArray = Stream.of(parameterTypeNames).map(it -> ReflectUtils.forName(it)).toArray(Class[]::new);
+        Method m = null;
+        try {
+            m = clazz.getMethod(methodName, clazzArray);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        return m;
+    }
+
+
 }

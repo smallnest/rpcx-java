@@ -158,7 +158,7 @@ public class RemotingCommand {
         this.flag ^= 1 << RPC_TYPE;
         this.message.setMessageType(MessageType.Response);
         this.data = null;
-        this.message.payload = null;
+        this.message.payload = new byte[]{};
         this.message.metadata.clear();
         return this;
     }

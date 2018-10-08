@@ -1,5 +1,6 @@
 package com.colobu.rpcx.rpc.impl;
 
+import com.colobu.rpcx.common.ClassUtils;
 import com.colobu.rpcx.rpc.Invoker;
 import com.colobu.rpcx.rpc.Result;
 import com.colobu.rpcx.rpc.RpcException;
@@ -20,6 +21,12 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
     private static final Logger logger = LoggerFactory.getLogger(RpcProviderInvoker.class);
 
     private static final boolean useMethodAccess = true;
+
+    /**
+     * 这个invoker 是否被共享(泛化调用就是共享的)
+     * 如果是共享的 则class 和 method 都是不能设值的,不然并发下是有问题的
+     */
+    private boolean share = false;
 
     /**
      * 如果是基于ioc容器的,需要提供获取bean的function
@@ -51,17 +58,33 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
             Result rpcResult = new RpcResult();
             //使用容器
             if (null != this.getBeanFunc) {
-                Object b = getBeanFunc.apply(clazz);
-                if (useMethodAccess) {
-                    obj = methodAccess.invoke(b, invocation.getMethodName(),invocation.getArguments());
+                if (share) {
+                    //泛化调用,每次都创建不同的
+                    Class c = ClassUtils.getClassByName(invocation.getClassName());
+                    Object b = getBeanFunc.apply(c);
+                    Method method = ClassUtils.getMethod(invocation.getClassName(), invocation.getMethodName(), invocation.getParameterTypeNames());
+                    obj = method.invoke(b, invocation.getArguments());
                 } else {
-                    obj = this.method.invoke(b, invocation.getArguments());
+                    //每次都调用相同的,应为class 和 method 都已经实例化好了
+                    Object b = getBeanFunc.apply(clazz);
+                    if (useMethodAccess) {
+                        obj = methodAccess.invoke(b, invocation.getMethodName(), invocation.getArguments());
+                    } else {
+                        obj = this.method.invoke(b, invocation.getArguments());
+                    }
                 }
             } else {//不使用容器
-                if (useMethodAccess) {
-                   obj = methodAccess.invoke(clazz.newInstance(), invocation.getMethodName(), invocation.getArguments());
+                if (share) {
+                    Class c = ClassUtils.getClassByName(invocation.getClassName());
+                    Object b = getBeanFunc.apply(c);
+                    Method method = ClassUtils.getMethod(invocation.getClassName(), invocation.getMethodName(), invocation.getParameterTypeNames());
+                    obj = method.invoke(b, invocation.getArguments());
                 } else {
-                    obj = this.method.invoke(clazz.newInstance(), invocation.getArguments());
+                    if (useMethodAccess) {
+                        obj = methodAccess.invoke(clazz.newInstance(), invocation.getMethodName(), invocation.getArguments());
+                    } else {
+                        obj = this.method.invoke(clazz.newInstance(), invocation.getArguments());
+                    }
                 }
             }
             rpcResult.setValue(obj);
@@ -113,5 +136,9 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
     @Override
     public void setMethodAccess(MethodAccess methodAccess) {
         this.methodAccess = methodAccess;
+    }
+
+    public void setShare(boolean share) {
+        this.share = share;
     }
 }

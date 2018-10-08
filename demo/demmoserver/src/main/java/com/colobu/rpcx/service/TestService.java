@@ -46,7 +46,7 @@ public class TestService implements ITestService {
         return ("hi " + new String(data)).getBytes();
     }
 
-    @Provider(cache = true)
+//    @Provider(cache = true)
     public int sum(int a, int b) {
         return a + b;
     }
