@@ -73,13 +73,18 @@ public class TestController {
     public String async() throws InterruptedException {
         testService.async();
         ResponseFuture<String> f1 = RpcContext.getContext().getFuture();
+        //需要自己手动清理
         RpcContext.removeContext();
         testService.async();
         ResponseFuture<String> f2 = RpcContext.getContext().getFuture();
         RpcContext.removeContext();
-        String s1 = f1.get(2000);
-        String s2 = f2.get(2000);
-        String result = s1 + s2;
+        String result = "";
+        if (null != f1 && f2 != null) {
+            String s1 = f1.get(2000);
+            String s2 = f2.get(2000);
+            result = s1 + s2;
+        }
+
         return result;
     }
 

@@ -1,5 +1,6 @@
 package com.colobu.rpcx.rpc.impl;
 
+import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.fail.FailType;
 import com.colobu.rpcx.protocol.LanguageCode;
 import com.colobu.rpcx.protocol.SerializeType;
@@ -43,7 +44,7 @@ public class RpcInvocation implements Invocation, Serializable {
 
     private int retryNum = 1;
 
-    private String sendType;
+    private String sendType = Constants.SYNC_KEY;
 
     public LanguageCode languageCode = LanguageCode.JAVA;
 
