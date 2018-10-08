@@ -15,7 +15,17 @@ public class CglibProxy {
         Enhancer e = new Enhancer();
         e.setSuperclass(clazz);
         e.setCallback((net.sf.cglib.proxy.InvocationHandler) (proxy, method, args) -> {
-            return function.apply(method,args);
+            String methodName = method.getName();
+            if ("getClass".equals(methodName)) {
+                return proxy.getClass();
+            }
+            if ("hashCode".equals(methodName)) {
+                return proxy.hashCode();
+            }
+            if ("toString".equals(methodName)) {
+                return proxy.toString();
+            }
+            return function.apply(method, args);
         });
         return (T) e.create();
     }

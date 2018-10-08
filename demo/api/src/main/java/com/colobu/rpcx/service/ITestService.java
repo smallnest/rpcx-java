@@ -14,6 +14,12 @@ public interface ITestService {
     byte[] golangHi(byte[] data);
 
 
-    int sum(int a,int b);
+    int sum(int a, int b);
+
+    /**
+     * 异步调用
+     * @return
+     */
+    String async();
 
 }

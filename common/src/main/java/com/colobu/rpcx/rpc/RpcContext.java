@@ -15,12 +15,7 @@ import java.util.concurrent.*;
  */
 public class RpcContext {
 	
-	private static final ThreadLocal<RpcContext> LOCAL = new ThreadLocal<RpcContext>() {
-		@Override
-		protected RpcContext initialValue() {
-			return new RpcContext();
-		}
-	};
+	private static final ThreadLocal<RpcContext> LOCAL = ThreadLocal.withInitial(() -> new RpcContext());
 
 	public static RpcContext getContext() {
 	    return LOCAL.get();

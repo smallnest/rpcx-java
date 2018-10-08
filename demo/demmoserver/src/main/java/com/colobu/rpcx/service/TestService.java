@@ -41,6 +41,10 @@ public class TestService implements ITestService {
         return "hi ####" + str;
     }
 
+    public String async() {
+        return "result:"+System.currentTimeMillis();
+    }
+
 
     public byte[] golangHi(byte[] data) {
         return ("hi " + new String(data)).getBytes();

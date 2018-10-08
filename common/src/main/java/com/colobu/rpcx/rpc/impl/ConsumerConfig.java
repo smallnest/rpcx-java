@@ -121,7 +121,6 @@ public class ConsumerConfig {
             invocation.setResultType(method.getReturnType());
 
             Invoker invoker = new RpcConsumerInvoker(client);
-            //TODO $---
             Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.CONSUMER,Sets.newHashSet());
 
             Result result = wrapperInvoker.invoke(invocation);

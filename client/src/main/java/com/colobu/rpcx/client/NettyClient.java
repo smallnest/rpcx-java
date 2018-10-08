@@ -109,7 +109,6 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
     }
 
 
-
     @Override
     public Message call(String addr, Message req, long timeOut) throws Exception {
         final RemotingCommand request = RemotingCommand.createRequestCommand(1);
@@ -279,6 +278,7 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
 
     /**
      * 异步调用
+     *
      * @param channel
      * @param request
      * @param timeoutMillis
@@ -301,28 +301,25 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
             final ResponseFuture responseFuture = new ResponseFuture(opaque, timeoutMillis, invokeCallback, once);
             this.responseTable.put(opaque, responseFuture);
             try {
-                channel.writeAndFlush(request).addListener(new ChannelFutureListener() {
-                    @Override
-                    public void operationComplete(ChannelFuture f) {
-                        if (f.isSuccess()) {
-                            responseFuture.setSendRequestOK(true);
-                            return;
-                        } else {
-                            responseFuture.setSendRequestOK(false);
-                        }
-                        //发送失败会解除阻塞
-                        responseFuture.putResponse(null);
-                        responseTable.remove(opaque);
-                        try {
-                            responseFuture.executeInvokeCallback();
-                        } catch (Throwable e) {
-                            logger.warn("excute callback in writeAndFlush addListener, and callback throw", e);
-                        } finally {
-                            responseFuture.release();
-                        }
-
-                        logger.warn("send a request command to channel <{}> failed.", RemotingHelper.parseChannelRemoteAddr(channel));
+                channel.writeAndFlush(request).addListener((ChannelFutureListener) f -> {
+                    if (f.isSuccess()) {
+                        responseFuture.setSendRequestOK(true);
+                        return;
+                    } else {
+                        responseFuture.setSendRequestOK(false);
                     }
+                    //发送失败会解除阻塞
+                    responseFuture.putResponse(null);
+                    responseTable.remove(opaque);
+                    try {
+                        responseFuture.executeInvokeCallback();
+                    } catch (Throwable e) {
+                        logger.warn("excute callback in writeAndFlush addListener, and callback throw", e);
+                    } finally {
+                        responseFuture.release();
+                    }
+
+                    logger.warn("send a request command to channel <{}> failed.", RemotingHelper.parseChannelRemoteAddr(channel));
                 });
             } catch (Exception e) {
                 responseFuture.release();

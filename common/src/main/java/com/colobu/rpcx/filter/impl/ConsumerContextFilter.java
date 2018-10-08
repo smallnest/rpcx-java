@@ -39,9 +39,16 @@ public class ConsumerContextFilter implements Filter {
         try {
             return invoker.invoke(invocation);
         } finally {
-            RpcContext.getContext().clearAttachments();
-            RpcContext.getContext().setServiceAddr("");
-            RpcContext.removeContext();
+            //同步的和oneway的直接清除掉context
+            if (invocation.getSendType().equals(Constants.SYNC_KEY) || invocation.getSendType().equals(Constants.ONE_WAY_KEY)) {
+                RpcContext.removeContext();
+            } else {
+                //async 需要手动自己清理(RpcContext.removeContext),因为future 还要从 contex他中拿
+                RpcContext.getContext().clearAttachments();
+                RpcContext.getContext().setServiceAddr("");
+                RpcContext.getContext().setLocalAddress("", 0);
+                RpcContext.getContext().setRemoteAddress("", 0);
+            }
         }
     }
 

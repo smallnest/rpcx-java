@@ -30,7 +30,7 @@ public class ConsumerConfig {
         return rpcxConsumer.wrap(ITestService.class, new ConsumerConfigBuilder()
 //                .setGroup("test")
                 .setToken("zzy123")
-                .setSendType(Constants.SYNC_KEY)
+                .setSendType(Constants.ASYNC_KEY)
                 .setTimeout(600000)
                 .setFailType(FailType.FailTry)
                 .setSelectMode(SelectMode.WeightedRoundRobin)

@@ -65,18 +65,20 @@ public class TestController {
 
     /**
      * 异步模式(必须consumer 开启 异步模式)
-     *
+     * ConsumerConfigBuilder.setSendType(Constants.ASYNC_KEY)
      * @return
      * @throws InterruptedException
      */
-//    @GetMapping("/async")
+    @GetMapping("/async")
     public String async() throws InterruptedException {
-        testService.hi("abc");
+        testService.async();
         ResponseFuture<String> f1 = RpcContext.getContext().getFuture();
-        testService.hi("def");
+        RpcContext.removeContext();
+        testService.async();
         ResponseFuture<String> f2 = RpcContext.getContext().getFuture();
-        String s1 = f1.get(6000);
-        String s2 = f2.get(6000);
+        RpcContext.removeContext();
+        String s1 = f1.get(2000);
+        String s2 = f2.get(2000);
         String result = s1 + s2;
         return result;
     }

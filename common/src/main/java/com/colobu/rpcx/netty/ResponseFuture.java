@@ -3,8 +3,11 @@ package com.colobu.rpcx.netty;
 
 import com.colobu.rpcx.common.InvokeCallback;
 import com.colobu.rpcx.common.SemaphoreReleaseOnlyOnce;
+import com.colobu.rpcx.config.Constants;
+import com.colobu.rpcx.protocol.MessageStatusType;
 import com.colobu.rpcx.protocol.RemotingCommand;
 import com.colobu.rpcx.rpc.HessianUtils;
+import com.colobu.rpcx.rpc.RpcException;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -69,7 +72,8 @@ public class ResponseFuture<T> {
     }
 
     /**
-     *  放入结果就是coutDownLatch 执行countDown  waitResponse就不会再阻塞
+     * 放入结果就是coutDownLatch 执行countDown  waitResponse就不会再阻塞
+     *
      * @param responseCommand
      */
     public void putResponse(final RemotingCommand responseCommand) {
@@ -138,7 +142,12 @@ public class ResponseFuture<T> {
 
     public T get(long timeoutMillis) throws InterruptedException {
         RemotingCommand res = this.waitResponse(timeoutMillis);
-        byte[] data = res.getMessage().payload;
-        return (T) HessianUtils.read(data);
+        //如果有错误,则输出错误异常
+        if (res.getMessage().getMessageStatusType().equals(MessageStatusType.Error)) {
+            throw new RpcException(res.getMessage().getMetadata().get(Constants.RPCX_ERROR_MESSAGE), res.getMessage().getMetadata().get(Constants.RPCX_ERROR_CODE));
+        } else {
+            byte[] data = res.getMessage().payload;
+            return (T) HessianUtils.read(data);
+        }
     }
 }
