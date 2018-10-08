@@ -160,7 +160,7 @@ public class Exporter {
         url.setHost(NetUtils.getLocalHost());
         url.setPort(0);
         invoker.setUrl(url);
-        ((RpcProviderInvoker<Object>) invoker).setUseMethodAccess(false);
+        ((RpcProviderInvoker<Object>) invoker).setShare(true);
         Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.PROVIDER, Sets.newHashSet());
         invokerMap.putIfAbsent(Constants.$INVOKE, wrapperInvoker);
     }
