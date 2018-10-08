@@ -349,21 +349,18 @@ public class NettyClient extends NettyRemotingAbstract implements IClient {
             this.responseTable.put(opaque, responseFuture);
             final SocketAddress addr = channel.remoteAddress();
             //通过网络发送信息
-            channel.writeAndFlush(request).addListener(new ChannelFutureListener() {
-                @Override
-                public void operationComplete(ChannelFuture f) {
-                    if (f.isSuccess()) {
-                        responseFuture.setSendRequestOK(true);
-                        return;
-                    } else {
-                        responseFuture.setSendRequestOK(false);
-                    }
-                    //发送失败responseTable中直接删除
-                    responseTable.remove(opaque);
-                    responseFuture.setCause(f.cause());
-                    responseFuture.putResponse(null);
-                    logger.warn("send a request command to channel <" + addr + "> failed.");
+            channel.writeAndFlush(request).addListener((ChannelFutureListener) f -> {
+                if (f.isSuccess()) {
+                    responseFuture.setSendRequestOK(true);
+                    return;
+                } else {
+                    responseFuture.setSendRequestOK(false);
                 }
+                //发送失败responseTable中直接删除
+                responseTable.remove(opaque);
+                responseFuture.setCause(f.cause());
+                responseFuture.putResponse(null);
+                logger.warn("send a request command to channel <" + addr + "> failed.");
             });
             //这里会直接阻塞住(CountDownLatch)
             RemotingCommand responseCommand = responseFuture.waitResponse(timeoutMillis);

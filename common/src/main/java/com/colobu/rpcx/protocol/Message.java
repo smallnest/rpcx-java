@@ -45,7 +45,7 @@ public class Message {
         header = new byte[12];
         header[0] = magicNumber;
         payload = new byte[]{};
-        this.metadata = new HashMap<>();
+        this.metadata = new HashMap<>(2);
     }
 
 

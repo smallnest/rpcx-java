@@ -120,10 +120,6 @@ public class RemotingCommand {
         RemotingCommand cmd = new RemotingCommand();
         cmd.markResponseType();
         cmd.getMessage().setMessageStatusType(MessageStatusType.Error);
-        if (null == cmd.getMessage().metadata) {
-            Map<String, String> map = new HashMap<>(2);
-            cmd.getMessage().setMetadata(map);
-        }
         cmd.getMessage().metadata.put(Constants.RPCX_ERROR_CODE, String.valueOf(errorCode));
         cmd.getMessage().metadata.put(Constants.RPCX_ERROR_MESSAGE, errorMessage);
         return cmd;
@@ -137,6 +133,12 @@ public class RemotingCommand {
         this.data = data;
     }
 
+
+    public void setErrorMessage(int code, String message) {
+        this.setErrorMessage(String.valueOf(code), message);
+    }
+
+
     /**
      * rpcx 是通过 meta 传递错误信息的
      *
@@ -145,19 +147,19 @@ public class RemotingCommand {
      */
     public void setErrorMessage(String code, String message) {
         //带有错误的返回结果
-        getMessage().setMessageStatusType(MessageStatusType.Error);
+        this.message.setMessageStatusType(MessageStatusType.Error);
         if (null == getMessage().metadata) {
             Map<String, String> map = new HashMap<>(2);
             getMessage().setMetadata(map);
         }
-        getMessage().metadata.put(Constants.RPCX_ERROR_CODE, code);
-        getMessage().metadata.put(Constants.RPCX_ERROR_MESSAGE, message);
+        this.message.metadata.put(Constants.RPCX_ERROR_CODE, code);
+        this.message.metadata.put(Constants.RPCX_ERROR_MESSAGE, message);
     }
 
     public RemotingCommand requestToResponse() {
         this.flag ^= 1 << RPC_TYPE;
         this.message.setMessageType(MessageType.Response);
-        this.data = null;
+        this.data = new byte[]{};
         this.message.payload = new byte[]{};
         this.message.metadata.clear();
         return this;

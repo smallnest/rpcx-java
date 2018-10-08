@@ -1,13 +1,12 @@
 package com.colobu.rpcx.processor;
 
+import com.colobu.rpcx.common.ClassUtils;
 import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.filter.FilterWrapper;
 import com.colobu.rpcx.netty.NettyRequestProcessor;
-import com.colobu.rpcx.protocol.LanguageCode;
-import com.colobu.rpcx.protocol.Message;
-import com.colobu.rpcx.protocol.MessageType;
-import com.colobu.rpcx.protocol.RemotingCommand;
+import com.colobu.rpcx.protocol.*;
 import com.colobu.rpcx.rpc.*;
+import com.colobu.rpcx.rpc.impl.Exporter;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
 import com.colobu.rpcx.rpc.impl.RpcProviderInvoker;
 import com.google.common.collect.Sets;
@@ -59,10 +58,11 @@ public class RpcHttpProcessor implements NettyRequestProcessor {
         invocation.url.setHost(req.metadata.get("_host"));
         invocation.url.setPort(Integer.parseInt(req.metadata.get("_port")));
 
-        Invoker<Object> invoker = new RpcProviderInvoker<>(getBeanFunc);
 
-        Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.PROVIDER, Sets.newHashSet());
+        String key = ClassUtils.getMethodKey(invocation.getClassName(), invocation.getMethodName(), invocation.getParameterTypeNames());
+        Invoker<Object> wrapperInvoker = Exporter.invokerMap.get(key);
 
+        
         RemotingCommand res = RemotingCommand.createResponseCommand();
         Message resMessage = new Message();
         resMessage.servicePath = invocation.getClassName();
@@ -74,7 +74,7 @@ public class RpcHttpProcessor implements NettyRequestProcessor {
         resMessage.payload = new Gson().toJson(rpcResult.getValue()).getBytes();
         if (rpcResult.hasException()) {
             logger.error(rpcResult.getException().getMessage(), rpcResult.getException());
-            resMessage.metadata.put(Constants.RPCX_ERROR_CODE, "-2");
+            resMessage.metadata.put(Constants.RPCX_ERROR_CODE, String.valueOf(RemotingSysResponseCode.SYSTEM_ERROR));
             resMessage.metadata.put(Constants.RPCX_ERROR_MESSAGE, rpcResult.getException().getMessage());
         }
         res.setMessage(resMessage);

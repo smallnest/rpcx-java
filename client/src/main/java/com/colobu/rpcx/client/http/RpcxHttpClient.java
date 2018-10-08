@@ -2,7 +2,6 @@ package com.colobu.rpcx.client.http;
 
 import com.colobu.rpcx.common.Pair;
 import com.colobu.rpcx.protocol.Message;
-import com.colobu.rpcx.rpc.HessianUtils;
 import com.colobu.rpcx.rpc.Invocation;
 import com.colobu.rpcx.rpc.RpcException;
 import com.colobu.rpcx.rpc.URL;
@@ -83,7 +82,6 @@ public class RpcxHttpClient {
             HttpResponse res = client.execute(post);
             HttpEntity resEntity = res.getEntity();
             byte[] data = EntityUtils.toByteArray(resEntity);
-            logger.info("res:" + new String(data));
             Message message = gson.fromJson(new String(data), Message.class);
             return new String(message.payload);
         } catch (Exception ex) {

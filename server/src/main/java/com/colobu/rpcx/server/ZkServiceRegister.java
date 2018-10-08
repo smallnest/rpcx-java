@@ -26,7 +26,7 @@ public class ZkServiceRegister implements IServiceRegister {
         this.basePath = basePath;
         this.addr = addr;
         //导出所有有注解的service
-        this.serviceNameSet = new Exporter(getBeanFunc).export(providerPackage);
+        this.serviceNameSet = new Exporter(getBeanFunc, addr).export(providerPackage);
         logger.info("export service names:{}", this.serviceNameSet);
     }
 

@@ -4,9 +4,8 @@ import com.colobu.rpcx.common.ClassUtils;
 import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.netty.NettyRequestProcessor;
 import com.colobu.rpcx.protocol.LanguageCode;
-import com.colobu.rpcx.protocol.Message;
-import com.colobu.rpcx.protocol.MessageType;
 import com.colobu.rpcx.protocol.RemotingCommand;
+import com.colobu.rpcx.protocol.RemotingSysResponseCode;
 import com.colobu.rpcx.rpc.HessianUtils;
 import com.colobu.rpcx.rpc.Invoker;
 import com.colobu.rpcx.rpc.Result;
@@ -36,10 +35,13 @@ public class RpcProcessor implements NettyRequestProcessor {
         RpcInvocation invocation = null;
         //golang调用是没有language的
         if (null == language) {
+            //golang 是没有invocation的
             invocation = new RpcInvocation();
+            invocation.setClassName(className);
+            invocation.setMethodName(methodName);
             invocation.setLanguageCode(LanguageCode.GO);
-            invocation.url = new URL("rpcx", "", 0);
-            invocation.url.setPath(className + "." + methodName);
+            String path = ClassUtils.getMethodKey(className, methodName, new String[]{"byte[]"});
+            invocation.url = new URL("rpcx", "", 0, path);
             //golang 参数是byte[]
             invocation.setParameterTypeNames(new String[]{"byte[]"});
             //参数就是payload数据
@@ -48,22 +50,21 @@ public class RpcProcessor implements NettyRequestProcessor {
             invocation = (RpcInvocation) HessianUtils.read(request.getMessage().payload);
         }
 
-        invocation.setClassName(className);
-        invocation.setMethodName(methodName);
-
         Invoker<Object> wrapperInvoker = null;
 
+        //request -> response
         RemotingCommand res = request.requestToResponse();
 
         String key = "";
 
-        //泛化调用
+
         if (methodName.equals(Constants.$ECHO)) {
+            //echo
             key = Constants.$ECHO;
         } else if (methodName.equals(Constants.$INVOKE)) {
+            //泛化调用
             key = Constants.$INVOKE;
-        }
-        else {
+        } else {
             key = ClassUtils.getMethodKey(className, methodName, invocation.getParameterTypeNames());
         }
 
@@ -71,12 +72,11 @@ public class RpcProcessor implements NettyRequestProcessor {
 
         if (null == wrapperInvoker) {
             logger.warn("get invoker is null key:{}", key);
-            res.setErrorMessage("-3", "get invoker is null  key:" + key);
+            res.setErrorMessage(RemotingSysResponseCode.SYSTEM_ERROR, "get invoker is null  key:" + key);
             return res;
         }
 
         Result rpcResult = wrapperInvoker.invoke(invocation);
-
 
         if (invocation.languageCode.equals(LanguageCode.HTTP)) {
             res.getMessage().payload = new Gson().toJson(rpcResult.getValue()).getBytes();
@@ -87,7 +87,7 @@ public class RpcProcessor implements NettyRequestProcessor {
         }
         if (rpcResult.hasException()) {
             logger.error(rpcResult.getException().getMessage(), rpcResult.getException());
-            res.setErrorMessage("-2", rpcResult.getException().getMessage());
+            res.setErrorMessage(RemotingSysResponseCode.SYSTEM_ERROR, rpcResult.getException().getMessage());
         }
         return res;
     }

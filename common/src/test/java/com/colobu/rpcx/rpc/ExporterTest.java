@@ -11,6 +11,6 @@ public class ExporterTest {
 
     @Test
     public void testExport() {
-        System.out.println(new Exporter(null).export("com.colobu.rpcx"));
+        System.out.println(new Exporter(null,"1:2").export("com.colobu.rpcx"));
     }
 }

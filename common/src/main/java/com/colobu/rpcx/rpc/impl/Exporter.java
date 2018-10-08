@@ -33,36 +33,39 @@ public class Exporter {
 
     private final Function<Class, Object> getBeanFunc;
 
-    public Exporter(Function<Class, Object> getBeanFunc) {
+    private final String addr;
+
+    public Exporter(Function<Class, Object> getBeanFunc, String addr) {
         this.getBeanFunc = getBeanFunc;
+        this.addr = addr;
     }
 
 
     /**
      * 导出所有对外服务(包括 echo 和 泛化调用)
+     *
      * @param providerPackage
      * @return
      */
     public Set<String> export(String providerPackage) {
         logger.info("export");
+        String[] ss = addr.split(":");
+        final String host = ss[0];
+        final int port = Integer.valueOf(ss[1]);
         Set<Class<?>> set = new ProviderFinder(providerPackage).find();
         return set.stream().map(it -> {
             String name = it.getName();
 
             Method[] methods = it.getDeclaredMethods();
             Arrays.stream(methods).forEach(m -> {
-                System.out.println("----------->" + m.getName());
                 String className = it.getName();
                 String method = m.getName();
                 //reflectasm 生成的方法需要过滤掉
                 if (!method.startsWith("access$")) {
                     String[] parameterTypeNames = ClassUtils.getMethodParameterNames(m);
-
                     String key = ClassUtils.getMethodKey(className, method, parameterTypeNames);
-                    System.out.println("--------->key:" + key);
-
-                    URL url = new URL("rpcx", "", 0);
-                    url.setPath(ClassUtils.getMethodKey(className, method, parameterTypeNames));
+                    logger.info("export key:{}", key);
+                    URL url = new URL("rpcx", host, port, key);
                     //暴露出invoker,使得远程可以调用
                     initProviderInvoker(key, className, method, parameterTypeNames, url);
                 }
@@ -73,7 +76,7 @@ public class Exporter {
             initGenericInvoker();
 
             //这里的url是注册到zk
-            URL url = new URL("rpcx", "", 0);
+            URL url = new URL("rpcx", host, port);
             url.setPath(name);
             //类名称
             Provider provider = it.getAnnotation(Provider.class);
@@ -95,7 +98,6 @@ public class Exporter {
     }
 
 
-
     /**
      * 初始化providerInvoker
      */
@@ -104,10 +106,6 @@ public class Exporter {
         Invoker<Object> invoker = new RpcProviderInvoker<>(getBeanFunc);
         Class clazz = ClassUtils.getClassByName(className);
         invoker.setInterface(clazz);
-
-
-        url.setHost(NetUtils.getLocalHost());
-        url.setPort(0);
 
         invoker.setUrl(url);
 

@@ -12,7 +12,6 @@ import com.colobu.rpcx.rpc.impl.RpcInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -27,14 +26,6 @@ public class ContextFilter implements Filter {
     public Result invoke(Invoker<?> invoker, RpcInvocation invocation) throws RpcException {
         logger.debug("ContextFilter begin className:{} methodName:{}", invocation.getClassName(), invocation.getMethodName());
         Map<String, String> attachments = invocation.getAttachments();
-        if (attachments != null) {
-            attachments = new HashMap<>(attachments);
-            attachments.remove(Constants.PATH_KEY);
-            attachments.remove(Constants.GROUP_KEY);
-            attachments.remove(Constants.VERSION_KEY);
-            attachments.remove(Constants.TOKEN_KEY);
-            attachments.remove(Constants.TIMEOUT_KEY);
-        }
         RpcContext.getContext()
                 .setAttachments(attachments)
                 .setRemoteAddress(invocation.getUrl().getAddress(), invocation.getUrl().getPort())
