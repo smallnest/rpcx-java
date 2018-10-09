@@ -2,9 +2,6 @@ package com.colobu.rpcx.protocol;
 
 import com.colobu.rpcx.config.Constants;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Created by goodjava@qq.com.
  */
@@ -138,10 +135,6 @@ public class RemotingCommand {
     public void setErrorMessage(String code, String message) {
         //带有错误的返回结果
         this.message.setMessageStatusType(MessageStatusType.Error);
-        if (null == getMessage().metadata) {
-            Map<String, String> map = new HashMap<>(2);
-            getMessage().setMetadata(map);
-        }
         this.message.metadata.put(Constants.RPCX_ERROR_CODE, code);
         this.message.metadata.put(Constants.RPCX_ERROR_MESSAGE, message);
     }

@@ -21,7 +21,7 @@ public class NettyDecoder extends ReplayingDecoder<DecoderState> {
     }
 
     @Override
-    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) {
         switch (state()) {
             case MagicNumber:
                 message = new Message();
