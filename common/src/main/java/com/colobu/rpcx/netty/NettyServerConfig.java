@@ -13,12 +13,17 @@ public class NettyServerConfig implements Cloneable {
     private int serverAsyncSemaphoreValue = 64;
     private int serverChannelMaxIdleTimeSeconds = 120;
 
-    private int serverSocketSndBufSize = 1024 * 32;
-    private int serverSocketRcvBufSize = 1024 * 32;
+    private int serverSocketSndBufSize = 1024 * 64;
+    private int serverSocketRcvBufSize = 1024 * 64;
+
+    //业务的线程数
+    private int serverBizThreads = 1000;
 
 
-    private boolean useEpollNativeSelector = false;
-
+    public int getServerBizThreads() {
+        int num = Integer.valueOf(Config.ins().get("rpcx.biz.processor.num", String.valueOf(serverBizThreads)));
+        return num;
+    }
 
     public int getListenPort() {
         return listenPort;
@@ -31,7 +36,7 @@ public class NettyServerConfig implements Cloneable {
 
 
     public int getServerWorkerThreads() {
-        int num = Integer.valueOf(Config.ins().get("rpcx.http.worker.processor.num", String.valueOf(serverWorkerThreads)));
+        int num = Integer.valueOf(Config.ins().get("rpcx.worker.processor.num", String.valueOf(serverWorkerThreads)));
         return num;
     }
 
@@ -82,33 +87,16 @@ public class NettyServerConfig implements Cloneable {
 
 
     public int getServerSocketSndBufSize() {
-        return serverSocketSndBufSize;
-    }
-
-
-    public void setServerSocketSndBufSize(int serverSocketSndBufSize) {
-        this.serverSocketSndBufSize = serverSocketSndBufSize;
+        int size = Integer.valueOf(Config.ins().get("rpcx.snd.buf.size", String.valueOf(serverSocketSndBufSize)));
+        return size;
     }
 
 
     public int getServerSocketRcvBufSize() {
-        return serverSocketRcvBufSize;
+        int size = Integer.valueOf(Config.ins().get("rpcx.rcv.buf.size", String.valueOf(serverSocketRcvBufSize)));
+        return size;
     }
 
-
-    public void setServerSocketRcvBufSize(int serverSocketRcvBufSize) {
-        this.serverSocketRcvBufSize = serverSocketRcvBufSize;
-    }
-
-
-    public boolean isUseEpollNativeSelector() {
-        return useEpollNativeSelector;
-    }
-
-
-    public void setUseEpollNativeSelector(boolean useEpollNativeSelector) {
-        this.useEpollNativeSelector = useEpollNativeSelector;
-    }
 
     @Override
     public Object clone() throws CloneNotSupportedException {

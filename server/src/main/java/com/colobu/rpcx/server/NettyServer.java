@@ -103,8 +103,7 @@ public class NettyServer extends NettyRemotingAbstract {
     }
 
     private Pair<NettyRequestProcessor, ExecutorService> createDefaultRequestProcessor() {
-        int processorNum = Integer.valueOf(Config.ins().get("rpcx.processor.num", "1000"));
-        ThreadPoolExecutor executor = new ThreadPoolExecutor(processorNum, processorNum,
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(nettyServerConfig.getServerBizThreads(), nettyServerConfig.getServerBizThreads(),
                 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<>(), new NamedThreadFactory("DefaultRequestProcessorPool"));
 
