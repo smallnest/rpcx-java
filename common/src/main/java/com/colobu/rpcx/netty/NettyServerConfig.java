@@ -1,5 +1,7 @@
 package com.colobu.rpcx.netty;
 
+import com.colobu.rpcx.common.Config;
+
 /**
  * @author goodjava@qq.com
  */
@@ -29,7 +31,8 @@ public class NettyServerConfig implements Cloneable {
 
 
     public int getServerWorkerThreads() {
-        return serverWorkerThreads;
+        int num = Integer.valueOf(Config.ins().get("rpcx.http.worker.processor.num", String.valueOf(serverWorkerThreads)));
+        return num;
     }
 
 
