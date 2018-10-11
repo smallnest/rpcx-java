@@ -16,6 +16,8 @@ import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
+
 /**
  * @author goodjava@qq.com
  * 处理远程rpc调用
@@ -25,7 +27,7 @@ public class RpcProcessor implements NettyRequestProcessor {
     private static final Logger logger = LoggerFactory.getLogger(RpcProcessor.class);
 
     @Override
-    public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request) {
+    public RemotingCommand processRequest(ChannelHandlerContext ctx, RemotingCommand request) throws UnsupportedEncodingException {
         request.getMessage().decode(request.getData());
 
         String language = request.getMessage().metadata.get(Constants.LANGUAGE);

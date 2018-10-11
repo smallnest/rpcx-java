@@ -239,30 +239,31 @@ public class Message {
     /**
      * 业务解码
      */
-    public void decode(byte[] data) {
+    public void decode(byte[] data) throws UnsupportedEncodingException {
         ByteBuffer buf = ByteBuffer.wrap(data);
+        //servicePath
         int len = buf.getInt();
         byte[] b = new byte[len];
         buf.get(b);
-        servicePath = new String(b);
-
+        servicePath = new String(b, "UTF-8");
+        //serviceMethod
         len = buf.getInt();
         b = new byte[len];
         buf.get(b);
-        serviceMethod = new String(b);
-
+        serviceMethod = new String(b, "UTF-8");
+        //metadata
         len = buf.getInt();
         b = new byte[len];
         buf.get(b);
         decodeMetadata(b);
-
+        //payload
         len = buf.getInt();
         byte[] payload = new byte[len];
         buf.get(payload);
         this.payload = payload;
     }
 
-    private void decodeMetadata(byte[] b) {
+    private void decodeMetadata(byte[] b) throws UnsupportedEncodingException {
         int blen = b.length;
         if (blen > 8) {
             int len;
@@ -276,7 +277,7 @@ public class Message {
                 index = index + 4;
                 data = new byte[len];
                 System.arraycopy(b, index, data, 0, len);
-                String key = new String(data);
+                String key = new String(data, "UTF-8");
                 index = index + len;
 
 
@@ -284,7 +285,7 @@ public class Message {
                 index = index + 4;
                 data = new byte[len];
                 System.arraycopy(b, index, data, 0, len);
-                String value = new String(data);
+                String value = new String(data, "UTF-8");
                 index = index + len;
                 this.metadata.put(key, value);
             }

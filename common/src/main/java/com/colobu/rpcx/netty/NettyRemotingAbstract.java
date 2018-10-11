@@ -15,6 +15,7 @@ import io.netty.channel.epoll.Epoll;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.LongAdder;
@@ -257,7 +258,11 @@ public class NettyRemotingAbstract {
      * @param cmd
      */
     public void processResponseCommand(ChannelHandlerContext ctx, RemotingCommand cmd) {
-        cmd.getMessage().decode(cmd.getData());
+        try {
+            cmd.getMessage().decode(cmd.getData());
+        } catch (UnsupportedEncodingException e) {
+            logger.warn("decode error:{}", e.getMessage());
+        }
         //获取request带过去的唯一码
         final int opaque = cmd.getOpaque();
         //查询responseFuture

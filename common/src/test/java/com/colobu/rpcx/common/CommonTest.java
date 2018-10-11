@@ -41,6 +41,39 @@ public class CommonTest {
 
 
     @Test
+    public void testString() {
+        String str = "abcde";
+        byte[] b = str.getBytes();
+
+        System.out.println(b[3]);
+
+        System.out.println(b.length);
+
+        String str2 = new String(b, 1, b.length - 1);
+        b[1] = 90;
+        System.out.println(str2);
+
+        System.out.println("------------->");
+
+        long begin = System.currentTimeMillis();
+        IntStream.range(0, 10000000).forEach(it -> {
+            byte[] b2 = new byte[b.length-1];
+            System.arraycopy(b, 1, b2, 0, b.length-1);
+            String st = new String(b2);
+//            System.out.println(st);
+        });
+        System.out.println(System.currentTimeMillis() - begin);
+
+        begin = System.currentTimeMillis();
+        IntStream.range(0, 10000000).forEach(it -> {
+            String st = new String(b, 1, b.length-1);
+//            System.out.println(st);
+        });
+        System.out.println(System.currentTimeMillis() - begin);
+    }
+
+
+    @Test
     public void testFlag() {
 //        RemotingCommand c = RemotingCommand.createResponseCommand();
         RemotingCommand c = RemotingCommand.createRequestCommand(new Message());
@@ -78,7 +111,7 @@ public class CommonTest {
         }
 
         byte[] d = os.toByteArray();
-        System.out.println(System.currentTimeMillis()-begin);
+        System.out.println(System.currentTimeMillis() - begin);
         System.out.println(Arrays.toString(d));
     }
 
@@ -110,7 +143,7 @@ public class CommonTest {
         }
 
         byte[] d = os.toByteArray();
-        System.out.println(System.currentTimeMillis()-begin);
+        System.out.println(System.currentTimeMillis() - begin);
         System.out.println(Arrays.toString(d));
     }
 
@@ -143,10 +176,9 @@ public class CommonTest {
         }
 
         buffer.capacity(buffer.writerIndex());
-        System.out.println(System.currentTimeMillis()-begin);
+        System.out.println(System.currentTimeMillis() - begin);
         System.out.println(Arrays.toString(buffer.array()));
     }
-
 
 
     //168
@@ -301,7 +333,7 @@ public class CommonTest {
         GenericObjectPool pool = new GenericObjectPool(factory);
         sw.reset();
 
-        IntStream.range(0,10000000).forEach(it->{
+        IntStream.range(0, 10000000).forEach(it -> {
             try {
                 pool.addObject();
             } catch (Exception e) {
@@ -350,7 +382,6 @@ public class CommonTest {
         System.out.println(System.currentTimeMillis() - begin);
 
     }
-
 
 
     @Test
@@ -435,11 +466,11 @@ public class CommonTest {
     }
 
 
-    class Bean {
-        public String str(String s) {
-            return "str:" + s;
-        }
+class Bean {
+    public String str(String s) {
+        return "str:" + s;
     }
+}
 
 
     @Test
@@ -548,7 +579,7 @@ public class CommonTest {
     @Test
     public void testConfig() {
         System.out.println(Config.ins().get("server.type"));
-        System.out.println(Config.ins().get("server.type1","aaaa"));
+        System.out.println(Config.ins().get("server.type1", "aaaa"));
     }
 
 
@@ -559,18 +590,19 @@ public class CommonTest {
     }
 
 
-    class E {
-        public E() {
-            Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
-                System.out.println("schedule");
-            }, 10, 1, TimeUnit.SECONDS);
+class E {
+    public E() {
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
+            System.out.println("schedule");
+        }, 10, 1, TimeUnit.SECONDS);
 
-            Executors.newSingleThreadScheduledExecutor()
-                    .scheduleWithFixedDelay(() -> {
-                        System.out.println("schedule");
-                    }, 0, 5, TimeUnit.SECONDS);
-        }
+        Executors.newSingleThreadScheduledExecutor()
+                .scheduleWithFixedDelay(() -> {
+                    System.out.println("schedule");
+                }, 0, 5, TimeUnit.SECONDS);
     }
+
+}
 
 
     @Test
