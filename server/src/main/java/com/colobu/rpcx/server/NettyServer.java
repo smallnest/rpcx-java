@@ -47,6 +47,9 @@ public class NettyServer extends NettyRemotingAbstract {
     private final EventLoopGroup eventLoopGroupWorker;
     private final NettyServerConfig nettyServerConfig;
 
+
+    private boolean rpcxDebug = Boolean.valueOf(Config.ins().get("rpcx.debug", "false"));
+
     /**
      * 如果使用ioc容器,这里需要注入获取bean的 function
      */
@@ -108,10 +111,12 @@ public class NettyServer extends NettyRemotingAbstract {
                 new LinkedBlockingQueue<>(), new NamedThreadFactory("DefaultRequestProcessorPool"));
 
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
-            try {
-                logger.info("default request pool----->{} {} {}", executor.getActiveCount(), executor.getCompletedTaskCount(), executor.getQueue().size());
-            } catch (Exception ex) {
+            if (rpcxDebug) {
+                try {
+                    logger.info("default request pool----->{} {} {}", executor.getActiveCount(), executor.getCompletedTaskCount(), executor.getQueue().size());
+                } catch (Exception ex) {
 
+                }
             }
         }, 0, 5, TimeUnit.SECONDS);
 
