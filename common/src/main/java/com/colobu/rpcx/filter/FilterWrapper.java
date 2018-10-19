@@ -31,7 +31,7 @@ public class FilterWrapper {
         this.providerFilters = this.findFilters("com.colobu", Constants.PROVIDER);
         this.consumerFilters = this.findFilters("com.colobu", Constants.CONSUMER);
 
-        String p = Config.ins().get("rpcx_filter_package");
+        String p = Config.ins().get("rpcx.filter.package");
 
         this.providerFilters.addAll(this.findFilters(p, Constants.PROVIDER));
         this.providerFilters.addAll(this.findFilters(p, Constants.CONSUMER));

@@ -167,7 +167,7 @@ public class NettyServer extends NettyRemotingAbstract {
     }
 
     private String getServerPort() {
-        String port = Config.ins().get("rpcx_port");
+        String port = Config.ins().get("rpcx.port");
         if (StringUtils.isEmpty(port)) {
             port = "0";
         }

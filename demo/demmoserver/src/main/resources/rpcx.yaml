@@ -1,0 +1,17 @@
+rpcx:
+  package:
+    path:com.colobu
+  consumer:
+    package:
+      path:com.colobu
+  base:
+    path:/youpin/services
+  zk:
+    connect:
+      string:127.0.0.1:2181
+  filter:
+    package:com.demo.filter
+  processor:
+    num:50
+  port:8033
+

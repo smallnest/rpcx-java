@@ -40,7 +40,7 @@ public class HotDeployFilter implements Filter {
             String className = arguments[0].toString();
             String token = arguments[1].toString();
 
-            String configToken = Config.ins().get("rpcx_deploy_tokey");
+            String configToken = Config.ins().get("rpcx.deploy.tokey");
             if (StringUtils.isEmpty(configToken) || !token.equals(configToken)) {
                 throw new RpcException("token error");
             }

@@ -147,16 +147,6 @@
         </dependency>
 
 
-
-
-        <!--<dependency>-->
-            <!--<groupId>com.esotericsoftware</groupId>-->
-            <!--<artifactId>reflectasm</artifactId>-->
-            <!--<version>1.11.7</version>-->
-        <!--</dependency>-->
-
-
-
     </dependencies>
 
     <distributionManagement>

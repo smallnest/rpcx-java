@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 //@Provider(name = "TestService", version = "0.0.2", token = "zzy123", timeout = 1000, cache = true)
 //@Provider(name = "TestService", version = "0.0.2", token = "zzy123", tps = 1)
 //@Provider(name = "TestService", version = "0.0.2", weight = "service_weight", group = "test")
-@Provider(name = "TestService", version = "0.0.2", weight = "service_weight")
+@Provider(name = "TestService", version = "0.0.2", weight = "rpc.service.weight")
 public class TestService implements ITestService {
 
     private static final Logger logger = LoggerFactory.getLogger(TestService.class);
