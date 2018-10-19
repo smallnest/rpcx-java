@@ -1,0 +1,21 @@
+server.type:
+  dev
+server.port:
+  8017
+server.debug:
+  true
+rpcx.package.path:
+  com.colobu
+rpcx.consumer.package.path:
+  com.colobu
+rpcx.base.path:
+  /youpin/services
+rpcx.zk.connect.string:
+  127.0.0.1:2181
+rpcx.filter.package:
+  com.demo.filter
+rpcx.processor.num:
+  50
+rpcx.port:
+  8033
+

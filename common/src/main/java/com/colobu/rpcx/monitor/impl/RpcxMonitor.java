@@ -50,7 +50,7 @@ public class RpcxMonitor implements Monitor {
 
     public void send() {
         if (logger.isInfoEnabled()) {
-            logger.info("Send statistics to monitor " + getUrl());
+            logger.info("Send statistics to monitor");
         }
         String timestamp = String.valueOf(System.currentTimeMillis());
         for (Map.Entry<Statistics, AtomicReference<long[]>> entry : statisticsMap.entrySet()) {

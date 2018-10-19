@@ -1,5 +1,7 @@
 package com.colobu.rpcx.common;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -16,39 +18,32 @@ import java.util.stream.Collectors;
  */
 public class Config {
 
+    private static final Logger logger = LoggerFactory.getLogger(Config.class);
+
     private Properties properties;
 
     private Config() {
         properties = new ClassPathResource("application.properties").getProperties();
-        try {
-            String path = Thread.currentThread().getContextClassLoader().getResource("").getPath();
-            File file = new File(path);
-            List<File> list = Arrays.stream(file.listFiles()).peek(it->{System.out.println(it);}).filter(f -> f.toString().endsWith(".yaml")).collect(Collectors.toList());
-            System.out.println("================>" + path + "," + list);
+        String path = Thread.currentThread().getContextClassLoader().getResource("").getPath();
+        File file = new File(path);
+        List<File> list = Arrays.stream(file.listFiles())
+                .peek(it -> logger.info("yaml config:{}", file.toString()))
+                .filter(f -> f.toString().endsWith(".yaml")).collect(Collectors.toList());
 
-            list.stream().forEach(f->{
-                try {
-                    String str = new String(Files.readAllBytes(f.toPath()));
-                    Yaml yaml = new Yaml();
-                    Map<String,String> m =  yaml.load(str);
-                    System.out.println(m);
-
-                    m.entrySet().stream().forEach(kv->{
-                        properties.put(kv.getKey(),kv.getValue());
-                    });
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-//            throw new RuntimeException(ex);
-        }
-
-
+        list.stream().forEach(f -> {
+            try {
+                String str = new String(Files.readAllBytes(f.toPath()));
+                Yaml yaml = new Yaml();
+                Map<String, String> m = yaml.load(str);
+                m.entrySet().stream().forEach(kv -> {
+                    if (kv.getKey().startsWith("rpcx.")) {
+                        properties.put(kv.getKey(), kv.getValue());
+                    }
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
 
