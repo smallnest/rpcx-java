@@ -4,7 +4,7 @@ server.port:
   8017
 server.debug:
   true
-rpcx.package.path:
+rpcx.provider.package.path:
   com.colobu
 rpcx.consumer.package.path:
   com.colobu
@@ -14,13 +14,13 @@ rpcx.zk.connect.string:
   127.0.0.1:2181
 rpcx.filter.package:
   com.demo.filter
-rpcx.worker.processor.nu:
-  50
 rpcx.port:
   8033
 rpcx.debug:
   false
 rpcx.http.processor.num:
+  50
+rpcx.worker.processor.nu:
   50
 rpcx.biz.processor.num:
   500

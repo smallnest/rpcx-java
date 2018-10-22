@@ -40,8 +40,8 @@ public class RpcxAutoConfigure {
     @Autowired
     private ApplicationContext context;
 
-    @Value("${rpcx.package.path}")
-    private String rpcxPackagePath;
+    @Value("${rpcx.provider.package.path}")
+    private String rpcxProviderPackagePath;
 
     @Value("${rpcx.consumer.package.path}")
     private String rpcxConsumerPackagePath;
@@ -52,7 +52,7 @@ public class RpcxAutoConfigure {
 
     @PostConstruct
     private void init() {
-        Reflections reflections = new Reflections(rpcxPackagePath);
+        Reflections reflections = new Reflections(rpcxProviderPackagePath);
         Set<Class<?>> providerSet = reflections.getTypesAnnotatedWith(Provider.class, true);
         providerSet.stream().forEach(it -> {
             logger.info("provider:{}", it);
@@ -62,7 +62,7 @@ public class RpcxAutoConfigure {
         Function<Class, Object> getBeanFunc = (clazz) -> context.getBean(clazz);
         server.setGetBeanFunc(getBeanFunc);
         server.start();
-        IServiceRegister reg = new ZkServiceRegister(rpcxBasePath, server.getAddr() + ":" + server.getPort(), rpcxPackagePath, getBeanFunc);
+        IServiceRegister reg = new ZkServiceRegister(rpcxBasePath, server.getAddr() + ":" + server.getPort(), rpcxProviderPackagePath, getBeanFunc);
         reg.register();
         reg.start();
     }
