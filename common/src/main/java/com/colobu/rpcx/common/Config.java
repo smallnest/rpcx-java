@@ -37,7 +37,7 @@ public class Config {
                 Map<String, String> m = yaml.load(str);
                 m.entrySet().stream().forEach(kv -> {
                     if (kv.getKey().startsWith("rpcx.")) {
-                        properties.put(kv.getKey(), kv.getValue());
+                        properties.put(kv.getKey(), String.valueOf(kv.getValue()));
                     }
                 });
             } catch (IOException e) {

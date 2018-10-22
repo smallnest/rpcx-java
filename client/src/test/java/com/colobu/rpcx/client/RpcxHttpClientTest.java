@@ -9,7 +9,7 @@ public class RpcxHttpClientTest {
 
     @Test
     public void testExecute() {
-        String res = RpcxHttpClient.execute("http://10.231.72.140:8033/", "com.colobu.rpcx.service.TestService", "sum", Pair.of("int", "11"), Pair.of("int", "22"));
+        String res = RpcxHttpClient.execute("http://10.231.39.214:8033/", "com.colobu.rpcx.service.TestService", "sum", Pair.of("int", "11"), Pair.of("int", "22"));
         System.out.println(res);
     }
 }
