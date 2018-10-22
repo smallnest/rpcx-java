@@ -1,6 +1,8 @@
 package com.colobu.rpcx.bootstrap;
 
 import com.colobu.rpcx.service.IArith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -17,8 +19,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class Bootstrap {
 
+    private static final Logger logger = LoggerFactory.getLogger(Bootstrap.class);
+
     public static void main(String... args) {
-        SpringApplication.run(Bootstrap.class, args);
+        try {
+            SpringApplication.run(Bootstrap.class, args);
+        } catch (Exception ex) {
+            logger.error(ex.getMessage(), ex);
+        }
     }
 
     @Autowired
