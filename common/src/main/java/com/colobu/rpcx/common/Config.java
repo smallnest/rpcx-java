@@ -24,6 +24,14 @@ public class Config {
 
     private Config() {
         properties = new ClassPathResource("application.properties").getProperties();
+
+        //拥有多个配置文件
+        if (properties.containsKey("spring.profiles.active")) {
+            Properties propertiesTmp = new ClassPathResource("application-" + properties.get("spring.profiles.active") + ".properties").getProperties();
+            propertiesTmp.keySet().stream().forEach(key -> properties.put(key, propertiesTmp.get(key)));
+        }
+
+
         String path = Thread.currentThread().getContextClassLoader().getResource("").getPath();
         File file = new File(path);
         List<File> list = Arrays.stream(file.listFiles())

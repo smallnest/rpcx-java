@@ -31,7 +31,7 @@ public class ClassPathResource {
             is = ClassLoader.getSystemResourceAsStream(this.path);
         }
         if (is == null) {
-            throw new FileNotFoundException("cannot be opened because it does not exist");
+            throw new FileNotFoundException("cannot be opened because it does not exist :"+ this.path);
         }
         return is;
     }
