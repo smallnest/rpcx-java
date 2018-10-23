@@ -91,7 +91,7 @@ public class NettyServer extends NettyRemotingAbstract {
             logger.info("----->server bind finish");
             this.addr = addr.getHostString();
             this.port = addr.getPort();
-            logger.info("###########rpc server start addr{} ", this.addr + ":" + this.port);
+            logger.info("###########rpc server start addr:{} ", this.addr + ":" + this.port);
         } catch (InterruptedException e1) {
             throw new RuntimeException("this.serverBootstrap.bind().sync() InterruptedException", e1);
         }
