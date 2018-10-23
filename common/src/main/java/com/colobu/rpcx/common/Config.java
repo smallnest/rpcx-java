@@ -44,6 +44,7 @@ public class Config {
                 e.printStackTrace();
             }
         });
+        logger.info("config info:{}", this.properties.propertyNames());
     }
 
 
