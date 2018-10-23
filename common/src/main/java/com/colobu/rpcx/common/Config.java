@@ -33,7 +33,7 @@ public class Config {
                 }
             });
         }
-        logger.info("config info:{}", this.properties.propertyNames());
+        logger.info("read config finish :{}", this.properties.keySet());
     }
 
 
