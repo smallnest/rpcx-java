@@ -55,6 +55,7 @@ public class RpcHttpProcessor implements NettyRequestProcessor {
 
         invocation.setClassName(request.getMessage().servicePath);
         invocation.setMethodName(request.getMessage().serviceMethod);
+        invocation.setUrl(new URL("rpcx", "", 0));
         invocation.url.setHost(req.metadata.get("_host"));
         invocation.url.setPort(Integer.parseInt(req.metadata.get("_port")));
 

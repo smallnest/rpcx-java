@@ -43,14 +43,10 @@ public class RpcxHttpHandler extends SimpleChannelInboundHandler<FullHttpRequest
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) {
-        logger.info(msg.getUri());
-
-        msg.headers().forEach(it -> {
-            logger.info("--------->{}:{}", it.getKey(), it.getValue());
-        });
-
         String servicePath = msg.headers().get("X-RPCX-ServicePath");
         String serviceMethod = msg.headers().get("X-RPCX-ServiceMethod");
+
+        logger.info("service:{} method:{}", servicePath, serviceMethod);
 
         ByteBuf buf = msg.content();
         int len = buf.readableBytes();
