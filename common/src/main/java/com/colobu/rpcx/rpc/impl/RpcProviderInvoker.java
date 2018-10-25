@@ -1,10 +1,8 @@
 package com.colobu.rpcx.rpc.impl;
 
 import com.colobu.rpcx.common.ClassUtils;
-import com.colobu.rpcx.rpc.Invoker;
-import com.colobu.rpcx.rpc.Result;
-import com.colobu.rpcx.rpc.RpcException;
-import com.colobu.rpcx.rpc.URL;
+import com.colobu.rpcx.config.Constants;
+import com.colobu.rpcx.rpc.*;
 import com.esotericsoftware.reflectasm.MethodAccess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,9 +51,13 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
 
     @Override
     public Result invoke(RpcInvocation invocation) {
+        Result rpcResult = new RpcResult();
+        String traceId = "";
         try {
             Object obj = null;
-            Result rpcResult = new RpcResult();
+            traceId = RpcContext.getContext().getAttachments().get(Constants.TRACE_ID);
+            //设置traceId
+            rpcResult.getAttachments().put(Constants.TRACE_ID, traceId == null ? "" : traceId);
             //使用容器
             if (null != this.getBeanFunc) {
                 if (share) {
@@ -94,7 +96,10 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
             if (throwable.getCause() != null) {
                 message = throwable.getCause().getMessage();
             }
-            throw new RpcException(message, throwable, "-2");
+            message = "traceId:" + traceId + ", message:" + message;
+            RpcException ex = new RpcException(message, throwable, "-2");
+            rpcResult.setThrowable(ex);
+            return rpcResult;
         }
     }
 

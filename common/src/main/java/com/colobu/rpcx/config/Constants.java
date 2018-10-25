@@ -92,6 +92,8 @@ public class Constants {
 
     public static final String RPCX_ERROR_MESSAGE = "_rpcx_error_message";
 
+    public static final String TRACE_ID = "trace_id";
+
 
 
 

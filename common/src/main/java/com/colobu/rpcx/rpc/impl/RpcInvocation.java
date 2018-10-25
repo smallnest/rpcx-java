@@ -11,6 +11,7 @@ import com.colobu.rpcx.selector.SelectMode;
 import io.netty.channel.Channel;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -34,7 +35,7 @@ public class RpcInvocation implements Invocation, Serializable {
 
     private Object[] arguments;
 
-    private Map<String, String> attachments;
+    private Map<String, String> attachments = new HashMap<>(1);
 
     private transient Invoker<?> invoker;
 
@@ -102,7 +103,7 @@ public class RpcInvocation implements Invocation, Serializable {
 
     @Override
     public String getAttachment(String key) {
-        return null;
+        return this.attachments.get(key);
     }
 
     @Override

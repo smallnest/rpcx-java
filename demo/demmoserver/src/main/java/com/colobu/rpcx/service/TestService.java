@@ -63,7 +63,7 @@ public class TestService implements ITestService {
      */
     public int error(int a, int b) {
         if (1 == 1) {
-            throw new RuntimeException("1==1");
+            throw new RuntimeException("system error!!!!");
         }
         return a + b;
     }
