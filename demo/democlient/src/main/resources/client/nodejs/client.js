@@ -10,7 +10,7 @@ var options = {
     },
     method: 'POST',
     json:true,
-    body:{"className":"com.colobu.rpcx.service.TestService","methodName":"sum","group":"","parameterTypeNames":["int","int"],"arguments":["11","22"],"url":{"protocol":"rpcx","host":"","port":0,"path":"com.colobu.rpcx.service.TestService.sum(\"11\",\"22\")","parameters":{}},"timeOut":1000,"retryNum":1,"sendType":"sync","languageCode":"JAVA","serializeType":"SerializeNone","failType":"FailFast","selectMode":"RandomSelect"}
+    body:{"parameterTypeNames":["int","int"],"arguments":["11","22"]}
 };
 
 function callback(error, response, body) {
