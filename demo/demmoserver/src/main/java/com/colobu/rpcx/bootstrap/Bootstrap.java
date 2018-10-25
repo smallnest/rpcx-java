@@ -1,13 +1,10 @@
 package com.colobu.rpcx.bootstrap;
 
-import com.colobu.rpcx.service.IArith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -30,13 +27,4 @@ public class Bootstrap {
         }
     }
 
-    @Autowired
-    private IArith arith;
-
-
-    @GetMapping("/sum")
-    public String sum() {
-        String s = String.valueOf(arith.sum(11, 22));
-        return s;
-    }
 }

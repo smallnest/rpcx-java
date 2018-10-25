@@ -42,7 +42,7 @@ public class TestService implements ITestService {
     }
 
     public String async() {
-        return "result:"+System.currentTimeMillis();
+        return "result:" + System.currentTimeMillis();
     }
 
 
@@ -50,8 +50,21 @@ public class TestService implements ITestService {
         return ("hi " + new String(data)).getBytes();
     }
 
-//    @Provider(cache = true)
     public int sum(int a, int b) {
+        return a + b;
+    }
+
+    /**
+     * 测试错误信息
+     *
+     * @param a
+     * @param b
+     * @return
+     */
+    public int error(int a, int b) {
+        if (1 == 1) {
+            throw new RuntimeException("1==1");
+        }
         return a + b;
     }
 

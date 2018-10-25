@@ -90,7 +90,7 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
             rpcResult.setValue(obj);
             return rpcResult;
         } catch (Throwable throwable) {
-            String message = "";
+            String message = throwable.getMessage();
             if (throwable.getCause() != null) {
                 message = throwable.getCause().getMessage();
             }

@@ -71,10 +71,13 @@ public class RpcHttpProcessor implements NettyRequestProcessor {
 
         Result rpcResult = wrapperInvoker.invoke(invocation);
         resMessage.payload = new Gson().toJson(rpcResult.getValue()).getBytes();
+
+
         if (rpcResult.hasException()) {
             logger.error(rpcResult.getException().getMessage(), rpcResult.getException());
             resMessage.metadata.put(Constants.RPCX_ERROR_CODE, String.valueOf(RemotingSysResponseCode.SYSTEM_ERROR));
             resMessage.metadata.put(Constants.RPCX_ERROR_MESSAGE, rpcResult.getException().getMessage());
+            resMessage.setPayload(new byte[]{});
         }
 
         RemotingCommand res = RemotingCommand.createResponseCommand(resMessage);
