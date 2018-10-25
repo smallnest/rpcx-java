@@ -6,7 +6,7 @@ package com.colobu.rpcx.common;
 public class RpcxVersion {
 
     private String version = "1.2.3";
-    private String date = "20181023";
+    private String date = "20181025";
 
 
     @Override
