@@ -1,6 +1,7 @@
 package com.colobu.rpcx.filter.impl;
 
 import com.colobu.rpcx.common.ClassUtils;
+import com.colobu.rpcx.common.StringUtils;
 import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.filter.Filter;
 import com.colobu.rpcx.rpc.Invoker;
@@ -21,10 +22,11 @@ public class TraceidFilter implements Filter {
 
     @Override
     public Result invoke(Invoker<?> invoker, RpcInvocation invocation) throws RpcException {
+        String clientTraceId = invocation.getAttachment(Constants.TRACE_ID);
         String key = ClassUtils.getMethodKey(invocation.getClassName(), invocation.getMethodName(), invocation.getParameterTypeNames());
-        String traceId = invocation.getAttachment(Constants.TRACE_ID);
-        if (null == traceId) {
-            traceId = UUID.randomUUID().toString();
+        String traceId = UUID.randomUUID().toString();
+        if (StringUtils.isNotEmpty(clientTraceId)) {
+            traceId = clientTraceId + "," + traceId;
         }
         logger.info("invoke:{} traceId:{}", key, traceId);
         RpcContext.getContext().getAttachments().put(Constants.TRACE_ID, traceId);

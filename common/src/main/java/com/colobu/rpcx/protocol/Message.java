@@ -293,4 +293,7 @@ public class Message {
     }
 
 
+    public Map<String, String> getMetadata() {
+        return metadata;
+    }
 }

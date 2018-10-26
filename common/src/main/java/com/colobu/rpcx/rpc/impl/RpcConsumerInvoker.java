@@ -64,6 +64,8 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
             req.setSeq(seq.incrementAndGet());
             Message res = client.call(req, invocation.getTimeOut(), invocation.getSendType());
 
+            result.getAttachments().put(Constants.TRACE_ID,res.getMetadata().get(Constants.TRACE_ID));
+
             if (res.metadata.containsKey(Constants.RPCX_ERROR_CODE)) {
                 String code = (res.metadata.get(Constants.RPCX_ERROR_CODE));
                 String message = res.metadata.get(Constants.RPCX_ERROR_MESSAGE);
@@ -91,7 +93,7 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
             logger.info("client call error:{} ", e.getMessage());
         }
 
-        logger.info("class:{} method:{} result:{} finish", className, method, new Gson().toJson(result));
+        logger.debug("class:{} method:{} result:{} finish", className, method, new Gson().toJson(result));
         return result;
     }
 

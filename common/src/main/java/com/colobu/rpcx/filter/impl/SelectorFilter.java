@@ -38,8 +38,6 @@ public class SelectorFilter implements Filter {
         //获取服务列表(ip:port?param)
         List<String> serviceList = invoker.serviceDiscovery().getServices(serviceName);
 
-        System.out.println("------------>"+serviceList);
-
         serviceList = serviceList.stream().filter(it->{
             URL url = URL.valueOf(it);
             if (!it.contains("state=inactive") && invocation.getGroup().equals(url.getParameter(Constants.GROUP_KEY,""))) {
