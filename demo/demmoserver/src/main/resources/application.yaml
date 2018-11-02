@@ -14,8 +14,6 @@ rpcx.base.path:
   /youpin/services/
 rpcx.zk.connect.string:
   127.0.0.1:2181
-rpcx.filter.package:
-  com.demo.filter
 rpcx.debug:
   false
 rpcx.http.processor.num:

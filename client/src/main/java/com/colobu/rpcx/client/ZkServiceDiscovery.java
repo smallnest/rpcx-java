@@ -28,7 +28,7 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
 
     private final String basePath;
 
-    private Set<String> serviceName = new HashSet<>();
+    private Set<String> serviceNameSet = new HashSet<>();
 
     private LinkedBlockingQueue<PathStatus> queue = new LinkedBlockingQueue<>();
 
@@ -45,14 +45,19 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
      */
     public ZkServiceDiscovery(final String basePath,String consumerPackage) {
         this.basePath = basePath;
-        this.serviceName = findConsumer(consumerPackage);
-        this.serviceName.stream().forEach(it -> this.map.put(it, new HashSet<>()));
+
+        //有多个业务提供方
+        Arrays.stream(consumerPackage.split(";")).forEach(it->{
+            this.serviceNameSet.addAll(findConsumer(it));
+        });
+
+        this.serviceNameSet.stream().forEach(it -> this.map.put(it, new HashSet<>()));
         zkServiceDiscovery(basePath);
     }
 
 
     private void zkServiceDiscovery(String basePath) {
-        this.serviceName.stream().forEach(it -> {
+        this.serviceNameSet.stream().forEach(it -> {
             Set<Pair<String, String>> set = ZkClient.ins().get(basePath, it).stream().map(it2 -> {
                 String addr = "";
                 try {
@@ -80,7 +85,7 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
     public ZkServiceDiscovery(final String basePath, LanguageCode languageCode, final String... serviceName) {
         logger.info("ZkServiceDiscovery languageCode:{}",languageCode);
         this.basePath = basePath;
-        Arrays.stream(serviceName).forEach(it -> this.serviceName.add(it));
+        Arrays.stream(serviceName).forEach(it -> this.serviceNameSet.add(it));
         zkServiceDiscovery(basePath);
     }
 
@@ -136,7 +141,7 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
         }).start();
 
         //根据serviceName 进行监控
-        this.serviceName.stream().forEach(it -> {
+        this.serviceNameSet.stream().forEach(it -> {
             try {
                 ZkClient.ins().watch(queue, basePath + it);
             } catch (Exception e) {
