@@ -1,6 +1,7 @@
 package com.colobu.rpcx.client;
 
 import com.colobu.rpcx.common.Pair;
+import com.colobu.rpcx.concurrent.ConcurrentHashSet;
 import com.colobu.rpcx.discovery.IServiceDiscovery;
 import com.colobu.rpcx.protocol.LanguageCode;
 import com.colobu.rpcx.rpc.impl.ConsumerFinder;
@@ -28,7 +29,7 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
 
     private final String basePath;
 
-    private Set<String> serviceNameSet = new HashSet<>();
+    private ConcurrentHashSet<String> serviceNameSet = new ConcurrentHashSet<>();
 
     private LinkedBlockingQueue<PathStatus> queue = new LinkedBlockingQueue<>();
 
@@ -43,11 +44,11 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
      *
      * @param basePath
      */
-    public ZkServiceDiscovery(final String basePath,String consumerPackage) {
+    public ZkServiceDiscovery(final String basePath, String consumerPackage) {
         this.basePath = basePath;
 
         //有多个业务提供方
-        Arrays.stream(consumerPackage.split(";")).forEach(it->{
+        Arrays.stream(consumerPackage.split(";")).forEach(it -> {
             this.serviceNameSet.addAll(findConsumer(it));
         });
 
@@ -66,7 +67,7 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
                     } else {
                         addr = it2.getObject1();
                     }
-                }catch (Exception ex) {
+                } catch (Exception ex) {
 
                 }
                 return Pair.of(addr, it2.getObject2());
@@ -78,14 +79,34 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
         watch();
     }
 
+    @Override
+    public void addServices(final String... serviceNames) {
+        Arrays.stream(serviceNames).forEach(it -> this.serviceNameSet.add(it));
+        Arrays.stream(serviceNames).forEach(it -> {
+            Set<Pair<String, String>> set = ZkClient.ins().get(basePath, it).stream().map(it2 -> {
+                String addr = "";
+                try {
+                    if (it2.getObject1().contains("@")) {
+                        addr = it2.getObject1().split("@")[1];
+                    } else {
+                        addr = it2.getObject1();
+                    }
+                } catch (Exception ex) {
+
+                }
+                return Pair.of(addr, it2.getObject2());
+            }).collect(Collectors.toSet());
+            this.map.putIfAbsent(it, set);
+        });
+    }
 
     /**
      * 根据提供的服务名字
      */
-    public ZkServiceDiscovery(final String basePath, LanguageCode languageCode, final String... serviceName) {
-        logger.info("ZkServiceDiscovery languageCode:{}",languageCode);
+    public ZkServiceDiscovery(final String basePath, LanguageCode languageCode, final String... serviceNames) {
+        logger.info("ZkServiceDiscovery languageCode:{}", languageCode);
         this.basePath = basePath;
-        Arrays.stream(serviceName).forEach(it -> this.serviceNameSet.add(it));
+        Arrays.stream(serviceNames).forEach(it -> this.serviceNameSet.add(it));
         zkServiceDiscovery(basePath);
     }
 

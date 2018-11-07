@@ -131,4 +131,8 @@ public class RpcxConsumer {
         logger.info("==================>close");
         this.client.close();
     }
+
+    public IClient getClient() {
+        return client;
+    }
 }

@@ -20,4 +20,10 @@ public interface IServiceDiscovery {
     void watch();
 
     void close();
+
+    /**
+     * 手动添加需要监控的服务
+     * @param serviceNames
+     */
+    void addServices(final String... serviceNames);
 }
