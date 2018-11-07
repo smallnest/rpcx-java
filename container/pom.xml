@@ -6,7 +6,11 @@
 
     <groupId>com.colobu</groupId>
     <artifactId>container</artifactId>
-    <version>1.2-SNAPSHOT</version>
+    <version>1.3-SNAPSHOT</version>
+
+    <properties>
+        <rpcx.version>1.3-SNAPSHOT</rpcx.version>
+    </properties>
 
 
     <dependencies>
@@ -41,21 +45,21 @@
         <dependency>
             <groupId>com.colobu</groupId>
             <artifactId>common</artifactId>
-            <version>1.2-SNAPSHOT</version>
+            <version>${rpcx.version}</version>
         </dependency>
 
 
         <dependency>
             <groupId>com.colobu</groupId>
             <artifactId>client</artifactId>
-            <version>1.2-SNAPSHOT</version>
+            <version>${rpcx.version}</version>
         </dependency>
 
 
         <dependency>
             <groupId>com.colobu</groupId>
             <artifactId>server</artifactId>
-            <version>1.2-SNAPSHOT</version>
+            <version>${rpcx.version}</version>
         </dependency>
 
         <dependency>
