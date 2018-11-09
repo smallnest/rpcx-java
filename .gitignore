@@ -16,6 +16,7 @@
 /container/target/
 /logs/
 /server/logs/
+/demo/demmoserver/logs/
 
 # Java compile files #
 *.class
