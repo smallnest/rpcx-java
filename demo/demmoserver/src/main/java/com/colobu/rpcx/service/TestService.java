@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 //@Provider(name = "TestService", version = "0.0.2", token = "zzy123", timeout = 1000, cache = true)
 //@Provider(name = "TestService", version = "0.0.2", token = "zzy123", tps = 1)
 //@Provider(name = "TestService", version = "0.0.2", weight = "service_weight", group = "test")
-@Provider(name = "TestService", version = "0.0.2", weight = "service_weight")
+@Provider(name = "TestService", version = "0.0.2", weight = "rpc.service.weight")
 public class TestService implements ITestService {
 
     private static final Logger logger = LoggerFactory.getLogger(TestService.class);
@@ -42,7 +42,7 @@ public class TestService implements ITestService {
     }
 
     public String async() {
-        return "result:"+System.currentTimeMillis();
+        return "result:" + System.currentTimeMillis();
     }
 
 
@@ -50,8 +50,21 @@ public class TestService implements ITestService {
         return ("hi " + new String(data)).getBytes();
     }
 
-//    @Provider(cache = true)
     public int sum(int a, int b) {
+        return a + b;
+    }
+
+    /**
+     * 测试错误信息
+     *
+     * @param a
+     * @param b
+     * @return
+     */
+    public int error(int a, int b) {
+        if (1 == 1) {
+            throw new RuntimeException("system error!!!!");
+        }
         return a + b;
     }
 

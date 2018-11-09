@@ -1,5 +1,7 @@
 package com.colobu.rpcx.handler;
 
+import com.colobu.rpcx.common.StringUtils;
+import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.protocol.LanguageCode;
 import com.colobu.rpcx.protocol.Message;
 import com.colobu.rpcx.protocol.MessageType;
@@ -15,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
+import java.util.HashMap;
 
 /**
  * XVersion           = "X-RPCX-Version"
@@ -43,14 +46,11 @@ public class RpcxHttpHandler extends SimpleChannelInboundHandler<FullHttpRequest
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) {
-        logger.info(msg.getUri());
+        String servicePath = msg.headers().get(Constants.X_RPCX_SERVICEPATH);
+        String serviceMethod = msg.headers().get(Constants.X_RPCX_SERVICEMETHOD);
+        String traceId = msg.headers().get(Constants.X_RPCX_TRACEID);
 
-        msg.headers().forEach(it -> {
-            logger.info("--------->{}:{}", it.getKey(), it.getValue());
-        });
-
-        String servicePath = msg.headers().get("X-RPCX-ServicePath");
-        String serviceMethod = msg.headers().get("X-RPCX-ServiceMethod");
+        logger.info("service:{} method:{} traceId:{}", servicePath, serviceMethod, traceId);
 
         ByteBuf buf = msg.content();
         int len = buf.readableBytes();
@@ -62,6 +62,7 @@ public class RpcxHttpHandler extends SimpleChannelInboundHandler<FullHttpRequest
         message.metadata.put("language", LanguageCode.HTTP.name());
         message.metadata.put("_host", getClientIp(ctx, msg));
         message.metadata.put("_port", "0");
+        message.metadata.put(Constants.X_RPCX_TRACEID, traceId == null ? "" : traceId);
         message.servicePath = servicePath;
         message.serviceMethod = serviceMethod;
         message.payload = payload;

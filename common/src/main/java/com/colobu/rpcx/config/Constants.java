@@ -30,7 +30,7 @@ public class Constants {
 
     public static final String SYNC_KEY = "sync";
 
-    public static final String ONE_WAY_KEY= "oneway";
+    public static final String ONE_WAY_KEY = "oneway";
 
     public static final String RETURN_KEY = "return";
 
@@ -92,7 +92,13 @@ public class Constants {
 
     public static final String RPCX_ERROR_MESSAGE = "_rpcx_error_message";
 
+    public static final String TRACE_ID = "trace_id";
 
+    public static final String X_RPCX_SERVICEPATH = "X-RPCX-ServicePath";
+
+    public static final String X_RPCX_SERVICEMETHOD = "X-RPCX-ServiceMethod";
+
+    public static final String X_RPCX_TRACEID = "X-RPCX-TraceId";
 
 
 }

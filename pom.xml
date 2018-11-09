@@ -7,7 +7,7 @@
    <groupId>com.colobu</groupId>
    <artifactId>rpcx</artifactId>
    <packaging>pom</packaging>
-   <version>1.1-SNAPSHOT</version>
+   <version>1.3-SNAPSHOT</version>
 
    <modules>
       <module>client</module>
@@ -169,6 +169,19 @@
          </build>
       </profile>
    </profiles>
+
+   <distributionManagement>
+      <repository>
+         <id>archiva.internal</id>
+         <name>Internal Release Repository</name>
+         <url>http://nexus.d.xiaomi.net/nexus/content/repositories/releases/</url>
+      </repository>
+      <snapshotRepository>
+         <id>archiva.snapshots</id>
+         <name>Internal Snapshot Repository</name>
+         <url>http://nexus.d.xiaomi.net/nexus/content/repositories/snapshots/</url>
+      </snapshotRepository>
+   </distributionManagement>
 
 
 

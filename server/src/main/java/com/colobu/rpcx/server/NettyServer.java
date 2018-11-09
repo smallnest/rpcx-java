@@ -47,6 +47,9 @@ public class NettyServer extends NettyRemotingAbstract {
     private final EventLoopGroup eventLoopGroupWorker;
     private final NettyServerConfig nettyServerConfig;
 
+
+    private boolean rpcxDebug = Boolean.valueOf(Config.ins().get("rpcx.debug", "false"));
+
     /**
      * 如果使用ioc容器,这里需要注入获取bean的 function
      */
@@ -88,7 +91,7 @@ public class NettyServer extends NettyRemotingAbstract {
             logger.info("----->server bind finish");
             this.addr = addr.getHostString();
             this.port = addr.getPort();
-            logger.info("###########rpc server start addr{} ", this.addr + ":" + this.port);
+            logger.info("###########rpc server start addr:{} ", this.addr + ":" + this.port);
         } catch (InterruptedException e1) {
             throw new RuntimeException("this.serverBootstrap.bind().sync() InterruptedException", e1);
         }
@@ -108,10 +111,12 @@ public class NettyServer extends NettyRemotingAbstract {
                 new LinkedBlockingQueue<>(), new NamedThreadFactory("DefaultRequestProcessorPool"));
 
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
-            try {
-                logger.info("default request pool----->{} {} {}", executor.getActiveCount(), executor.getCompletedTaskCount(), executor.getQueue().size());
-            } catch (Exception ex) {
+            if (rpcxDebug) {
+                try {
+                    logger.info("default request pool----->{} {} {}", executor.getActiveCount(), executor.getCompletedTaskCount(), executor.getQueue().size());
+                } catch (Exception ex) {
 
+                }
             }
         }, 0, 5, TimeUnit.SECONDS);
 
@@ -162,7 +167,7 @@ public class NettyServer extends NettyRemotingAbstract {
     }
 
     private String getServerPort() {
-        String port = Config.ins().get("rpcx_port");
+        String port = Config.ins().get("rpcx.port");
         if (StringUtils.isEmpty(port)) {
             port = "0";
         }

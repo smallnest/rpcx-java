@@ -2,14 +2,14 @@ package com.colobu.rpcx.processor;
 
 import com.colobu.rpcx.common.ClassUtils;
 import com.colobu.rpcx.config.Constants;
-import com.colobu.rpcx.filter.FilterWrapper;
 import com.colobu.rpcx.netty.NettyRequestProcessor;
 import com.colobu.rpcx.protocol.*;
-import com.colobu.rpcx.rpc.*;
+import com.colobu.rpcx.rpc.Invoker;
+import com.colobu.rpcx.rpc.ReflectUtils;
+import com.colobu.rpcx.rpc.Result;
+import com.colobu.rpcx.rpc.URL;
 import com.colobu.rpcx.rpc.impl.Exporter;
 import com.colobu.rpcx.rpc.impl.RpcInvocation;
-import com.colobu.rpcx.rpc.impl.RpcProviderInvoker;
-import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -55,12 +55,11 @@ public class RpcHttpProcessor implements NettyRequestProcessor {
 
         invocation.setClassName(request.getMessage().servicePath);
         invocation.setMethodName(request.getMessage().serviceMethod);
+        invocation.setUrl(new URL("rpcx", "", 0));
         invocation.url.setHost(req.metadata.get("_host"));
         invocation.url.setPort(Integer.parseInt(req.metadata.get("_port")));
+        invocation.getAttachments().put(Constants.TRACE_ID,req.metadata.get(Constants.X_RPCX_TRACEID));
 
-
-        String key = ClassUtils.getMethodKey(invocation.getClassName(), invocation.getMethodName(), invocation.getParameterTypeNames());
-        Invoker<Object> wrapperInvoker = Exporter.invokerMap.get(key);
 
         Message resMessage = new Message();
         resMessage.servicePath = invocation.getClassName();
@@ -68,12 +67,32 @@ public class RpcHttpProcessor implements NettyRequestProcessor {
         resMessage.setMessageType(MessageType.Response);
         resMessage.setSeq(request.getOpaque());
 
+
+        String key = ClassUtils.getMethodKey(invocation.getClassName(), invocation.getMethodName(), invocation.getParameterTypeNames());
+        Invoker<Object> wrapperInvoker = Exporter.invokerMap.get(key);
+
+
+        //提供的class+method+paramType 找不到 provider
+        if (null == wrapperInvoker) {
+            resMessage.metadata.put(Constants.RPCX_ERROR_CODE, String.valueOf(RemotingSysResponseCode.SYSTEM_ERROR));
+            resMessage.metadata.put(Constants.RPCX_ERROR_MESSAGE, "don't find service:" + key);
+            resMessage.setPayload(new byte[]{});
+            byte[] data = new Gson().toJson(resMessage).getBytes();
+            sendResponse(ctx, data);
+            return RemotingCommand.createResponseCommand(resMessage);
+        }
+
+
         Result rpcResult = wrapperInvoker.invoke(invocation);
+        resMessage.metadata.put(Constants.TRACE_ID, rpcResult.getAttachment(Constants.TRACE_ID));
         resMessage.payload = new Gson().toJson(rpcResult.getValue()).getBytes();
+
+
         if (rpcResult.hasException()) {
             logger.error(rpcResult.getException().getMessage(), rpcResult.getException());
             resMessage.metadata.put(Constants.RPCX_ERROR_CODE, String.valueOf(RemotingSysResponseCode.SYSTEM_ERROR));
             resMessage.metadata.put(Constants.RPCX_ERROR_MESSAGE, rpcResult.getException().getMessage());
+            resMessage.setPayload(new byte[]{});
         }
 
         RemotingCommand res = RemotingCommand.createResponseCommand(resMessage);
@@ -82,18 +101,21 @@ public class RpcHttpProcessor implements NettyRequestProcessor {
 
         byte[] data = new Gson().toJson(res.getMessage()).getBytes();
 
+        sendResponse(ctx, data);
 
+        return res;
+    }
+
+
+    private void sendResponse(ChannelHandlerContext ctx, byte[] data) {
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1,
                 OK, Unpooled.wrappedBuffer(data));
-        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/plain");
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json");
         response.headers().set(HttpHeaderNames.CONTENT_LENGTH,
                 response.content().readableBytes());
         response.headers().set(HttpHeaderNames.CONNECTION, "close");
-
         ctx.write(response);
         ctx.flush();
-
-        return res;
     }
 
     @Override

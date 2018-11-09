@@ -41,6 +41,7 @@ public class RpcProcessor implements NettyRequestProcessor {
             invocation.setClassName(className);
             invocation.setMethodName(methodName);
             invocation.setLanguageCode(LanguageCode.GO);
+            invocation.setParameterTypeNames(new String[]{"byte[]"});
             String path = ClassUtils.getMethodKey(className, methodName, new String[]{"byte[]"});
             invocation.url = new URL("rpcx", "", 0, path);
             //golang 参数是byte[]
@@ -78,6 +79,7 @@ public class RpcProcessor implements NettyRequestProcessor {
         }
 
         Result rpcResult = wrapperInvoker.invoke(invocation);
+        res.getMessage().metadata.put(Constants.TRACE_ID, rpcResult.getAttachment(Constants.TRACE_ID, ""));
 
         if (invocation.languageCode.equals(LanguageCode.JAVA)) {
             res.getMessage().payload = HessianUtils.write(rpcResult.getValue());

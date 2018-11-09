@@ -40,7 +40,7 @@ public class ZkClient {
 
     private ZkClient() {
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
-        String cs = Config.ins().get("zk.connect.string");
+        String cs = Config.ins().get("rpcx.zk.connect.string");
         client =
                 CuratorFrameworkFactory.builder()
                         .connectString(cs)

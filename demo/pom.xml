@@ -7,7 +7,7 @@
     <groupId>com.colobu</groupId>
     <artifactId>demo</artifactId>
     <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.3-SNAPSHOT</version>
 
     <modules>
         <module>api</module>
@@ -15,24 +15,28 @@
         <module>democlient</module>
     </modules>
 
+    <properties>
+        <rpcx.version>1.3-SNAPSHOT</rpcx.version>
+    </properties>
+
     <dependencies>
 
         <dependency>
             <groupId>com.colobu</groupId>
             <artifactId>server</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${rpcx.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.colobu</groupId>
             <artifactId>client</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${rpcx.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.colobu</groupId>
             <artifactId>container</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${rpcx.version}</version>
         </dependency>
 
         <dependency>
@@ -75,18 +79,21 @@
             <scope>test</scope>
         </dependency>
 
-        <!--<dependency>-->
-            <!--<groupId>org.slf4j</groupId>-->
-            <!--<artifactId>jul-to-slf4j</artifactId>-->
-        <!--</dependency>-->
-
-        <!--<dependency>-->
-            <!--<groupId>org.slf4j</groupId>-->
-            <!--<artifactId>log4j-over-slf4j</artifactId>-->
-        <!--</dependency>-->
-
 
     </dependencies>
+
+    <distributionManagement>
+        <repository>
+            <id>archiva.internal</id>
+            <name>Internal Release Repository</name>
+            <url>http://nexus.d.xiaomi.net/nexus/content/repositories/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>archiva.snapshots</id>
+            <name>Internal Snapshot Repository</name>
+            <url>http://nexus.d.xiaomi.net/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
 
 
 </project>

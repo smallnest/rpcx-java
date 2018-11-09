@@ -1,6 +1,7 @@
 package com.colobu.rpcx.filter;
 
 import com.colobu.rpcx.common.Config;
+import com.colobu.rpcx.common.StringUtils;
 import com.colobu.rpcx.config.Constants;
 import com.colobu.rpcx.rpc.Invoker;
 import com.colobu.rpcx.rpc.Result;
@@ -31,10 +32,12 @@ public class FilterWrapper {
         this.providerFilters = this.findFilters("com.colobu", Constants.PROVIDER);
         this.consumerFilters = this.findFilters("com.colobu", Constants.CONSUMER);
 
-        String p = Config.ins().get("rpcx_filter_package");
-
-        this.providerFilters.addAll(this.findFilters(p, Constants.PROVIDER));
-        this.providerFilters.addAll(this.findFilters(p, Constants.CONSUMER));
+        String p = Config.ins().get("rpcx.filter.package");
+        //自己没有配置filter package 则不添加
+        if (StringUtils.isNotEmpty(p)) {
+            this.providerFilters.addAll(this.findFilters(p, Constants.PROVIDER));
+            this.providerFilters.addAll(this.findFilters(p, Constants.CONSUMER));
+        }
     }
 
 
@@ -64,7 +67,6 @@ public class FilterWrapper {
     }
 
     /**
-     *
      * @param invoker
      * @param key
      * @param group
