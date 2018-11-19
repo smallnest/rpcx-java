@@ -41,6 +41,12 @@ public class TestController {
         return s;
     }
 
+    @GetMapping("/sum2")
+    public String sum2() {
+        String s = String.valueOf(testService.sum2(22, 33));
+        return s;
+    }
+
     /**
      * 测试echo filter
      *

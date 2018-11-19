@@ -14,16 +14,16 @@ import java.util.concurrent.*;
  * @author goodjava@qq.com
  */
 public class RpcContext {
-	
-	private static final ThreadLocal<RpcContext> LOCAL = ThreadLocal.withInitial(() -> new RpcContext());
 
-	public static RpcContext getContext() {
-	    return LOCAL.get();
-	}
-	
-	public static void removeContext() {
-	    LOCAL.remove();
-	}
+    private static final ThreadLocal<RpcContext> LOCAL = ThreadLocal.withInitial(() -> new RpcContext());
+
+    public static RpcContext getContext() {
+        return LOCAL.get();
+    }
+
+    public static void removeContext() {
+        LOCAL.remove();
+    }
 
     private ResponseFuture future;
 
@@ -37,22 +37,22 @@ public class RpcContext {
 
     private Object[] arguments;
 
-	private InetSocketAddress localAddress;
+    private InetSocketAddress localAddress;
 
-	private InetSocketAddress remoteAddress;
+    private InetSocketAddress remoteAddress;
 
-    private final Map<String, String> attachments = new HashMap<String, String>();
+    private final Map<String, String> attachments = new HashMap<>();
 
     private final Map<String, Object> values = new HashMap<>();
 
     private String serviceAddr;
 
-	protected RpcContext() {
-	}
+    protected RpcContext() {
+    }
 
     /**
      * is provider side.
-     * 
+     *
      * @return provider side.
      */
     public boolean isProviderSide() {
@@ -70,13 +70,13 @@ public class RpcContext {
         } else {
             host = address.getAddress().getHostAddress();
         }
-        return url.getPort() != address.getPort() || 
-                ! NetUtils.filterLocalHost(url.getIp()).equals(NetUtils.filterLocalHost(host));
+        return url.getPort() != address.getPort() ||
+                !NetUtils.filterLocalHost(url.getIp()).equals(NetUtils.filterLocalHost(host));
     }
 
     /**
      * is consumer side.
-     * 
+     *
      * @return consumer side.
      */
     public boolean isConsumerSide() {
@@ -94,12 +94,13 @@ public class RpcContext {
         } else {
             host = address.getAddress().getHostAddress();
         }
-        return url.getPort() == address.getPort() && 
+        return url.getPort() == address.getPort() &&
                 NetUtils.filterLocalHost(url.getIp()).equals(NetUtils.filterLocalHost(host));
     }
 
     /**
      * get future.
+     *
      * @return future
      */
     public ResponseFuture getFuture() {
@@ -108,7 +109,7 @@ public class RpcContext {
 
     /**
      * set future.
-     * 
+     *
      * @param future
      */
     public void setFuture(ResponseFuture future) {
@@ -133,7 +134,7 @@ public class RpcContext {
 
     /**
      * get method name.
-     * 
+     *
      * @return method name.
      */
     public String getMethodName() {
@@ -146,7 +147,7 @@ public class RpcContext {
 
     /**
      * get parameter types.
-     * 
+     *
      * @serial
      */
     public Class<?>[] getParameterTypes() {
@@ -159,7 +160,7 @@ public class RpcContext {
 
     /**
      * get arguments.
-     * 
+     *
      * @return arguments.
      */
     public Object[] getArguments() {
@@ -172,22 +173,22 @@ public class RpcContext {
 
     /**
      * set local address.
-     * 
+     *
      * @param address
      * @return context
      */
-	public RpcContext setLocalAddress(InetSocketAddress address) {
-	    this.localAddress = address;
-	    return this;
-	}
+    public RpcContext setLocalAddress(InetSocketAddress address) {
+        this.localAddress = address;
+        return this;
+    }
 
-	/**
-	 * set local address.
-	 * 
-	 * @param host
-	 * @param port
-	 * @return context
-	 */
+    /**
+     * set local address.
+     *
+     * @param host
+     * @param port
+     * @return context
+     */
     public RpcContext setLocalAddress(String host, int port) {
         if (port < 0) {
             port = 0;
@@ -196,35 +197,35 @@ public class RpcContext {
         return this;
     }
 
-	/**
-	 * get local address.
-	 * 
-	 * @return local address
-	 */
-	public InetSocketAddress getLocalAddress() {
-		return localAddress;
-	}
+    /**
+     * get local address.
+     *
+     * @return local address
+     */
+    public InetSocketAddress getLocalAddress() {
+        return localAddress;
+    }
 
-	public String getLocalAddressString() {
+    public String getLocalAddressString() {
         return getLocalHost() + ":" + getLocalPort();
     }
-    
-	/**
-	 * get local host name.
-	 * 
-	 * @return local host name
-	 */
-	public String getLocalHostName() {
-		String host = localAddress == null ? null : localAddress.getHostName();
-		if (host == null || host.length() == 0) {
-		    return getLocalHost();
-		}
-		return host;
-	}
+
+    /**
+     * get local host name.
+     *
+     * @return local host name
+     */
+    public String getLocalHostName() {
+        String host = localAddress == null ? null : localAddress.getHostName();
+        if (host == null || host.length() == 0) {
+            return getLocalHost();
+        }
+        return host;
+    }
 
     /**
      * set remote address.
-     * 
+     *
      * @param address
      * @return context
      */
@@ -232,10 +233,10 @@ public class RpcContext {
         this.remoteAddress = address;
         return this;
     }
-    
+
     /**
      * set remote address.
-     * 
+     *
      * @param host
      * @param port
      * @return context
@@ -248,42 +249,42 @@ public class RpcContext {
         return this;
     }
 
-	/**
-	 * get remote address.
-	 * 
-	 * @return remote address
-	 */
-	public InetSocketAddress getRemoteAddress() {
-		return remoteAddress;
-	}
-	
-	/**
-	 * get remote address string.
-	 * 
-	 * @return remote address string.
-	 */
-	public String getRemoteAddressString() {
-	    return getRemoteHost() + ":" + getRemotePort();
-	}
-	
-	/**
-	 * get remote host name.
-	 * 
-	 * @return remote host name
-	 */
-	public String getRemoteHostName() {
-		return remoteAddress == null ? null : remoteAddress.getHostName();
-	}
+    /**
+     * get remote address.
+     *
+     * @return remote address
+     */
+    public InetSocketAddress getRemoteAddress() {
+        return remoteAddress;
+    }
+
+    /**
+     * get remote address string.
+     *
+     * @return remote address string.
+     */
+    public String getRemoteAddressString() {
+        return getRemoteHost() + ":" + getRemotePort();
+    }
+
+    /**
+     * get remote host name.
+     *
+     * @return remote host name
+     */
+    public String getRemoteHostName() {
+        return remoteAddress == null ? null : remoteAddress.getHostName();
+    }
 
     /**
      * get local host.
-     * 
+     *
      * @return local host
      */
     public String getLocalHost() {
-        String host = localAddress == null ? null : 
-            localAddress.getAddress() == null ? localAddress.getHostName() 
-                    : NetUtils.filterLocalHost(localAddress.getAddress().getHostAddress());
+        String host = localAddress == null ? null :
+                localAddress.getAddress() == null ? localAddress.getHostName()
+                        : NetUtils.filterLocalHost(localAddress.getAddress().getHostAddress());
         if (host == null || host.length() == 0) {
             return NetUtils.getLocalHost();
         }
@@ -292,7 +293,7 @@ public class RpcContext {
 
     /**
      * get local port.
-     * 
+     *
      * @return port
      */
     public int getLocalPort() {
@@ -301,18 +302,18 @@ public class RpcContext {
 
     /**
      * get remote host.
-     * 
+     *
      * @return remote host
      */
     public String getRemoteHost() {
-        return remoteAddress == null ? null : 
-            remoteAddress.getAddress() == null ? remoteAddress.getHostName() 
-                    : NetUtils.filterLocalHost(remoteAddress.getAddress().getHostAddress());
+        return remoteAddress == null ? null :
+                remoteAddress.getAddress() == null ? remoteAddress.getHostName()
+                        : NetUtils.filterLocalHost(remoteAddress.getAddress().getHostAddress());
     }
 
     /**
      * get remote port.
-     * 
+     *
      * @return remote port
      */
     public int getRemotePort() {
@@ -321,7 +322,7 @@ public class RpcContext {
 
     /**
      * get attachment.
-     * 
+     *
      * @param key
      * @return attachment
      */
@@ -331,7 +332,7 @@ public class RpcContext {
 
     /**
      * set attachment.
-     * 
+     *
      * @param key
      * @param value
      * @return context
@@ -347,7 +348,7 @@ public class RpcContext {
 
     /**
      * remove attachment.
-     * 
+     *
      * @param key
      * @return context
      */
@@ -358,7 +359,7 @@ public class RpcContext {
 
     /**
      * get attachments.
-     * 
+     *
      * @return attachments
      */
     public Map<String, String> getAttachments() {
@@ -367,7 +368,7 @@ public class RpcContext {
 
     /**
      * set attachments
-     * 
+     *
      * @param attachment
      * @return context
      */
@@ -378,14 +379,14 @@ public class RpcContext {
         }
         return this;
     }
-    
+
     public void clearAttachments() {
         this.attachments.clear();
     }
 
     /**
      * get values.
-     * 
+     *
      * @return values
      */
     public Map<String, Object> get() {
@@ -418,7 +419,7 @@ public class RpcContext {
     public boolean isServerSide() {
         return isProviderSide();
     }
-    
+
     /**
      * @deprecated Replace to isConsumerSide()
      */
@@ -426,7 +427,7 @@ public class RpcContext {
     public boolean isClientSide() {
         return isConsumerSide();
     }
-    
+
 
     public String getServiceAddr() {
         return serviceAddr;

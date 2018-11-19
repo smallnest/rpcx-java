@@ -53,11 +53,14 @@ public class RpcProviderInvoker<T> implements Invoker<T> {
     public Result invoke(RpcInvocation invocation) {
         Result rpcResult = new RpcResult();
         String traceId = "";
+        String spanId = "";
         try {
             Object obj = null;
             traceId = RpcContext.getContext().getAttachments().get(Constants.TRACE_ID);
+            spanId = RpcContext.getContext().getAttachments().get(Constants.SPAN_ID);
             //设置traceId
             rpcResult.getAttachments().put(Constants.TRACE_ID, traceId == null ? "" : traceId);
+            rpcResult.getAttachments().put(Constants.SPAN_ID, spanId == null ? "" : spanId);
             //使用容器
             if (null != this.getBeanFunc) {
                 if (share) {

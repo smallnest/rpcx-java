@@ -97,6 +97,11 @@ public class ZkServiceDiscovery implements IServiceDiscovery {
                 return Pair.of(addr, it2.getObject2());
             }).collect(Collectors.toSet());
             this.map.putIfAbsent(it, set);
+            try {
+                ZkClient.ins().watch(queue, basePath + it);
+            } catch (Exception e) {
+                logger.error("service name foreach {} error:{}", it, e.getMessage());
+            }
         });
     }
 

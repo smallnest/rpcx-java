@@ -94,6 +94,8 @@ public class Constants {
 
     public static final String TRACE_ID = "trace_id";
 
+    public static final String SPAN_ID = "span_id";
+
     public static final String X_RPCX_SERVICEPATH = "X-RPCX-ServicePath";
 
     public static final String X_RPCX_SERVICEMETHOD = "X-RPCX-ServiceMethod";
