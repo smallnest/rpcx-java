@@ -65,6 +65,9 @@ public class RpcConsumerInvoker<T> implements Invoker<T> {
             Message res = client.call(req, invocation.getTimeOut(), invocation.getSendType());
 
             result.getAttachments().put(Constants.TRACE_ID,res.getMetadata().get(Constants.TRACE_ID));
+            RpcContext.getContext().getAttachments().put(Constants.TRACE_ID,res.getMetadata().get(Constants.TRACE_ID));
+            result.getAttachments().put(Constants.SPAN_ID,res.getMetadata().get(Constants.SPAN_ID));
+            RpcContext.getContext().getAttachments().put(Constants.SPAN_ID,res.getMetadata().get(Constants.SPAN_ID));
 
             if (res.metadata.containsKey(Constants.RPCX_ERROR_CODE)) {
                 String code = (res.metadata.get(Constants.RPCX_ERROR_CODE));

@@ -108,7 +108,11 @@ public class RpcInvocation implements Invocation, Serializable {
 
     @Override
     public String getAttachment(String key, String defaultValue) {
-        return null;
+        String value = this.attachments.get(key);
+        if (null == value) {
+            return defaultValue;
+        }
+        return value;
     }
 
     public void setAttachments(Map<String, String> attachments) {

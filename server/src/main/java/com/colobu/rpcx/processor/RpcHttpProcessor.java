@@ -85,6 +85,7 @@ public class RpcHttpProcessor implements NettyRequestProcessor {
 
         Result rpcResult = wrapperInvoker.invoke(invocation);
         resMessage.metadata.put(Constants.TRACE_ID, rpcResult.getAttachment(Constants.TRACE_ID));
+        resMessage.metadata.put(Constants.SPAN_ID, rpcResult.getAttachment(Constants.SPAN_ID));
         resMessage.payload = new Gson().toJson(rpcResult.getValue()).getBytes();
 
 

@@ -15,6 +15,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
+/**
+ * @author goodjava@qq.com
+ */
 @RpcFilter(order = -999, group = {Constants.PROVIDER})
 public class TraceidFilter implements Filter {
 
@@ -24,12 +27,26 @@ public class TraceidFilter implements Filter {
     public Result invoke(Invoker<?> invoker, RpcInvocation invocation) throws RpcException {
         String clientTraceId = invocation.getAttachment(Constants.TRACE_ID);
         String key = ClassUtils.getMethodKey(invocation.getClassName(), invocation.getMethodName(), invocation.getParameterTypeNames());
-        String traceId = UUID.randomUUID().toString();
+        String traceId = "";
+        String spanId = invocation.getAttachment(Constants.SPAN_ID, "");
         if (StringUtils.isNotEmpty(clientTraceId)) {
-            traceId = clientTraceId + "," + traceId;
+            traceId = clientTraceId;
+            spanId = spanId + "," + UUID.randomUUID().toString();
+        } else {
+            //new
+            traceId = UUID.randomUUID().toString();
+            spanId = traceId;
         }
-        logger.info("invoke:{} traceId:{}", key, traceId);
+        logger.info("invoke begin:{} traceId:{} spanId:{}", key, traceId, spanId);
         RpcContext.getContext().getAttachments().put(Constants.TRACE_ID, traceId);
-        return invoker.invoke(invocation);
+        RpcContext.getContext().getAttachments().put(Constants.SPAN_ID, spanId);
+        try {
+            Result res = invoker.invoke(invocation);
+            logger.info("invoke end:{} success traceId:{} spanId:{}", key, traceId, spanId);
+            return res;
+        } catch (Throwable ex) {
+            logger.info("invoke end:{} failure traceId:{} spanId:{}", key, traceId, spanId);
+            throw ex;
+        }
     }
 }

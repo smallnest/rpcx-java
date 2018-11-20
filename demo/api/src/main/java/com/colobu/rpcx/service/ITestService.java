@@ -16,6 +16,9 @@ public interface ITestService {
 
     int sum(int a, int b);
 
+
+    int sum2(int a, int b);
+
     /**
      * 异步调用
      * @return

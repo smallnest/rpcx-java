@@ -7,18 +7,18 @@
             <pattern>%d|%-5level|%thread|%logger{40}|%L|%msg%n</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/rpcx/demo_server.log.%d{yyyy-MM-dd-HH}</fileNamePattern>
+            <fileNamePattern>logs/rpcx/demo_server2.log.%d{yyyy-MM-dd-HH}</fileNamePattern>
         </rollingPolicy>
     </appender>
 
 
     <appender name="errorAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/rpcx/demo_server_error.log</file>
+        <file>logs/rpcx/demo_server2_error.log</file>
         <encoder>
             <pattern>%d|%-5level|%thread|%logger{40}|%L|%msg%n</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/rpcx/demo_error.log.%d{yyyy-MM-dd-HH}</fileNamePattern>
+            <fileNamePattern>logs/rpcx/demo_server2_error.log.%d{yyyy-MM-dd-HH}</fileNamePattern>
         </rollingPolicy>
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>ERROR</level>

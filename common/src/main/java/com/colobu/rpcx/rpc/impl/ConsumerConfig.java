@@ -111,8 +111,10 @@ public class ConsumerConfig {
             invocation.setLanguageCode(LanguageCode.JAVA);
             invocation.setGroup(group);
 
-            Map<String, String> attachments = new HashMap<>(1);
+            Map<String, String> attachments = new HashMap<>(3);
             attachments.put(Constants.TOKEN_KEY, token);
+            attachments.put(Constants.TRACE_ID, RpcContext.getContext().getAttachment(Constants.TRACE_ID));
+            attachments.put(Constants.SPAN_ID, RpcContext.getContext().getAttachment(Constants.SPAN_ID));
             invocation.setAttachments(attachments);
 
             Class<?>[] types = method.getParameterTypes();
@@ -121,7 +123,7 @@ public class ConsumerConfig {
             invocation.setResultType(method.getReturnType());
 
             Invoker invoker = new RpcConsumerInvoker(client);
-            Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.CONSUMER,Sets.newHashSet());
+            Invoker<Object> wrapperInvoker = FilterWrapper.ins().buildInvokerChain(invoker, "", Constants.CONSUMER, Sets.newHashSet());
 
             Result result = wrapperInvoker.invoke(invocation);
 

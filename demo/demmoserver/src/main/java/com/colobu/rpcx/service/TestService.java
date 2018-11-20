@@ -3,6 +3,7 @@ package com.colobu.rpcx.service;
 import com.colobu.rpcx.rpc.annotation.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Random;
@@ -20,6 +21,10 @@ import java.util.concurrent.TimeUnit;
 public class TestService implements ITestService {
 
     private static final Logger logger = LoggerFactory.getLogger(TestService.class);
+
+
+    @Autowired
+    private ITest2Service test2Service;
 
     private Random random = new Random();
 
@@ -52,6 +57,16 @@ public class TestService implements ITestService {
 
     public int sum(int a, int b) {
         return a + b;
+    }
+
+    /**
+     * 再次调用其他服务
+     * @param a
+     * @param b
+     * @return
+     */
+    public int sum2(int a, int b) {
+        return a + b + test2Service.num();
     }
 
     /**

@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * @author goodjava@qq.com
  * 打印traceid
  */
 @RpcFilter(group = {Constants.CONSUMER}, order = -1000)
@@ -26,7 +27,8 @@ public class ConsumerTraceidFilter implements Filter {
         if (null != result) {
             String key = ClassUtils.getMethodKey(invocation.getClassName(), invocation.getMethodName(), invocation.getParameterTypeNames());
             String traceId = result.getAttachment(Constants.TRACE_ID);
-            logger.info("invoke {} traceid:{} error:{}", key, traceId, result.hasException());
+            String spanId = result.getAttachment(Constants.SPAN_ID);
+            logger.info("invoke {} traceid:{} spanId:{} error:{}", key, traceId, spanId, result.hasException());
         }
 
         return result;

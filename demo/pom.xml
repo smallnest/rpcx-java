@@ -13,6 +13,7 @@
         <module>api</module>
         <module>demmoserver</module>
         <module>democlient</module>
+        <module>demoserver2</module>
     </modules>
 
     <properties>
