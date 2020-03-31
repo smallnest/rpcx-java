@@ -1,5 +1,6 @@
 ## rpcx-java
 
+**Unmaintained**: 目前没有资源维护这个项目。欢迎有时间的开发者接手。
 
 ### example
 assume you have started a Go rpcx server:
